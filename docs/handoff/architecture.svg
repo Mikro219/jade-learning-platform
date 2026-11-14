@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 560" width="1520" height="1120" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#8a8f98"/>
+    </marker>
+    <style>
+      .box{fill:#ffffff;stroke:#b8bcc4;stroke-width:1.25}
+      .name{font-weight:600;fill:#1f2328;text-anchor:middle}
+      .sub{font-size:11.5px;fill:#5b616b;text-anchor:middle}
+      .lbl{font-size:10.5px;fill:#5b616b}
+      .ln{fill:none;stroke:#8a8f98;stroke-width:1.25;marker-end:url(#a)}
+      .dash{stroke-dasharray:4 4}
+    </style>
+  </defs>
+  <rect width="760" height="560" fill="#ffffff"/>
+  <text x="24" y="34" font-size="15" font-weight="600" fill="#1f2328">JADE platform v2: one app, one database, one origin</text>
+
+  <!-- clients -->
+  <rect class="box" x="24" y="60" width="166" height="56" rx="8"/><text class="name" x="107" y="84">Student tablet</text><text class="sub" x="107" y="100">PWA, offline queue</text>
+  <rect class="box" x="206" y="60" width="166" height="56" rx="8"/><text class="name" x="289" y="84">Facilitator</text><text class="sub" x="289" y="100">class, consent, notes</text>
+  <rect class="box" x="388" y="60" width="166" height="56" rx="8"/><text class="name" x="471" y="84">Printed guide</text><text class="sub" x="471" y="100">QR on every step</text>
+  <rect class="box" x="570" y="60" width="166" height="56" rx="8"/><text class="name" x="653" y="84">Staff</text><text class="sub" x="653" y="100">codes, analytics</text>
+
+  <path class="ln" d="M107 116V160"/><text class="lbl" x="114" y="142">steps, events</text>
+  <path class="ln" d="M289 116V160"/><text class="lbl" x="296" y="142">redeem, run session</text>
+  <path class="ln dash" d="M471 116V160"/><text class="lbl" x="478" y="142">/s/step-id</text>
+  <path class="ln" d="M653 116V160"/><text class="lbl" x="660" y="142">review data</text>
+
+  <!-- VM container -->
+  <rect x="24" y="162" width="712" height="290" rx="8" fill="#f6f7f9" stroke="#b8bcc4" stroke-width="1.25"/>
+  <text x="40" y="186" font-weight="600" fill="#1f2328">Canadian VM (Docker Compose)</text>
+
+  <!-- Caddy -->
+  <rect class="box" x="40" y="198" width="680" height="44" rx="8"/><text class="name" x="380" y="218">Caddy</text><text class="sub" x="380" y="234">TLS, static media with Range, no IP logs. The only public service</text>
+
+  <path class="ln" d="M300 242V266"/>
+  <path class="ln" d="M640 242V340"/><text class="lbl" x="648" y="296">/media</text>
+
+  <!-- App container -->
+  <rect x="40" y="268" width="520" height="104" rx="8" fill="#e8f0fb" stroke="#2f6fd0" stroke-width="2"/>
+  <text x="56" y="290" font-weight="600" fill="#1f2328">App: SvelteKit on Node (modular monolith)</text>
+  <rect class="box" x="56" y="300" width="88" height="56" rx="8"/><text class="name" x="100" y="324">auth</text><text class="sub" x="100" y="340">+ classes</text>
+  <rect class="box" x="154" y="300" width="88" height="56" rx="8"/><text class="name" x="198" y="324">codes</text><text class="sub" x="198" y="340">HMAC, redeem</text>
+  <rect class="box" x="252" y="300" width="88" height="56" rx="8"/><text class="name" x="296" y="324">content</text><text class="sub" x="296" y="340">versioned</text>
+  <rect class="box" x="350" y="300" width="88" height="56" rx="8"/><text class="name" x="394" y="324">events</text><text class="sub" x="394" y="340">consent gate</text>
+  <rect class="box" x="448" y="300" width="96" height="56" rx="8"/><text class="name" x="496" y="324">analytics</text><text class="sub" x="496" y="340">SQL views</text>
+
+  <!-- media -->
+  <rect class="box" x="576" y="342" width="144" height="56" rx="8"/><text class="name" x="648" y="366">Media volume</text><text class="sub" x="648" y="382">MP4, images</text>
+
+  <!-- DB -->
+  <path class="ln" d="M240 372V394"/><text class="lbl" x="248" y="388">read / write</text>
+  <rect class="box" x="40" y="396" width="400" height="44" rx="8"/><text class="name" x="240" y="416">PostgreSQL</text><text class="sub" x="240" y="432">codes, classes, events, notes, quiz results</text>
+
+  <!-- outside -->
+  <rect class="box" x="24" y="484" width="348" height="56" rx="8"/><text class="name" x="198" y="508">Encrypted backups</text><text class="sub" x="198" y="524">Canadian object storage, nightly, restore tested</text>
+  <path class="ln" d="M198 440V482"/><text class="lbl" x="206" y="468">nightly dump</text>
+
+  <rect class="box" x="388" y="484" width="348" height="56" rx="8"/><text class="name" x="562" y="508">Git repo + CI</text><text class="sub" x="562" y="524">code and Markdown content; deploys to staging, then prod</text>
+  <path class="ln" d="M500 484V374"/><text class="lbl" x="508" y="424">build + deploy</text>
+</svg>

@@ -1,0 +1,13 @@
+{
+  "phases": 11,
+  "tasks": 92,
+  "edges": 158,
+  "human_tasks": 11,
+  "initially_ready_tasks": [
+    "p0-adr",
+    "p0-consent",
+    "p0-host",
+    "p0-open-decisions",
+    "p0-school-it"
+  ]
+}

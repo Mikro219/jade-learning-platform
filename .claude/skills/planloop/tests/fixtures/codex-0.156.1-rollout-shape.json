@@ -1,0 +1,160 @@
+{
+ "source": "codex-cli 0.156.1 rollout, gate call of 2026-10-22 (e0n gate 7); content and instructions stripped, record shapes kept",
+ "records": [
+  {
+   "timestamp": "2026-10-22T04:00:52.303Z",
+   "ordinal": 0,
+   "type": "session_meta",
+   "payload": {
+    "session_id": "01a161c4-d331-7fa2-bac1-315fca309888",
+    "id": "01a161c4-d331-7fa2-bac1-315fca309888",
+    "timestamp": "2026-10-22T04:00:51.708Z",
+    "cwd": "<<CWD>>",
+    "runtime_workspace_roots": [
+     "<<CWD>>"
+    ],
+    "originator": "codex_exec",
+    "cli_version": "0.156.1",
+    "source": "exec",
+    "thread_source": "user",
+    "model_provider": "openai",
+    "base_instructions": "<stripped>",
+    "history_mode": "paginated",
+    "context_window": {
+     "window_id": "01a161c4-d331-7fa2-bac1-316f5ac1f962"
+    },
+    "git": {
+     "commit_hash": "<stripped>",
+     "branch": "main",
+     "repository_url": "<stripped>"
+    }
+   }
+  },
+  {
+   "timestamp": "2026-10-22T04:00:52.306Z",
+   "ordinal": 1,
+   "type": "event_msg",
+   "payload": {
+    "type": "task_started",
+    "turn_id": "01a161c4-d565-7362-85e3-759ecd04f85a",
+    "root_turn_id": "01a161c4-d565-7362-85e3-759ecd04f85a",
+    "started_at": 1792641652,
+    "model_context_window": 258400,
+    "collaboration_mode_kind": "default"
+   }
+  },
+  {
+   "timestamp": "2026-10-22T04:00:53.374Z",
+   "ordinal": 5,
+   "type": "response_item",
+   "payload": {
+    "type": "message",
+    "id": "msg_01a161c4-da7b-70b1-854e-3948ad6de05d",
+    "role": "user",
+    "content": [
+     {
+      "type": "input_text",
+      "text": "<environment context stripped>"
+     },
+     {
+      "type": "input_text",
+      "text": "<<PROMPT>>"
+     }
+    ],
+    "internal_chat_message_metadata_passthrough": {
+     "turn_id": "01a161c4-d565-7362-85e3-759ecd04f85a",
+     "create_time": 1792641653.3719006,
+     "content_item_kinds": [
+      "plugins.recommendations",
+      "agents_md.instructions",
+      "environments.environment_context"
+     ]
+    }
+   }
+  },
+  {
+   "timestamp": "2026-10-22T04:00:53.389Z",
+   "ordinal": 7,
+   "type": "turn_context",
+   "payload": {
+    "turn_id": "01a161c4-d565-7362-85e3-759ecd04f85a",
+    "root_turn_id": "01a161c4-d565-7362-85e3-759ecd04f85a",
+    "disabled_plugin_ids": [],
+    "cwd": "<<CWD>>",
+    "workspace_roots": [
+     "<<CWD>>"
+    ],
+    "current_date": "2026-10-22",
+    "timezone": "America/Toronto",
+    "approval_policy": "never",
+    "approvals_reviewer": "user",
+    "sandbox_policy": {
+     "type": "read-only"
+    },
+    "permission_profile": {
+     "type": "managed",
+     "file_system": {
+      "type": "restricted",
+      "entries": [
+       {
+        "path": {
+         "type": "special",
+         "value": {
+          "kind": "root"
+         }
+        },
+        "access": "read"
+       }
+      ]
+     },
+     "network": "restricted"
+    },
+    "model": "gpt-6-astra",
+    "comp_hash": "3000",
+    "collaboration_mode": {
+     "mode": "default",
+     "settings": {
+      "model": "gpt-6-astra",
+      "reasoning_effort": "high",
+      "developer_instructions": null
+     }
+    },
+    "multi_agent_version": "v2",
+    "realtime_active": false,
+    "effort": "high",
+    "summary": "none"
+   }
+  },
+  {
+   "timestamp": "2026-10-22T04:00:59.040Z",
+   "ordinal": 12,
+   "type": "response_item",
+   "payload": {
+    "type": "custom_tool_call",
+    "id": "ctc_0b7e6baa155ebce6016ad98a792af8819697c183daeef81ff2",
+    "status": "completed",
+    "call_id": "call_c699356369ad4c1e84dc021fa8d38f76",
+    "name": "exec",
+    "input": "<<TOOL_INPUT>>",
+    "internal_chat_message_metadata_passthrough": {
+     "turn_id": "01a161c4-d565-7362-85e3-759ecd04f85a",
+     "create_time": 1792641657.1707935
+    }
+   }
+  },
+  {
+   "timestamp": "2026-10-22T04:04:08.976Z",
+   "ordinal": 104,
+   "type": "event_msg",
+   "payload": {
+    "type": "task_complete",
+    "turn_id": "01a161c4-d565-7362-85e3-759ecd04f85a",
+    "last_agent_message": "<stripped>",
+    "started_at": "<stripped>",
+    "completed_at": "<stripped>",
+    "duration_ms": "<stripped>",
+    "time_to_first_token_ms": "<stripped>"
+   }
+  }
+ ]
+}

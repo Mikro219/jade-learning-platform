@@ -1,0 +1,2185 @@
+{
+  "commit_message": "Seed JADE platform build plan",
+  "nodes": [
+    {
+      "key": "phase-00",
+      "type": "epic",
+      "priority": 0,
+      "title": "Phase 0: Architecture lock",
+      "description": "Freeze the decisions the build depends on, and start the slow human-side items (host, school IT, consent wording) on day one because they have lead times the code does not.\n\nDetails: docs/handoff/phases/phase-00-architecture-lock.md",
+      "acceptance_criteria": "- ADRs committed under docs/adr/ and referenced from CLAUDE.md\n- Threat model and data-flow doc committed\n- Host chosen, domain bought, pilot-site IT contacted, consent wording under review (human beads closed or explicitly deferred with a date)",
+      "labels": [
+        "phase-0"
+      ]
+    },
+    {
+      "key": "p0-adr",
+      "type": "task",
+      "priority": 0,
+      "title": "Commit ADRs from the handoff decisions",
+      "parent_key": "phase-00",
+      "description": "Turn each ADR in docs/handoff/DECISIONS.md into its own file under docs/adr/NNNN-title.md (status: accepted). Do not change the decisions. If one looks wrong, file a `decision` bead and stop instead of silently deviating.\n\nPlan key: p0-adr. Phase file: docs/handoff/phases/phase-00-architecture-lock.md",
+      "acceptance_criteria": "- One file per ADR, numbered, each with Context / Decision / Consequences\n- docs/adr/README.md indexes them\n- CLAUDE.md links to docs/adr/ and docs/handoff/ARCHITECTURE.md",
+      "labels": [
+        "phase-0",
+        "docs"
+      ]
+    },
+    {
+      "key": "p0-threat",
+      "type": "task",
+      "priority": 1,
+      "title": "Write threat model and data-flow document",
+      "parent_key": "phase-00",
+      "description": "Write docs/threat-model.md: actors (student device, facilitator, staff, outsider on school Wi-Fi, outsider on internet), assets (kit codes, code pepper, adult credentials, event data), trust boundaries, and the abuse cases listed in ARCHITECTURE.md section 9. Include a data-flow diagram (Mermaid).\n\nPlan key: p0-threat. Phase file: docs/handoff/phases/phase-00-architecture-lock.md",
+      "acceptance_criteria": "- Every abuse case has a named mitigation and the phase that implements it\n- Data-flow diagram shows every place adult PII and kit-level data is stored",
+      "labels": [
+        "phase-0",
+        "docs",
+        "security"
+      ]
+    },
+    {
+      "key": "p0-open-decisions",
+      "type": "decision",
+      "priority": 0,
+      "title": "HUMAN: answer the open product questions",
+      "parent_key": "phase-00",
+      "description": "Mike/Given/Kai to answer the questions in docs/handoff/DECISIONS.md section 'Open questions': kit name and code prefix, module and step outline for the arm kit, whether the arm has any networked electronics, device availability at the pilot site, retention period. Record answers in docs/adr/ and close this bead.\n\nPlan key: p0-open-decisions. Phase file: docs/handoff/phases/phase-00-architecture-lock.md",
+      "acceptance_criteria": "- Kit slug and 3-letter code prefix recorded\n- Module list with step counts recorded (or a date when Given will deliver it)\n- Explicit yes/no on networked electronics and AI assistant for the arm kit",
+      "labels": [
+        "phase-0",
+        "human"
+      ]
+    },
+    {
+      "key": "p0-host",
+      "type": "task",
+      "priority": 0,
+      "title": "HUMAN: choose Canadian host, create account, buy domain",
+      "parent_key": "phase-00",
+      "description": "Pick a VM provider with a Canadian region (see DECISIONS.md ADR-04 for candidates), create the account with billing, and register the domain. Give the agent: provider name, region, domain, and how it will receive SSH/API access (never paste secrets into a bead).\n\nPlan key: p0-host. Phase file: docs/handoff/phases/phase-00-architecture-lock.md",
+      "acceptance_criteria": "- Provider and region recorded in docs/adr/0004\n- Domain registered and DNS manageable\n- Access method for deploys agreed",
+      "labels": [
+        "phase-0",
+        "human",
+        "infra"
+      ]
+    },
+    {
+      "key": "p0-school-it",
+      "type": "task",
+      "priority": 0,
+      "title": "HUMAN: contact pilot-site IT about devices and network",
+      "parent_key": "phase-00",
+      "description": "Ask the pilot site: which devices and how many (Chromebook / iPad / other), browser versions, whether new domains must be allowlisted and how long that takes, whether video streaming is throttled, and whether devices keep cookies between sessions (managed Chromebooks often wipe on sign-out).\n\nPlan key: p0-school-it. Phase file: docs/handoff/phases/phase-00-architecture-lock.md",
+      "acceptance_criteria": "- Device type, count and browser recorded\n- Allowlist process and lead time recorded\n- Cookie/session persistence behaviour on the school devices recorded",
+      "labels": [
+        "phase-0",
+        "human",
+        "pilot"
+      ]
+    },
+    {
+      "key": "p0-consent",
+      "type": "task",
+      "priority": 0,
+      "title": "HUMAN: update consent form and research application for the platform",
+      "parent_key": "phase-00",
+      "description": "The consent form and school board application were written before the pivot and before the web platform existed. They must describe what the platform logs (see docs/handoff/EVENTS.md and PRIVACY.md) and the opt-out behaviour (no-log mode). Phase 9 produces a plain-language appendix to attach.\n\nPlan key: p0-consent. Phase file: docs/handoff/phases/phase-00-architecture-lock.md",
+      "acceptance_criteria": "- Consent form text covers the web platform, kit-level logging and deletion on request\n- School board / research reviewer has the event list appendix",
+      "labels": [
+        "phase-0",
+        "human",
+        "privacy",
+        "pilot"
+      ]
+    },
+    {
+      "key": "phase-01",
+      "type": "epic",
+      "priority": 0,
+      "title": "Phase 1: Foundation and walking skeleton",
+      "description": "A deployable empty app: repo, CI, database, container image, and a live staging URL. Everything after this ships to staging on every merge, so deploy problems surface in week one instead of the week before the pilot.\n\nDetails: docs/handoff/phases/phase-01-foundation.md",
+      "acceptance_criteria": "- `pnpm dev`, `pnpm test`, `pnpm e2e` work from a clean clone\n- CI is green and required on main\n- Staging URL serves /healthz over HTTPS from a Canadian region",
+      "labels": [
+        "phase-1"
+      ]
+    },
+    {
+      "key": "p1-scaffold",
+      "type": "task",
+      "priority": 0,
+      "title": "Scaffold SvelteKit app with TypeScript strict, lint, unit and e2e test runners",
+      "parent_key": "phase-01",
+      "description": "SvelteKit with adapter-node, TypeScript strict, pnpm, ESLint + Prettier, Vitest, Playwright. Use the current Node LTS and pin it in .nvmrc and the Dockerfile. Folder layout per ARCHITECTURE.md section 4 (src/lib/server/{auth,codes,content,events,analytics}, src/routes/{(student),(adult),(staff),api}).\n\nPlan key: p1-scaffold. Phase file: docs/handoff/phases/phase-01-foundation.md",
+      "acceptance_criteria": "- `pnpm lint`, `pnpm check`, `pnpm test`, `pnpm e2e` all pass on an empty app\n- Module boundaries exist as folders with an index.ts each\n- README has setup steps that work from a clean clone",
+      "labels": [
+        "phase-1",
+        "foundation"
+      ]
+    },
+    {
+      "key": "p1-config",
+      "type": "task",
+      "priority": 0,
+      "title": "Typed environment config and secrets handling",
+      "parent_key": "phase-01",
+      "description": "Single config module that parses process.env with zod at boot and fails fast. .env.example documents every variable. Secrets (CODE_PEPPER, SESSION_SECRET, DATABASE_URL) never have defaults outside test.\n\nPlan key: p1-config. Phase file: docs/handoff/phases/phase-01-foundation.md",
+      "acceptance_criteria": "- App refuses to start with a clear message when a required variable is missing\n- .env.example is complete; .env is gitignored\n- No secret has a production default",
+      "labels": [
+        "phase-1",
+        "foundation",
+        "security"
+      ]
+    },
+    {
+      "key": "p1-db",
+      "type": "task",
+      "priority": 0,
+      "title": "PostgreSQL via Docker Compose, Drizzle, migration tooling, test database harness",
+      "parent_key": "phase-01",
+      "description": "compose.dev.yml with Postgres 16. Drizzle ORM with SQL migrations checked in. Test harness that gives each test file an isolated schema or transaction rollback so tests run in parallel.\n\nPlan key: p1-db. Phase file: docs/handoff/phases/phase-01-foundation.md",
+      "acceptance_criteria": "- `pnpm db:migrate` and `pnpm db:reset` work\n- A sample migration and a sample integration test pass in CI\n- Migrations are forward-only and run automatically on deploy",
+      "labels": [
+        "phase-1",
+        "foundation",
+        "db"
+      ]
+    },
+    {
+      "key": "p1-observability",
+      "type": "task",
+      "priority": 1,
+      "title": "Health endpoints, structured logs without IPs, request IDs",
+      "parent_key": "phase-01",
+      "description": "/healthz (process up) and /readyz (DB reachable, migrations current). JSON logs with request id, route, status, duration. Never log IP addresses, cookies, kit codes, join codes or request bodies.\n\nPlan key: p1-observability. Phase file: docs/handoff/phases/phase-01-foundation.md",
+      "acceptance_criteria": "- /readyz fails when the DB is down\n- A test asserts log lines contain no IP, cookie or code values\n- Error responses carry the request id",
+      "labels": [
+        "phase-1",
+        "foundation",
+        "privacy"
+      ]
+    },
+    {
+      "key": "p1-ui-shell",
+      "type": "task",
+      "priority": 1,
+      "title": "Base layout, design tokens, kid-friendly accessibility baseline",
+      "parent_key": "phase-01",
+      "description": "Shared layout and CSS tokens. Body text at least 18px on student pages, tap targets at least 48px, WCAG AA contrast, system font stack (no third-party font requests), reduced-motion respected. Three route groups with distinct shells: student, adult, staff.\n\nPlan key: p1-ui-shell. Phase file: docs/handoff/phases/phase-01-foundation.md",
+      "acceptance_criteria": "- No network request leaves the app origin on any page (Playwright asserts this)\n- Student shell passes an automated axe check\n- Layout holds at 360px wide and at 1366x768 (Chromebook)",
+      "labels": [
+        "phase-1",
+        "foundation",
+        "ui"
+      ]
+    },
+    {
+      "key": "p1-ci",
+      "type": "task",
+      "priority": 0,
+      "title": "CI pipeline: lint, typecheck, unit, integration, e2e, image build",
+      "parent_key": "phase-01",
+      "description": "GitHub Actions workflow on pull request and main. Postgres service container for integration tests. Playwright with Chromium and WebKit (iPad Safari stand-in). Cache pnpm. Fail on lint warnings.\n\nPlan key: p1-ci. Phase file: docs/handoff/phases/phase-01-foundation.md",
+      "acceptance_criteria": "- Workflow runs in under 10 minutes\n- Main branch is protected and requires the workflow\n- Playwright report is uploaded on failure",
+      "labels": [
+        "phase-1",
+        "foundation",
+        "ci"
+      ]
+    },
+    {
+      "key": "p1-docker",
+      "type": "task",
+      "priority": 0,
+      "title": "Production Dockerfile and compose.prod.yml (app, postgres, caddy)",
+      "parent_key": "phase-01",
+      "description": "Multi-stage Dockerfile, non-root user, healthcheck. compose.prod.yml with app, postgres (named volume), and Caddy as the only public service (automatic TLS, compression, static /media with Range support, access log disabled or IP-stripped). App and DB are not exposed on the host.\n\nPlan key: p1-docker. Phase file: docs/handoff/phases/phase-01-foundation.md",
+      "acceptance_criteria": "- `docker compose -f compose.prod.yml up` serves the app locally over Caddy\n- Image runs as non-root and is under 300 MB\n- Only ports 80 and 443 are published",
+      "labels": [
+        "phase-1",
+        "foundation",
+        "infra"
+      ]
+    },
+    {
+      "key": "p1-staging",
+      "type": "task",
+      "priority": 0,
+      "title": "Provision staging VM and deploy from CI on every merge to main",
+      "parent_key": "phase-01",
+      "description": "Staging VM in the chosen Canadian region. Firewall (22 from deploy source only, 80, 443), non-root deploy user, Docker. CI job: build image, push to registry, SSH deploy, run migrations, health-check gate. Staging shows a visible STAGING banner and uses its own secrets.\n\nPlan key: p1-staging. Phase file: docs/handoff/phases/phase-01-foundation.md",
+      "acceptance_criteria": "- Merge to main results in a new version live on staging without manual steps\n- A failed health check leaves the previous version running\n- Staging URL recorded in README",
+      "labels": [
+        "phase-1",
+        "infra",
+        "deploy"
+      ]
+    },
+    {
+      "key": "phase-02",
+      "type": "epic",
+      "priority": 0,
+      "title": "Phase 2: Data model and kit codes",
+      "description": "The tables everything hangs off, and the kit code lifecycle: generate, print, redeem once, revoke.\n\nDetails: docs/handoff/phases/phase-02-data-model-and-kit-codes.md",
+      "acceptance_criteria": "- Core schema migrated on staging\n- A batch of codes can be generated, printed as cards, and redeemed exactly once\n- Plain codes exist only on the printed sheet and the packing CSV, never in the database",
+      "labels": [
+        "phase-2"
+      ]
+    },
+    {
+      "key": "p2-schema-core",
+      "type": "task",
+      "priority": 0,
+      "title": "Core schema: products, kits, code batches, kit codes, users, sessions, classes, class kits, device sessions, audit log",
+      "parent_key": "phase-02",
+      "description": "Implement the tables in docs/handoff/DATA-MODEL.md sections 1 to 3 as Drizzle schema plus SQL migrations, with the constraints and indexes listed there. Kits are product-agnostic: nothing in the schema names a specific kit.\n\nPlan key: p2-schema-core. Phase file: docs/handoff/phases/phase-02-data-model-and-kit-codes.md",
+      "acceptance_criteria": "- Migrations apply cleanly on an empty database and on staging\n- Constraints from DATA-MODEL.md are enforced (tests insert violating rows and expect failure)\n- No column stores a plain kit code or plain join-session token",
+      "labels": [
+        "phase-2",
+        "db"
+      ]
+    },
+    {
+      "key": "p2-code-lib",
+      "type": "task",
+      "priority": 0,
+      "title": "Kit code library: generate, normalise, validate, HMAC",
+      "parent_key": "phase-02",
+      "description": "Format PREFIX-XXXX-XXXX-C: 3-letter product prefix, 8 random Crockford Base32 characters from a CSPRNG, 1 check character. Normalise input (case, spaces, dashes, O to 0, I and L to 1). Lookup key is HMAC-SHA256(CODE_PEPPER, normalised code). Plain SHA-256 is not acceptable: 40 bits of entropy is brute-forceable from a leaked table.\n\nPlan key: p2-code-lib. Phase file: docs/handoff/phases/phase-02-data-model-and-kit-codes.md",
+      "acceptance_criteria": "- Property tests: generate then validate round-trips; single-character typos are rejected by the check character\n- Normalisation accepts lower case, missing dashes and O/I/L confusions\n- HMAC uses the pepper from config and constant-time comparison",
+      "labels": [
+        "phase-2",
+        "codes",
+        "security"
+      ]
+    },
+    {
+      "key": "p2-redeem",
+      "type": "task",
+      "priority": 0,
+      "title": "Redemption service: single use, transactional, rate limited, audited",
+      "parent_key": "phase-02",
+      "description": "redeemCode(user, code, classId?) in one transaction with row lock: unused becomes redeemed, kit attached to class. Reject revoked and already-redeemed codes with distinct, non-leaky messages. Rate limit per account and per IP (IP held in memory only). Write an audit row.\n\nPlan key: p2-redeem. Phase file: docs/handoff/phases/phase-02-data-model-and-kit-codes.md",
+      "acceptance_criteria": "- Concurrent redemption of the same code succeeds exactly once (test with parallel transactions)\n- Ten failed attempts in an hour locks further attempts for that account\n- Audit log records who redeemed which kit and when, never the code",
+      "labels": [
+        "phase-2",
+        "codes",
+        "security"
+      ]
+    },
+    {
+      "key": "p2-code-cli",
+      "type": "task",
+      "priority": 1,
+      "title": "Batch generator CLI with printable code cards and packing CSV",
+      "parent_key": "phase-02",
+      "description": "`pnpm codes:generate --product <slug> --batch <label> --count <n>` creates kits and code rows, and writes two files outside the repo: packing CSV (kit number, code) and a printable A4/Letter sheet of code cards with the code in large type plus a QR that opens /redeem?code=... The plain codes are shown once and never stored.\n\nPlan key: p2-code-cli. Phase file: docs/handoff/phases/phase-02-data-model-and-kit-codes.md",
+      "acceptance_criteria": "- Running the CLI twice with the same batch label fails instead of duplicating\n- Printed sheet is legible in greyscale and each QR scans on a phone\n- Output directory is gitignored and the CLI warns that the files are the only copy",
+      "labels": [
+        "phase-2",
+        "codes",
+        "tooling"
+      ]
+    },
+    {
+      "key": "p2-staff-codes",
+      "type": "task",
+      "priority": 2,
+      "title": "Staff screen: batches, code status, revoke and reissue, move kit between classes",
+      "parent_key": "phase-02",
+      "description": "Staff-only pages listing batches and per-kit status. Actions: revoke a code, reissue a new code for the same kit (prints once), detach a kit from a class and attach to another keeping its kit id so history carries across pilots.\n\nPlan key: p2-staff-codes. Phase file: docs/handoff/phases/phase-02-data-model-and-kit-codes.md",
+      "acceptance_criteria": "- Non-staff users get 404 on every staff route\n- Reissue keeps kit_id and invalidates the old code\n- Every action writes an audit row",
+      "labels": [
+        "phase-2",
+        "codes",
+        "staff-ui"
+      ]
+    },
+    {
+      "key": "p2-seed",
+      "type": "task",
+      "priority": 2,
+      "title": "Development seed data",
+      "parent_key": "phase-02",
+      "description": "`pnpm db:seed` creates a demo product, a batch of 15 kits with known dev codes, a staff user, a facilitator, and a class. Dev-only; refuses to run when NODE_ENV=production.\n\nPlan key: p2-seed. Phase file: docs/handoff/phases/phase-02-data-model-and-kit-codes.md",
+      "acceptance_criteria": "- Fresh clone to a usable local app in under 5 minutes following the README\n- Seed refuses to run in production",
+      "labels": [
+        "phase-2",
+        "tooling"
+      ]
+    },
+    {
+      "key": "phase-03",
+      "type": "epic",
+      "priority": 0,
+      "title": "Phase 3: Accounts, classes and student sessions",
+      "description": "Adults hold accounts and own classes. Students never have accounts: a tablet joins a class with a short code and is bound to one kit.\n\nDetails: docs/handoff/phases/phase-03-accounts-classes-sessions.md",
+      "acceptance_criteria": "- A facilitator can sign up with a kit code, create a class, redeem kits, open a session and see a join code\n- A student device can join, pick a kit, and stay joined across page reloads\n- Authorization matrix tests pass",
+      "labels": [
+        "phase-3"
+      ]
+    },
+    {
+      "key": "p3-adult-auth",
+      "type": "task",
+      "priority": 0,
+      "title": "Adult accounts: code-gated signup, login, sessions, staff role",
+      "parent_key": "phase-03",
+      "description": "Email + password (argon2id). Signup requires a valid unused kit code or a staff invite, so there is no open registration and no email service in v1. Server-side sessions in Postgres, httpOnly + Secure + SameSite=Lax cookie, rotation on login, idle and absolute expiry. Roles: adult, staff. Password reset is a staff action in v1 (generates a one-time reset link shown to staff).\n\nPlan key: p3-adult-auth. Phase file: docs/handoff/phases/phase-03-accounts-classes-sessions.md",
+      "acceptance_criteria": "- Signup without a valid code or invite is impossible\n- Login is rate limited and returns the same message for unknown email and wrong password\n- Session cookie flags verified by test; logout invalidates server-side",
+      "labels": [
+        "phase-3",
+        "auth",
+        "security"
+      ]
+    },
+    {
+      "key": "p3-invites",
+      "type": "task",
+      "priority": 1,
+      "title": "Staff invites for facilitators",
+      "parent_key": "phase-03",
+      "description": "Staff create a single-use, expiring invite link to hand to a facilitator or teacher in person or over Discord. Accepting it creates an adult account without consuming a kit code.\n\nPlan key: p3-invites. Phase file: docs/handoff/phases/phase-03-accounts-classes-sessions.md",
+      "acceptance_criteria": "- Invite works once and expires after 7 days\n- Invite token is stored hashed",
+      "labels": [
+        "phase-3",
+        "auth",
+        "staff-ui"
+      ]
+    },
+    {
+      "key": "p3-classes",
+      "type": "task",
+      "priority": 0,
+      "title": "Classes: create, redeem kits into a class, list kits",
+      "parent_key": "phase-03",
+      "description": "Adult creates a class (name, kind: classroom / camp / home). Redeem by typing a code or opening the QR link while signed in. Class page lists kits with their display number.\n\nPlan key: p3-classes. Phase file: docs/handoff/phases/phase-03-accounts-classes-sessions.md",
+      "acceptance_criteria": "- A user only ever sees their own classes\n- Redeeming 15 codes in a row takes under 2 minutes with the QR flow\n- Kit display numbers are stable within a class",
+      "labels": [
+        "phase-3",
+        "classes",
+        "adult-ui"
+      ]
+    },
+    {
+      "key": "p3-join",
+      "type": "task",
+      "priority": 0,
+      "title": "Student join flow: join code, kit picker, device session",
+      "parent_key": "phase-03",
+      "description": "Facilitator opens a session, which shows a 6-character join code (same alphabet as kit codes) valid only while the session is open. Student device enters the code, taps its kit number, and receives a device-session cookie (random token, stored hashed, bound to class + kit). Rate limit join attempts. If p0-school-it reports that devices wipe cookies, re-joining must take under 15 seconds.\n\nPlan key: p3-join. Phase file: docs/handoff/phases/phase-03-accounts-classes-sessions.md",
+      "acceptance_criteria": "- Join code stops working when the facilitator closes the session\n- A device session can only read and write for its own kit (tested)\n- Join attempts are rate limited; join codes are not guessable within the limit",
+      "labels": [
+        "phase-3",
+        "auth",
+        "student-ui",
+        "security"
+      ]
+    },
+    {
+      "key": "p3-session-controls",
+      "type": "task",
+      "priority": 1,
+      "title": "Facilitator session controls: open, close, rotate code, reset a kit's devices",
+      "parent_key": "phase-03",
+      "description": "Controls on the class page. Reset revokes all device sessions for one kit (for when a group joined as the wrong kit).\n\nPlan key: p3-session-controls. Phase file: docs/handoff/phases/phase-03-accounts-classes-sessions.md",
+      "acceptance_criteria": "- Rotating the code does not disconnect devices already joined\n- Reset forces the kit's devices back to the join screen on next request",
+      "labels": [
+        "phase-3",
+        "classes",
+        "adult-ui"
+      ]
+    },
+    {
+      "key": "p3-consent-flag",
+      "type": "task",
+      "priority": 0,
+      "title": "Per-kit logging switch with consent confirmation",
+      "parent_key": "phase-03",
+      "description": "Each kit in a class has logging_enabled, default off. Facilitator turns it on only after confirming consent is in hand for every child in that group; the confirmation (who, when) is stored. Turning it off stops collection immediately. This flag is the single switch Phase 6 ingestion checks.\n\nPlan key: p3-consent-flag. Phase file: docs/handoff/phases/phase-03-accounts-classes-sessions.md",
+      "acceptance_criteria": "- Default is off for every newly redeemed kit\n- Toggle writes an audit row with user and time\n- UI states plainly what is and is not recorded in each mode",
+      "labels": [
+        "phase-3",
+        "privacy",
+        "adult-ui"
+      ]
+    },
+    {
+      "key": "p3-authz-tests",
+      "type": "task",
+      "priority": 0,
+      "title": "Authorization matrix tests",
+      "parent_key": "phase-03",
+      "description": "Table-driven tests over every route and API endpoint for five actors: anonymous, student device (own kit), student device (other kit), adult (other owner's class), staff. Add new routes to the matrix as later phases create them; CI fails if a route is missing from it.\n\nPlan key: p3-authz-tests. Phase file: docs/handoff/phases/phase-03-accounts-classes-sessions.md",
+      "acceptance_criteria": "- Matrix covers 100% of routes (enforced by a test that enumerates the route manifest)\n- No IDOR: other-kit and other-class access returns 404",
+      "labels": [
+        "phase-3",
+        "security",
+        "tests"
+      ]
+    },
+    {
+      "key": "p3-home-mode",
+      "type": "task",
+      "priority": 3,
+      "title": "Home mode: parent redeems one code, device joins without a class code",
+      "parent_key": "phase-03",
+      "description": "Retail path. Parent account with a single kit; the parent's own browser session can open the student view directly. Not needed for either pilot.\n\nPlan key: p3-home-mode. Phase file: docs/handoff/phases/phase-03-accounts-classes-sessions.md",
+      "acceptance_criteria": "- Parent can reach the student view for their kit in two taps after login",
+      "labels": [
+        "phase-3",
+        "post-pilot",
+        "auth"
+      ]
+    },
+    {
+      "key": "phase-04",
+      "type": "epic",
+      "priority": 0,
+      "title": "Phase 4: Content pipeline",
+      "description": "Modules live as Markdown in the repo, with permanent step IDs and enforced versioning, so every data point can be tied to the exact wording a group saw.\n\nDetails: docs/handoff/phases/phase-04-content-pipeline.md",
+      "acceptance_criteria": "- Sample kit content renders from Markdown\n- CI rejects a changed step whose version was not bumped\n- Given has a written authoring guide and a preview URL",
+      "labels": [
+        "phase-4"
+      ]
+    },
+    {
+      "key": "p4-schema",
+      "type": "task",
+      "priority": 0,
+      "title": "Content format and validation schema",
+      "parent_key": "phase-04",
+      "description": "content/<kit>/kit.yaml, content/<kit>/<module>/module.yaml, content/<kit>/<module>/<step>.md with frontmatter (id, version, title, track, expected_seconds, video, checkpoints[], facilitator_notes, stuck_reasons override). Step id format <kit>.<module>.<step>, permanent. zod schema validates everything at build time. Document in docs/content-format.md.\n\nPlan key: p4-schema. Phase file: docs/handoff/phases/phase-04-content-pipeline.md",
+      "acceptance_criteria": "- Invalid frontmatter fails the build with file and field named\n- Checkpoint definitions support text and image options\n- Format doc includes one complete example step",
+      "labels": [
+        "phase-4",
+        "content"
+      ]
+    },
+    {
+      "key": "p4-loader",
+      "type": "task",
+      "priority": 0,
+      "title": "Build-time content loader and sanitised Markdown rendering",
+      "parent_key": "phase-04",
+      "description": "Load all content into a typed index at build time. Render Markdown to HTML with a strict allowlist (no raw HTML, no external images or links in student view). Images are processed to responsive sizes and served from the app origin.\n\nPlan key: p4-loader. Phase file: docs/handoff/phases/phase-04-content-pipeline.md",
+      "acceptance_criteria": "- Typed API: getKit, getModule, getStep(stepId, version?)\n- Rendering strips script, iframe and external URLs (tested)\n- Images get width/height to avoid layout shift",
+      "labels": [
+        "phase-4",
+        "content"
+      ]
+    },
+    {
+      "key": "p4-lock",
+      "type": "task",
+      "priority": 0,
+      "title": "Content lint and lockfile: unique permanent IDs and enforced version bumps",
+      "parent_key": "phase-04",
+      "description": "content.lock.json maps step_id@version to a content hash. `pnpm content:lint` fails if an existing id@version's hash changed (must bump version), if an id disappeared (must be marked retired, never reused), or if ids collide. `pnpm content:lock` updates the lockfile. Runs in CI. Old versions stay retrievable from git history via the hash for analytics labels.\n\nPlan key: p4-lock. Phase file: docs/handoff/phases/phase-04-content-pipeline.md",
+      "acceptance_criteria": "- Editing a step without bumping version fails CI with a clear message\n- Reusing a retired id fails CI\n- Typo-only fixes can be marked `minor: true` to keep the same version, and that is recorded in the lockfile",
+      "labels": [
+        "phase-4",
+        "content",
+        "ci"
+      ]
+    },
+    {
+      "key": "p4-registry",
+      "type": "task",
+      "priority": 1,
+      "title": "Sync content registry to the database on deploy",
+      "parent_key": "phase-04",
+      "description": "On deploy, upsert content_steps (step_id, version, module, track, title, expected_seconds, hash, first_published_at) so analytics can join events to step metadata without reading the repo. Never delete rows.\n\nPlan key: p4-registry. Phase file: docs/handoff/phases/phase-04-content-pipeline.md",
+      "acceptance_criteria": "- Deploying a version bump adds a row and keeps the old one\n- Registry sync is idempotent",
+      "labels": [
+        "phase-4",
+        "content",
+        "db"
+      ]
+    },
+    {
+      "key": "p4-sample",
+      "type": "task",
+      "priority": 0,
+      "title": "Placeholder kit content for development and tests",
+      "parent_key": "phase-04",
+      "description": "A clearly fake kit ('demo') with 2 modules of 3 steps each, both tracks on one module, one checkpoint, one short placeholder video and one image. Used by tests and staging until real arm-kit content arrives. Do not invent real arm-kit teaching content.\n\nPlan key: p4-sample. Phase file: docs/handoff/phases/phase-04-content-pipeline.md",
+      "acceptance_criteria": "- Demo kit exercises every content feature\n- All e2e tests run against the demo kit",
+      "labels": [
+        "phase-4",
+        "content"
+      ]
+    },
+    {
+      "key": "p4-video",
+      "type": "task",
+      "priority": 1,
+      "title": "Video pipeline: transcode script, storage layout, same-origin serving with entitlement check",
+      "parent_key": "phase-04",
+      "description": "`pnpm video:prepare <file>` runs ffmpeg to H.264/AAC MP4 at 720p with faststart plus a poster image. Files live on a volume and are served by Caddy from /media with Range support. The app issues short-lived signed URLs only to sessions entitled to the kit. Same origin means one domain to allowlist at schools.\n\nPlan key: p4-video. Phase file: docs/handoff/phases/phase-04-content-pipeline.md",
+      "acceptance_criteria": "- Seeking works on Chromebook Chrome and iPad Safari\n- Unsigned or expired media URLs return 403\n- Video files are not in git; README documents where they live and how they are backed up",
+      "labels": [
+        "phase-4",
+        "content",
+        "infra"
+      ]
+    },
+    {
+      "key": "p4-shortlinks",
+      "type": "task",
+      "priority": 1,
+      "title": "Stable step short links and QR generation for print",
+      "parent_key": "phase-04",
+      "description": "/s/<step_id> redirects to the current version of the step and marks entry=qr. `pnpm content:qr` writes one SVG QR per step for Kai's print layout. The QR never changes when a step's version changes.\n\nPlan key: p4-shortlinks. Phase file: docs/handoff/phases/phase-04-content-pipeline.md",
+      "acceptance_criteria": "- Short link survives a version bump\n- QR SVGs regenerate deterministically",
+      "labels": [
+        "phase-4",
+        "content",
+        "tooling"
+      ]
+    },
+    {
+      "key": "p4-print",
+      "type": "task",
+      "priority": 2,
+      "title": "Print stylesheet and PDF export of a module from the same source",
+      "parent_key": "phase-04",
+      "description": "A print view per module (both tracks) with step QR codes, exported to PDF with Playwright. Keeps printed guide and web steps from drifting apart.\n\nPlan key: p4-print. Phase file: docs/handoff/phases/phase-04-content-pipeline.md",
+      "acceptance_criteria": "- PDF for the demo module is paginated without cut-off images\n- Each printed step shows its QR and step id",
+      "labels": [
+        "phase-4",
+        "content",
+        "tooling"
+      ]
+    },
+    {
+      "key": "p4-authoring-guide",
+      "type": "task",
+      "priority": 1,
+      "title": "Authoring guide for Given and per-branch preview",
+      "parent_key": "phase-04",
+      "description": "docs/content-authoring.md written for a non-developer: how to edit a step in the GitHub web editor, what version bumps mean, how to add an image, how to see a preview. CI posts a preview link or the staging URL on content pull requests.\n\nPlan key: p4-authoring-guide. Phase file: docs/handoff/phases/phase-04-content-pipeline.md",
+      "acceptance_criteria": "- Guide has screenshots or exact click paths\n- A content-only pull request can be merged without touching code",
+      "labels": [
+        "phase-4",
+        "docs",
+        "content"
+      ]
+    },
+    {
+      "key": "p4-real-content",
+      "type": "task",
+      "priority": 1,
+      "title": "Load the real arm-kit modules",
+      "parent_key": "phase-04",
+      "description": "HUMAN-GATED: needs Given's module text, images and videos. The agent may convert supplied drafts to the content format and run lint, but must not write teaching content itself.\n\nPlan key: p4-real-content. Phase file: docs/handoff/phases/phase-04-content-pipeline.md",
+      "acceptance_criteria": "- All modules for Pilot 1 pass content lint\n- Expected time is set on every step\n- Given has reviewed the preview",
+      "labels": [
+        "phase-4",
+        "content",
+        "human"
+      ]
+    },
+    {
+      "key": "phase-05",
+      "type": "epic",
+      "priority": 0,
+      "title": "Phase 5: Student experience",
+      "description": "The step player an 8 to 10 year old group uses on a shared tablet: read, watch, build, check, ask for help, move on. It must survive flaky Wi-Fi.\n\nDetails: docs/handoff/phases/phase-05-student-experience.md",
+      "acceptance_criteria": "- A group can join, complete a demo module end to end, close the tablet and resume\n- Steps already opened remain usable offline\n- Usability pass done on a Chromebook and an iPad",
+      "labels": [
+        "phase-5"
+      ]
+    },
+    {
+      "key": "p5-home",
+      "type": "task",
+      "priority": 0,
+      "title": "Student home: module list, progress, resume",
+      "parent_key": "phase-05",
+      "description": "After join, show modules as large cards with progress and a single obvious Continue button. Locked content (not entitled) is shown as locked, not hidden.\n\nPlan key: p5-home. Phase file: docs/handoff/phases/phase-05-student-experience.md",
+      "acceptance_criteria": "- Continue goes to the first incomplete step\n- Usable with touch only and with keyboard only",
+      "labels": [
+        "phase-5",
+        "student-ui"
+      ]
+    },
+    {
+      "key": "p5-step",
+      "type": "task",
+      "priority": 0,
+      "title": "Step player: text, images, video, navigation, track switch",
+      "parent_key": "phase-05",
+      "description": "One step per screen. Video at top when present, then instructions, then a large Done button. Back and Next. Track switch (beginner/advanced) where the step has both. No autoplay with sound.\n\nPlan key: p5-step. Phase file: docs/handoff/phases/phase-05-student-experience.md",
+      "acceptance_criteria": "- Works at 360px width and on 1366x768\n- Next is disabled until Done or checkpoint is satisfied; facilitator override exists\n- Track switch keeps position in the module",
+      "labels": [
+        "phase-5",
+        "student-ui"
+      ]
+    },
+    {
+      "key": "p5-checkpoint",
+      "type": "task",
+      "priority": 0,
+      "title": "Checkpoint questions",
+      "parent_key": "phase-05",
+      "description": "Multiple choice with text or picture options, immediate feedback, retry allowed. First attempt and attempt count are what analytics needs; do not show scores or leaderboards.\n\nPlan key: p5-checkpoint. Phase file: docs/handoff/phases/phase-05-student-experience.md",
+      "acceptance_criteria": "- Options are shuffled per render but recorded by stable option id\n- Wrong answer shows the hint from content, not just 'try again'",
+      "labels": [
+        "phase-5",
+        "student-ui"
+      ]
+    },
+    {
+      "key": "p5-stuck",
+      "type": "task",
+      "priority": 0,
+      "title": "'I'm stuck' button with preset reasons and resolution",
+      "parent_key": "phase-05",
+      "description": "Always-visible button on every step. Opens preset reasons from content (defaults: can't find the part, it won't fit, don't understand, it doesn't work). After choosing, the step shows a 'We fixed it!' button. No free text from students anywhere.\n\nPlan key: p5-stuck. Phase file: docs/handoff/phases/phase-05-student-experience.md",
+      "acceptance_criteria": "- Stuck state is visible to the facilitator view (Phase 7 consumes it)\n- Resolution records how it ended: fixed, skipped, facilitator helped",
+      "labels": [
+        "phase-5",
+        "student-ui"
+      ]
+    },
+    {
+      "key": "p5-progress",
+      "type": "task",
+      "priority": 0,
+      "title": "Progress persistence: device always, server only when logging is enabled",
+      "parent_key": "phase-05",
+      "description": "Progress is always kept in localStorage so a group can resume. It is written to the server (kit_progress) only when the kit's logging_enabled is on. In no-log mode the server stores nothing about activity.\n\nPlan key: p5-progress. Phase file: docs/handoff/phases/phase-05-student-experience.md",
+      "acceptance_criteria": "- With logging off, completing steps creates zero rows server-side (test)\n- With logging on, a second device joining the same kit resumes at the same step",
+      "labels": [
+        "phase-5",
+        "student-ui",
+        "privacy"
+      ]
+    },
+    {
+      "key": "p5-entitlement",
+      "type": "task",
+      "priority": 2,
+      "title": "Entitlement gating for core and add-on content",
+      "parent_key": "phase-05",
+      "description": "Content sections map to entitlements on the kit's code. Locked modules show a friendly locked card.\n\nPlan key: p5-entitlement. Phase file: docs/handoff/phases/phase-05-student-experience.md",
+      "acceptance_criteria": "- A kit without the add-on entitlement cannot open add-on steps by URL",
+      "labels": [
+        "phase-5",
+        "student-ui",
+        "codes"
+      ]
+    },
+    {
+      "key": "p5-pwa",
+      "type": "task",
+      "priority": 1,
+      "title": "Offline support: service worker, app shell and content precache",
+      "parent_key": "phase-05",
+      "description": "Installable PWA. Precache app shell and the current module's text and images on join. Videos stream when online; optional 'download this session's videos' button for facilitators to run before class. Show a small offline indicator, never a blocking error.\n\nPlan key: p5-pwa. Phase file: docs/handoff/phases/phase-05-student-experience.md",
+      "acceptance_criteria": "- With the network disabled after join, the current module's steps open and Done works\n- A new deploy updates the service worker without trapping users on an old version",
+      "labels": [
+        "phase-5",
+        "student-ui",
+        "offline"
+      ]
+    },
+    {
+      "key": "p5-a11y",
+      "type": "task",
+      "priority": 1,
+      "title": "Accessibility and kid-usability pass on real devices",
+      "parent_key": "phase-05",
+      "description": "Automated axe checks in e2e plus a manual pass on a Chromebook and an iPad: focus order, contrast, reduced motion, text resize to 200%, reading level of UI strings (short words, no jargon).\n\nPlan key: p5-a11y. Phase file: docs/handoff/phases/phase-05-student-experience.md",
+      "acceptance_criteria": "- axe reports no serious or critical issues on student pages\n- Manual checklist committed with findings filed as beads",
+      "labels": [
+        "phase-5",
+        "student-ui",
+        "a11y"
+      ]
+    },
+    {
+      "key": "p5-e2e",
+      "type": "task",
+      "priority": 0,
+      "title": "End-to-end test: join, complete a module, resume",
+      "parent_key": "phase-05",
+      "description": "Playwright scenario on Chromium and WebKit covering join, steps, checkpoint (wrong then right), stuck and fixed, close and resume.\n\nPlan key: p5-e2e. Phase file: docs/handoff/phases/phase-05-student-experience.md",
+      "acceptance_criteria": "- Scenario passes on both browsers in CI",
+      "labels": [
+        "phase-5",
+        "tests"
+      ]
+    },
+    {
+      "key": "phase-06",
+      "type": "epic",
+      "priority": 0,
+      "title": "Phase 6: Event pipeline",
+      "description": "Trustworthy data for redesigning the modules: every event validated, idempotent, correctly timed even when it was queued offline, and never stored without consent.\n\nDetails: docs/handoff/phases/phase-06-event-pipeline.md",
+      "acceptance_criteria": "- All catalog events flow from the demo kit to the database on staging\n- Replaying a batch creates no duplicates\n- The no-log invariant test passes",
+      "labels": [
+        "phase-6"
+      ]
+    },
+    {
+      "key": "p6-catalog",
+      "type": "task",
+      "priority": 0,
+      "title": "Event catalog as code, with generated documentation",
+      "parent_key": "phase-06",
+      "description": "Implement docs/handoff/EVENTS.md as a zod discriminated union shared by client and server, with a catalog version. Generate docs/events.md from the code so the consent appendix is always accurate.\n\nPlan key: p6-catalog. Phase file: docs/handoff/phases/phase-06-event-pipeline.md",
+      "acceptance_criteria": "- Unknown event types and extra fields are rejected\n- Generated doc matches the code (CI checks it is up to date)",
+      "labels": [
+        "phase-6",
+        "events"
+      ]
+    },
+    {
+      "key": "p6-table",
+      "type": "task",
+      "priority": 0,
+      "title": "Events table, indexes and progress table",
+      "parent_key": "phase-06",
+      "description": "Tables from DATA-MODEL.md section 4: events (append-only, primary key event_id), kit_progress. Indexes for (class_id, kit_id, client_ts) and (step_id, content_version, type). No update or delete grants for the app role on events except through the deletion function added in Phase 9.\n\nPlan key: p6-table. Phase file: docs/handoff/phases/phase-06-event-pipeline.md",
+      "acceptance_criteria": "- Insert with a duplicate event_id is a no-op\n- App role cannot UPDATE events (tested)",
+      "labels": [
+        "phase-6",
+        "events",
+        "db"
+      ]
+    },
+    {
+      "key": "p6-ingest",
+      "type": "task",
+      "priority": 0,
+      "title": "Ingest endpoint: authenticated, validated, consent-gated, idempotent",
+      "parent_key": "phase-06",
+      "description": "POST /api/events accepts a batch (max 100 events, max 64 KB). Auth by device session; class and kit come from the session, never from the payload. If logging is off for the kit, return 204 and store nothing. Validate against the catalog, set received_at, insert with ON CONFLICT DO NOTHING. Clamp client timestamps that are in the future or older than 14 days and flag them.\n\nPlan key: p6-ingest. Phase file: docs/handoff/phases/phase-06-event-pipeline.md",
+      "acceptance_criteria": "- Payload cannot write events for another kit (tested)\n- Same batch posted three times yields one set of rows\n- With logging off, zero rows are written and the response is indistinguishable in timing class",
+      "labels": [
+        "phase-6",
+        "events",
+        "privacy",
+        "security"
+      ]
+    },
+    {
+      "key": "p6-client",
+      "type": "task",
+      "priority": 0,
+      "title": "Client event queue: persistent, batched, retried",
+      "parent_key": "phase-06",
+      "description": "Queue in IndexedDB. Each event gets a UUIDv7, client_ts, a per-session sequence number and the app version. Flush every 10 seconds or 20 events, on visibilitychange and pagehide (sendBeacon/keepalive), with exponential backoff. Cap the queue (drop oldest heartbeats first, never stuck or checkpoint events). If the server says logging is off, stop queueing.\n\nPlan key: p6-client. Phase file: docs/handoff/phases/phase-06-event-pipeline.md",
+      "acceptance_criteria": "- Events created offline are delivered after reconnect with original client_ts\n- Queue survives a tab close and a browser restart\n- No events are queued in no-log mode",
+      "labels": [
+        "phase-6",
+        "events",
+        "offline"
+      ]
+    },
+    {
+      "key": "p6-time",
+      "type": "task",
+      "priority": 0,
+      "title": "Active-time measurement",
+      "parent_key": "phase-06",
+      "description": "Count time on a step only while the tab is visible and there was interaction (touch, key, scroll, video playing) in the last 60 seconds. Emit step_time deltas at flush and on leave. This replaces the vague 'time on screen', which over-counts every time a group walks away to build.\n\nPlan key: p6-time. Phase file: docs/handoff/phases/phase-06-event-pipeline.md",
+      "acceptance_criteria": "- Leaving a step open and idle for 10 minutes records about 60 seconds, not 600\n- Sum of deltas equals measured active time within 5%",
+      "labels": [
+        "phase-6",
+        "events"
+      ]
+    },
+    {
+      "key": "p6-video-events",
+      "type": "task",
+      "priority": 1,
+      "title": "Video instrumentation",
+      "parent_key": "phase-06",
+      "description": "Emit video_play, video_pause, video_seek (from, to), video_ended and watched ranges (merged intervals in seconds) so analytics can show which seconds get replayed.\n\nPlan key: p6-video-events. Phase file: docs/handoff/phases/phase-06-event-pipeline.md",
+      "acceptance_criteria": "- Replaying 0:20 to 0:35 twice produces overlapping ranges that reconstruct the replay\n- No event spam: at most one range update per 5 seconds",
+      "labels": [
+        "phase-6",
+        "events"
+      ]
+    },
+    {
+      "key": "p6-instrument",
+      "type": "task",
+      "priority": 0,
+      "title": "Instrument the student app with all catalog events",
+      "parent_key": "phase-06",
+      "description": "Wire step_view (with entry: nav, resume, qr), step_complete, stuck, stuck_resolved, checkpoint_answer, track_switch, session_start. Every event carries step_id, content_version and track from the content actually rendered.\n\nPlan key: p6-instrument. Phase file: docs/handoff/phases/phase-06-event-pipeline.md",
+      "acceptance_criteria": "- e2e test asserts the exact event sequence for the scripted scenario\n- content_version on events matches the rendered step",
+      "labels": [
+        "phase-6",
+        "events"
+      ]
+    },
+    {
+      "key": "p6-nolog-invariant",
+      "type": "task",
+      "priority": 0,
+      "title": "Privacy invariant test: no-log mode stores nothing",
+      "parent_key": "phase-06",
+      "description": "A dedicated e2e test runs the full student scenario with logging off, then asserts row counts in events, kit_progress, notes and quiz tables are unchanged, and that app logs contain no kit activity. This test is the evidence behind the consent form's opt-out promise; it must never be skipped or weakened.\n\nPlan key: p6-nolog-invariant. Phase file: docs/handoff/phases/phase-06-event-pipeline.md",
+      "acceptance_criteria": "- Test fails if any activity row is written with logging off\n- Test is marked required in CI",
+      "labels": [
+        "phase-6",
+        "privacy",
+        "tests"
+      ]
+    },
+    {
+      "key": "p6-replay-tests",
+      "type": "task",
+      "priority": 1,
+      "title": "Offline and replay robustness tests",
+      "parent_key": "phase-06",
+      "description": "Tests for duplicate batches, out-of-order delivery, partial batch failure, clock skew of plus or minus one day, and an airplane-mode e2e run.\n\nPlan key: p6-replay-tests. Phase file: docs/handoff/phases/phase-06-event-pipeline.md",
+      "acceptance_criteria": "- All cases leave the events table consistent and deduplicated",
+      "labels": [
+        "phase-6",
+        "tests",
+        "offline"
+      ]
+    },
+    {
+      "key": "phase-07",
+      "type": "epic",
+      "priority": 0,
+      "title": "Phase 7: Facilitator dashboard",
+      "description": "What the adult in the room needs during a session: who is where, who is stuck, and a fast way to record observations on the same step IDs as the event data.\n\nDetails: docs/handoff/phases/phase-07-facilitator-dashboard.md",
+      "acceptance_criteria": "- Facilitator can run a full session from a phone or laptop\n- Observation notes and quiz results land in the database tied to kits and steps",
+      "labels": [
+        "phase-7"
+      ]
+    },
+    {
+      "key": "p7-class-view",
+      "type": "task",
+      "priority": 0,
+      "title": "Class dashboard: kits, current step, progress, last active",
+      "parent_key": "phase-07",
+      "description": "Grid of kits showing current step, progress bar, last activity and logging state. Kits with logging off show 'not recorded' rather than stale data.\n\nPlan key: p7-class-view. Phase file: docs/handoff/phases/phase-07-facilitator-dashboard.md",
+      "acceptance_criteria": "- Usable on a phone held in one hand\n- Reflects a kit's progress within 10 seconds",
+      "labels": [
+        "phase-7",
+        "adult-ui"
+      ]
+    },
+    {
+      "key": "p7-live-stuck",
+      "type": "task",
+      "priority": 0,
+      "title": "Live stuck alerts",
+      "parent_key": "phase-07",
+      "description": "Kits that pressed 'I'm stuck' rise to the top with step and reason; facilitator can mark 'helping' and the kit sees that help is coming. Use polling or server-sent events; no websockets dependency. For kits with logging off, stuck alerts still work in the moment but are held in memory only and not persisted.\n\nPlan key: p7-live-stuck. Phase file: docs/handoff/phases/phase-07-facilitator-dashboard.md",
+      "acceptance_criteria": "- Alert appears within 5 seconds\n- With logging off, an alert is shown live and no row is stored (covered by the invariant test)",
+      "labels": [
+        "phase-7",
+        "adult-ui"
+      ]
+    },
+    {
+      "key": "p7-notes",
+      "type": "task",
+      "priority": 0,
+      "title": "Facilitator observation form",
+      "parent_key": "phase-07",
+      "description": "Three taps to record: kit (optional), step (defaults to the kit's current step), issue type (wording, video, diagram, hardware, sequencing, other), severity 1 to 3, optional short note. Guidance text reminds facilitators not to write children's names.\n\nPlan key: p7-notes. Phase file: docs/handoff/phases/phase-07-facilitator-dashboard.md",
+      "acceptance_criteria": "- A note can be saved in under 15 seconds on a phone\n- Notes are stored with step_id and content_version",
+      "labels": [
+        "phase-7",
+        "adult-ui",
+        "data"
+      ]
+    },
+    {
+      "key": "p7-quiz",
+      "type": "task",
+      "priority": 1,
+      "title": "Pre/post quiz and exit card entry",
+      "parent_key": "phase-07",
+      "description": "Quiz questions are defined in kit content. Staff or facilitators enter paper results in a grid: kit, participant letter (A/B/C), phase (pre/post), answer per question; plus exit-card fun rating per module. Participant letters are assigned on paper in class and are the only per-child identifier in the system. Only stored when logging is enabled for the kit.\n\nPlan key: p7-quiz. Phase file: docs/handoff/phases/phase-07-facilitator-dashboard.md",
+      "acceptance_criteria": "- Entry for a class of 30 takes under 15 minutes\n- Same question ids across pre and post so gain can be computed",
+      "labels": [
+        "phase-7",
+        "adult-ui",
+        "data"
+      ]
+    },
+    {
+      "key": "p7-guide",
+      "type": "task",
+      "priority": 2,
+      "title": "Facilitator view of steps with answer keys and common fixes",
+      "parent_key": "phase-07",
+      "description": "Adults can open any step with facilitator_notes and checkpoint answers shown.\n\nPlan key: p7-guide. Phase file: docs/handoff/phases/phase-07-facilitator-dashboard.md",
+      "acceptance_criteria": "- Student sessions can never see facilitator notes (authz matrix updated)",
+      "labels": [
+        "phase-7",
+        "adult-ui",
+        "content"
+      ]
+    },
+    {
+      "key": "p7-e2e",
+      "type": "task",
+      "priority": 1,
+      "title": "End-to-end test: run a session as facilitator",
+      "parent_key": "phase-07",
+      "description": "Playwright with two browser contexts: a student device and a facilitator. Open session, join, get stuck, facilitator sees it, records a note, closes session.\n\nPlan key: p7-e2e. Phase file: docs/handoff/phases/phase-07-facilitator-dashboard.md",
+      "acceptance_criteria": "- Scenario passes in CI",
+      "labels": [
+        "phase-7",
+        "tests"
+      ]
+    },
+    {
+      "key": "phase-08",
+      "type": "epic",
+      "priority": 1,
+      "title": "Phase 8: Analytics and the redesign loop",
+      "description": "Turn pilot data into a ranked list of steps to fix. Only verification and export are needed before Pilot 1; the dashboards can land while the pilot runs.\n\nDetails: docs/handoff/phases/phase-08-analytics.md",
+      "acceptance_criteria": "- Before launch: data-quality report and export work on staging data\n- Before February analysis: heatmap and step detail pages work on Pilot 1 data",
+      "labels": [
+        "phase-8"
+      ]
+    },
+    {
+      "key": "p8-views",
+      "type": "task",
+      "priority": 1,
+      "title": "Step metrics as SQL views",
+      "parent_key": "phase-08",
+      "description": "Views per step x version x track x class: kits viewed, kits completed, median and p90 active seconds, overrun ratio against expected time, kits stuck, stuck reasons, kits rewatching, first-attempt miss rate per checkpoint, note count and severity sum. Report counts alongside every rate (4 of 13 kits), because a pilot has 12 to 15 kits and percentages alone mislead.\n\nPlan key: p8-views. Phase file: docs/handoff/phases/phase-08-analytics.md",
+      "acceptance_criteria": "- Views are covered by tests with fixture events and hand-computed expected values\n- Every rate column has matching numerator and denominator columns",
+      "labels": [
+        "phase-8",
+        "analytics",
+        "db"
+      ]
+    },
+    {
+      "key": "p8-quality",
+      "type": "task",
+      "priority": 0,
+      "title": "Data-quality report for pilot days",
+      "parent_key": "phase-08",
+      "description": "Staff page per class session: events per kit, time of first and last event, gaps over 10 minutes, flagged timestamps, kits with logging off, app versions seen. Run after every session to catch a broken tablet or a missed consent toggle the same day.\n\nPlan key: p8-quality. Phase file: docs/handoff/phases/phase-08-analytics.md",
+      "acceptance_criteria": "- A kit that sent nothing during a session is highlighted\n- Report loads in under 3 seconds for a 30-kit class",
+      "labels": [
+        "phase-8",
+        "analytics"
+      ]
+    },
+    {
+      "key": "p8-export",
+      "type": "task",
+      "priority": 0,
+      "title": "Staff export to CSV and JSON",
+      "parent_key": "phase-08",
+      "description": "Staff-only export of events, notes, quiz results and step metrics per class or per pilot, for analysis outside the app and for the evidence package. Exports contain kit ids, never adult emails.\n\nPlan key: p8-export. Phase file: docs/handoff/phases/phase-08-analytics.md",
+      "acceptance_criteria": "- Export is staff-only and audited\n- Row counts in the export match the database",
+      "labels": [
+        "phase-8",
+        "analytics"
+      ]
+    },
+    {
+      "key": "p8-heatmap",
+      "type": "task",
+      "priority": 2,
+      "title": "Step heatmap ranked by friction",
+      "parent_key": "phase-08",
+      "description": "Modules by steps grid coloured by friction rank, filterable by pilot, version and track. Friction is a rank for sorting, not a score to report. Cells show n of N.\n\nPlan key: p8-heatmap. Phase file: docs/handoff/phases/phase-08-analytics.md",
+      "acceptance_criteria": "- Top 10 friction steps list matches a hand-check on fixture data",
+      "labels": [
+        "phase-8",
+        "analytics",
+        "staff-ui",
+        "post-launch-ok"
+      ]
+    },
+    {
+      "key": "p8-step-detail",
+      "type": "task",
+      "priority": 2,
+      "title": "Step detail page",
+      "parent_key": "phase-08",
+      "description": "Funnel, active-time distribution, stuck reasons and time-to-unstuck, video replay histogram by second, checkpoint answer spread, facilitator notes.\n\nPlan key: p8-step-detail. Phase file: docs/handoff/phases/phase-08-analytics.md",
+      "acceptance_criteria": "- Each chart states its n\n- Replay histogram highlights the most replayed 10 seconds",
+      "labels": [
+        "phase-8",
+        "analytics",
+        "staff-ui",
+        "post-launch-ok"
+      ]
+    },
+    {
+      "key": "p8-outcomes",
+      "type": "task",
+      "priority": 2,
+      "title": "Learning outcomes: pre/post gain",
+      "parent_key": "phase-08",
+      "description": "Per question and per module: pre correct, post correct, gain, with counts.\n\nPlan key: p8-outcomes. Phase file: docs/handoff/phases/phase-08-analytics.md",
+      "acceptance_criteria": "- Handles participants missing a pre or post entry without crashing or miscounting",
+      "labels": [
+        "phase-8",
+        "analytics",
+        "staff-ui",
+        "post-launch-ok"
+      ]
+    },
+    {
+      "key": "p8-compare",
+      "type": "task",
+      "priority": 3,
+      "title": "Version comparison for the same step",
+      "parent_key": "phase-08",
+      "description": "Side-by-side metrics for two versions of a step (Pilot 1 v1 against Pilot 2 v2). Needed in March.\n\nPlan key: p8-compare. Phase file: docs/handoff/phases/phase-08-analytics.md",
+      "acceptance_criteria": "- Shows both versions' counts and the difference, with a small-n warning",
+      "labels": [
+        "phase-8",
+        "analytics",
+        "staff-ui",
+        "post-launch-ok"
+      ]
+    },
+    {
+      "key": "phase-09",
+      "type": "epic",
+      "priority": 0,
+      "title": "Phase 9: Privacy, security and hardening",
+      "description": "Make the promises in the consent form true and testable, and make sure fifteen tablets streaming video in one room do not take the site down.\n\nDetails: docs/handoff/phases/phase-09-privacy-security-hardening.md",
+      "acceptance_criteria": "- Deletion, retention and no-log behaviour are covered by tests\n- Security headers and rate limits verified on staging\n- Load test passed at twice the pilot size",
+      "labels": [
+        "phase-9"
+      ]
+    },
+    {
+      "key": "p9-delete",
+      "type": "task",
+      "priority": 0,
+      "title": "Kit data deletion",
+      "parent_key": "phase-09",
+      "description": "Staff action: delete all activity data for a kit (events, progress, notes, quiz, exit cards) in one transaction. Record an audit row with counts only. This is how a parent withdrawal is honoured.\n\nPlan key: p9-delete. Phase file: docs/handoff/phases/phase-09-privacy-security-hardening.md",
+      "acceptance_criteria": "- After deletion no table contains the kit's activity rows (test enumerates all tables with a kit_id column)\n- Deletion is idempotent and audited",
+      "labels": [
+        "phase-9",
+        "privacy"
+      ]
+    },
+    {
+      "key": "p9-retention",
+      "type": "task",
+      "priority": 1,
+      "title": "Retention job",
+      "parent_key": "phase-09",
+      "description": "Scheduled job that, after the configured period, replaces raw events with per-step aggregates. Period comes from config (default 12 months after class end, to be confirmed against the research approval). Supports dry run.\n\nPlan key: p9-retention. Phase file: docs/handoff/phases/phase-09-privacy-security-hardening.md",
+      "acceptance_criteria": "- Dry run reports what would be removed\n- Aggregates are preserved after raw rows are removed",
+      "labels": [
+        "phase-9",
+        "privacy"
+      ]
+    },
+    {
+      "key": "p9-headers",
+      "type": "task",
+      "priority": 0,
+      "title": "Security headers, cookies and CSRF",
+      "parent_key": "phase-09",
+      "description": "CSP default-src 'self' with no inline script, HSTS, Referrer-Policy no-referrer, Permissions-Policy denying camera/mic/geolocation (except camera on the adult QR-scan page if used), X-Content-Type-Options. CSRF protection on all state-changing requests.\n\nPlan key: p9-headers. Phase file: docs/handoff/phases/phase-09-privacy-security-hardening.md",
+      "acceptance_criteria": "- Playwright asserts headers on every route group\n- No CSP violations in the console during e2e runs",
+      "labels": [
+        "phase-9",
+        "security"
+      ]
+    },
+    {
+      "key": "p9-ratelimit",
+      "type": "task",
+      "priority": 0,
+      "title": "Rate limiting and lockout review",
+      "parent_key": "phase-09",
+      "description": "Review and test limits for login, signup, redeem, join and ingest. A whole classroom shares one public IP, so join and ingest limits are per device session or per class, not per IP. IPs are used in memory only and never written to disk.\n\nPlan key: p9-ratelimit. Phase file: docs/handoff/phases/phase-09-privacy-security-hardening.md",
+      "acceptance_criteria": "- 30 devices joining within one minute from one IP all succeed\n- Brute-forcing join codes from one device is cut off well before the expected number of guesses",
+      "labels": [
+        "phase-9",
+        "security"
+      ]
+    },
+    {
+      "key": "p9-logs",
+      "type": "task",
+      "priority": 0,
+      "title": "Log and PII audit",
+      "parent_key": "phase-09",
+      "description": "Verify end to end on staging: Caddy stores no client IPs, app logs contain no emails, codes, tokens or bodies, database has no IP columns. Document log retention (14 days).\n\nPlan key: p9-logs. Phase file: docs/handoff/phases/phase-09-privacy-security-hardening.md",
+      "acceptance_criteria": "- Grep of staging logs after a full e2e run finds no IPs, emails or codes\n- Log retention configured and documented",
+      "labels": [
+        "phase-9",
+        "privacy",
+        "security"
+      ]
+    },
+    {
+      "key": "p9-authz-sweep",
+      "type": "task",
+      "priority": 1,
+      "title": "Abuse-case sweep against the threat model",
+      "parent_key": "phase-09",
+      "description": "Walk every abuse case in docs/threat-model.md and add a test or a documented manual check: join-code guessing, kit-code brute force, event spoofing for another kit, media URL sharing, student reaching adult or staff pages, facilitator reaching another class.\n\nPlan key: p9-authz-sweep. Phase file: docs/handoff/phases/phase-09-privacy-security-hardening.md",
+      "acceptance_criteria": "- Each abuse case links to a passing test or a signed-off manual check",
+      "labels": [
+        "phase-9",
+        "security",
+        "tests"
+      ]
+    },
+    {
+      "key": "p9-deps",
+      "type": "task",
+      "priority": 2,
+      "title": "Dependency audit and pinned images",
+      "parent_key": "phase-09",
+      "description": "pnpm audit clean or exceptions documented, Docker base images pinned by digest, Dependabot or Renovate enabled, lockfile committed.\n\nPlan key: p9-deps. Phase file: docs/handoff/phases/phase-09-privacy-security-hardening.md",
+      "acceptance_criteria": "- No high or critical advisories without a written exception",
+      "labels": [
+        "phase-9",
+        "security"
+      ]
+    },
+    {
+      "key": "p9-load",
+      "type": "task",
+      "priority": 0,
+      "title": "Load test at twice pilot size",
+      "parent_key": "phase-09",
+      "description": "k6 (or similar) scenario on staging: 30 devices joining within a minute, stepping through a module, sending events and each streaming a 720p video. Record CPU, memory, bandwidth and p95 latency; size the production VM from the result.\n\nPlan key: p9-load. Phase file: docs/handoff/phases/phase-09-privacy-security-hardening.md",
+      "acceptance_criteria": "- p95 page response under 500 ms and no errors at 30 devices\n- Capacity note committed with the chosen production VM size and expected monthly bandwidth",
+      "labels": [
+        "phase-9",
+        "infra",
+        "tests"
+      ]
+    },
+    {
+      "key": "p9-privacy-doc",
+      "type": "task",
+      "priority": 0,
+      "title": "Final privacy documentation and consent appendix",
+      "parent_key": "phase-09",
+      "description": "Finalize docs/PRIVACY.md from the handoff version against what was actually built: data inventory, where it is stored, who can see it, retention, deletion. Produce a one-page plain-language appendix with the generated event list for the consent form and research application.\n\nPlan key: p9-privacy-doc. Phase file: docs/handoff/phases/phase-09-privacy-security-hardening.md",
+      "acceptance_criteria": "- Every table and log is in the data inventory\n- Appendix is readable by a parent (no jargon) and matches the generated event catalog",
+      "labels": [
+        "phase-9",
+        "privacy",
+        "docs"
+      ]
+    },
+    {
+      "key": "phase-10",
+      "type": "epic",
+      "priority": 0,
+      "title": "Phase 10: Production deploy and pilot readiness",
+      "description": "A production environment that can be restored from backup, real content and real codes loaded, and a rehearsed plan for the pilot day including what happens when the Wi-Fi fails.\n\nDetails: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- Production is live in a Canadian region with backups restored at least once in a drill\n- Printed code cards match the kits; smoke test passes on the pilot's device types\n- Go/no-go checklist signed by the team",
+      "labels": [
+        "phase-10"
+      ]
+    },
+    {
+      "key": "p10-prod-infra",
+      "type": "task",
+      "priority": 0,
+      "title": "Provision production VM",
+      "parent_key": "phase-10",
+      "description": "Production VM sized from the load test, same region as staging, separate from staging. Firewall, automatic security updates, non-root deploy user, Docker, separate volumes for database and media, time sync.\n\nPlan key: p10-prod-infra. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- Only 80/443 public; SSH restricted\n- Infra steps are scripted or documented so the VM can be rebuilt from scratch",
+      "labels": [
+        "phase-10",
+        "infra",
+        "deploy"
+      ]
+    },
+    {
+      "key": "p10-secrets",
+      "type": "task",
+      "priority": 0,
+      "title": "Production secrets and the code pepper backup procedure",
+      "parent_key": "phase-10",
+      "description": "Generate production secrets on the server. HUMAN: store CODE_PEPPER and the backup encryption key in two offline places the team controls. Losing the pepper invalidates every printed code; leaking it weakens them. Document rotation.\n\nPlan key: p10-secrets. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- Secrets exist only on the server and in the team's offline store\n- docs/runbook/secrets.md explains recovery and rotation",
+      "labels": [
+        "phase-10",
+        "infra",
+        "security",
+        "human"
+      ]
+    },
+    {
+      "key": "p10-backups",
+      "type": "task",
+      "priority": 0,
+      "title": "Encrypted nightly backups and a restore drill",
+      "parent_key": "phase-10",
+      "description": "Nightly pg_dump, encrypted client-side, to object storage in Canada, 30-day retention; media volume synced separately. Perform a full restore onto staging and record the time taken.\n\nPlan key: p10-backups. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- Restore drill completed and documented with elapsed time\n- Backup failure raises an alert",
+      "labels": [
+        "phase-10",
+        "infra"
+      ]
+    },
+    {
+      "key": "p10-cd",
+      "type": "task",
+      "priority": 0,
+      "title": "Release pipeline with health gate and rollback",
+      "parent_key": "phase-10",
+      "description": "Tagged release promotes the exact image tested on staging: migrate, start, health-check, switch. Rollback is one documented command to the previous image. Migrations must be backward compatible with the previous app version.\n\nPlan key: p10-cd. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- A deliberately broken release is rejected by the health gate and the old version stays up\n- Rollback rehearsed once on staging",
+      "labels": [
+        "phase-10",
+        "deploy",
+        "ci"
+      ]
+    },
+    {
+      "key": "p10-dns-tls",
+      "type": "task",
+      "priority": 0,
+      "title": "Domain, DNS and TLS for production",
+      "parent_key": "phase-10",
+      "description": "Point the production hostname at the VM, Caddy obtains certificates, HTTP redirects to HTTPS, HSTS on. Give the final hostname to the pilot site for allowlisting.\n\nPlan key: p10-dns-tls. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- TLS test grade A or better\n- Hostname sent to pilot-site IT (note on the p0-school-it bead)",
+      "labels": [
+        "phase-10",
+        "infra",
+        "deploy"
+      ]
+    },
+    {
+      "key": "p10-monitoring",
+      "type": "task",
+      "priority": 1,
+      "title": "Uptime, resource and error alerts to Discord",
+      "parent_key": "phase-10",
+      "description": "External uptime check on /readyz, disk/CPU/memory alerts, alert on 5xx spikes and on backup failure, all to a Discord webhook channel. No third-party script runs in users' browsers.\n\nPlan key: p10-monitoring. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- Stopping the app triggers an alert within 3 minutes\n- Alert channel documented in the runbook",
+      "labels": [
+        "phase-10",
+        "infra"
+      ]
+    },
+    {
+      "key": "p10-content-release",
+      "type": "task",
+      "priority": 0,
+      "title": "Content v1 freeze and release",
+      "parent_key": "phase-10",
+      "description": "Freeze v1 content for Pilot 1, deploy, sync the registry, upload videos, verify every step and video in production.\n\nPlan key: p10-content-release. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- Every step opens and every video plays in production\n- content.lock.json tagged as pilot-1",
+      "labels": [
+        "phase-10",
+        "content",
+        "deploy"
+      ]
+    },
+    {
+      "key": "p10-codes",
+      "type": "task",
+      "priority": 0,
+      "title": "Generate the production code batch and print code cards",
+      "parent_key": "phase-10",
+      "description": "Run the generator against production for the Pilot 1 batch (kits plus spares). HUMAN: print cards, match each card to its kit during packing using the CSV, store the CSV offline.\n\nPlan key: p10-codes. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- One card per kit and spare, QR scans to the production redeem page\n- Packing check recorded: card number equals kit label for every kit",
+      "labels": [
+        "phase-10",
+        "codes",
+        "human"
+      ]
+    },
+    {
+      "key": "p10-accounts",
+      "type": "task",
+      "priority": 1,
+      "title": "Create staff and facilitator accounts and the pilot class",
+      "parent_key": "phase-10",
+      "description": "Create staff accounts for the team, invite facilitators and the teacher, create the Pilot 1 class. Kits are redeemed into it during the dry run.\n\nPlan key: p10-accounts. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- Each facilitator has logged in once before pilot day",
+      "labels": [
+        "phase-10",
+        "deploy",
+        "human"
+      ]
+    },
+    {
+      "key": "p10-smoke",
+      "type": "task",
+      "priority": 0,
+      "title": "Production smoke test",
+      "parent_key": "phase-10",
+      "description": "Scripted end-to-end check against production using a spare kit's real code: redeem, open session, join from a second device, complete a step, get stuck, see it on the dashboard, verify events arrive, then delete that kit's data.\n\nPlan key: p10-smoke. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- Smoke script passes and leaves no test data behind\n- Script is re-runnable before every pilot session",
+      "labels": [
+        "phase-10",
+        "deploy",
+        "tests"
+      ]
+    },
+    {
+      "key": "p10-school-test",
+      "type": "task",
+      "priority": 0,
+      "title": "HUMAN: test on the pilot site's network and devices",
+      "parent_key": "phase-10",
+      "description": "On site or with a borrowed school device on the school network: load the site, join, play a video, go offline and back. Earlier is better: run it against staging as soon as Phase 5 is done, then again against production.\n\nPlan key: p10-school-test. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- Site and video load on the school network on the actual device type\n- Join and resume behaviour confirmed with the school's cookie policy",
+      "labels": [
+        "phase-10",
+        "human",
+        "pilot"
+      ]
+    },
+    {
+      "key": "p10-runbook",
+      "type": "task",
+      "priority": 0,
+      "title": "Pilot-day runbook and offline fallback",
+      "parent_key": "phase-10",
+      "description": "docs/runbook/pilot-day.md: setup checklist, how to open a session, what to do when a tablet will not join, when the Wi-Fi drops, when the site is down (printed guides plus videos on USB or a facilitator laptop), who to message, and the after-session data-quality check.\n\nPlan key: p10-runbook. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- Runbook fits on two printed pages\n- Offline fallback kit list is specific (how many printed guides, which files on the USB)",
+      "labels": [
+        "phase-10",
+        "docs",
+        "pilot"
+      ]
+    },
+    {
+      "key": "p10-dry-run",
+      "type": "task",
+      "priority": 0,
+      "title": "HUMAN: facilitator dry run with all kits",
+      "parent_key": "phase-10",
+      "description": "Full rehearsal with every kit and tablet, facilitators following the runbook. File every problem as a bead.\n\nPlan key: p10-dry-run. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- All kits redeemed into the pilot class\n- Problems filed and triaged; P0/P1 fixed",
+      "labels": [
+        "phase-10",
+        "human",
+        "pilot"
+      ]
+    },
+    {
+      "key": "p10-go-live",
+      "type": "task",
+      "priority": 0,
+      "title": "Go/no-go checklist and launch",
+      "parent_key": "phase-10",
+      "description": "Team signs off: consent and approval in hand and matching what the platform does, dry run clean, backups restorable, no open P0/P1 beads, runbook printed.\n\nPlan key: p10-go-live. Phase file: docs/handoff/phases/phase-10-production-deploy.md",
+      "acceptance_criteria": "- Checklist committed with names and date\n- `bd list` shows no open P0 or P1 beads outside post-launch-ok and post-pilot",
+      "labels": [
+        "phase-10",
+        "pilot",
+        "human"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from_key": "p0-threat",
+      "to_key": "p0-adr",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p1-scaffold",
+      "to_key": "p0-adr",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p1-config",
+      "to_key": "p1-scaffold",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p1-db",
+      "to_key": "p1-scaffold",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p1-observability",
+      "to_key": "p1-config",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p1-ui-shell",
+      "to_key": "p1-scaffold",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p1-ci",
+      "to_key": "p1-db",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p1-docker",
+      "to_key": "p1-db",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p1-docker",
+      "to_key": "p1-observability",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p1-staging",
+      "to_key": "p1-docker",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p1-staging",
+      "to_key": "p1-ci",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p1-staging",
+      "to_key": "p0-host",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p2-schema-core",
+      "to_key": "p1-db",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p2-code-lib",
+      "to_key": "p1-config",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p2-redeem",
+      "to_key": "p2-schema-core",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p2-redeem",
+      "to_key": "p2-code-lib",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p2-code-cli",
+      "to_key": "p2-schema-core",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p2-code-cli",
+      "to_key": "p2-code-lib",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p2-staff-codes",
+      "to_key": "p2-redeem",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p2-staff-codes",
+      "to_key": "p3-adult-auth",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p2-seed",
+      "to_key": "p2-schema-core",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p3-adult-auth",
+      "to_key": "p2-redeem",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p3-invites",
+      "to_key": "p3-adult-auth",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p3-classes",
+      "to_key": "p3-adult-auth",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p3-join",
+      "to_key": "p3-classes",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p3-join",
+      "to_key": "p1-ui-shell",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p3-session-controls",
+      "to_key": "p3-join",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p3-consent-flag",
+      "to_key": "p3-classes",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p3-authz-tests",
+      "to_key": "p3-join",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p3-authz-tests",
+      "to_key": "p3-consent-flag",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p3-home-mode",
+      "to_key": "p3-join",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-schema",
+      "to_key": "p1-scaffold",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-loader",
+      "to_key": "p4-schema",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-lock",
+      "to_key": "p4-loader",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-registry",
+      "to_key": "p4-lock",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-registry",
+      "to_key": "p2-schema-core",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-sample",
+      "to_key": "p4-schema",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-video",
+      "to_key": "p4-loader",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-video",
+      "to_key": "p1-docker",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-shortlinks",
+      "to_key": "p4-loader",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-print",
+      "to_key": "p4-shortlinks",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-authoring-guide",
+      "to_key": "p4-lock",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-real-content",
+      "to_key": "p4-lock",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p4-real-content",
+      "to_key": "p0-open-decisions",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-home",
+      "to_key": "p3-join",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-home",
+      "to_key": "p4-loader",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-home",
+      "to_key": "p4-sample",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-step",
+      "to_key": "p5-home",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-checkpoint",
+      "to_key": "p5-step",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-stuck",
+      "to_key": "p5-step",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-progress",
+      "to_key": "p5-step",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-progress",
+      "to_key": "p3-consent-flag",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-entitlement",
+      "to_key": "p5-home",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-pwa",
+      "to_key": "p5-step",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-a11y",
+      "to_key": "p5-checkpoint",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-a11y",
+      "to_key": "p5-stuck",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-e2e",
+      "to_key": "p5-checkpoint",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-e2e",
+      "to_key": "p5-stuck",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p5-e2e",
+      "to_key": "p5-progress",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-catalog",
+      "to_key": "p1-scaffold",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-table",
+      "to_key": "p2-schema-core",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-ingest",
+      "to_key": "p6-catalog",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-ingest",
+      "to_key": "p6-table",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-ingest",
+      "to_key": "p3-join",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-ingest",
+      "to_key": "p3-consent-flag",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-client",
+      "to_key": "p6-catalog",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-client",
+      "to_key": "p5-step",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-time",
+      "to_key": "p6-client",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-video-events",
+      "to_key": "p6-client",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-video-events",
+      "to_key": "p4-video",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-instrument",
+      "to_key": "p6-client",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-instrument",
+      "to_key": "p5-checkpoint",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-instrument",
+      "to_key": "p5-stuck",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-instrument",
+      "to_key": "p4-shortlinks",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-nolog-invariant",
+      "to_key": "p6-ingest",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-nolog-invariant",
+      "to_key": "p6-instrument",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-nolog-invariant",
+      "to_key": "p5-progress",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-replay-tests",
+      "to_key": "p6-ingest",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p6-replay-tests",
+      "to_key": "p6-client",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p7-class-view",
+      "to_key": "p5-progress",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p7-class-view",
+      "to_key": "p3-session-controls",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p7-live-stuck",
+      "to_key": "p7-class-view",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p7-live-stuck",
+      "to_key": "p5-stuck",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p7-notes",
+      "to_key": "p7-class-view",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p7-quiz",
+      "to_key": "p7-class-view",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p7-quiz",
+      "to_key": "p4-schema",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p7-guide",
+      "to_key": "p5-step",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p7-e2e",
+      "to_key": "p7-live-stuck",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p7-e2e",
+      "to_key": "p7-notes",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p8-views",
+      "to_key": "p6-table",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p8-views",
+      "to_key": "p4-registry",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p8-quality",
+      "to_key": "p6-ingest",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p8-export",
+      "to_key": "p8-quality",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p8-heatmap",
+      "to_key": "p8-views",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p8-step-detail",
+      "to_key": "p8-views",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p8-step-detail",
+      "to_key": "p6-video-events",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p8-outcomes",
+      "to_key": "p7-quiz",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p8-compare",
+      "to_key": "p8-step-detail",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-delete",
+      "to_key": "p6-table",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-delete",
+      "to_key": "p7-notes",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-delete",
+      "to_key": "p7-quiz",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-retention",
+      "to_key": "p8-views",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-retention",
+      "to_key": "p9-delete",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-headers",
+      "to_key": "p3-join",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-ratelimit",
+      "to_key": "p3-join",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-ratelimit",
+      "to_key": "p2-redeem",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-ratelimit",
+      "to_key": "p6-ingest",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-logs",
+      "to_key": "p1-observability",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-logs",
+      "to_key": "p1-docker",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-authz-sweep",
+      "to_key": "p3-authz-tests",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-authz-sweep",
+      "to_key": "p6-ingest",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-authz-sweep",
+      "to_key": "p7-quiz",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-authz-sweep",
+      "to_key": "p8-export",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-authz-sweep",
+      "to_key": "p0-threat",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-deps",
+      "to_key": "p1-docker",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-load",
+      "to_key": "p6-instrument",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-load",
+      "to_key": "p4-video",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-load",
+      "to_key": "p1-staging",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-privacy-doc",
+      "to_key": "p6-catalog",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-privacy-doc",
+      "to_key": "p9-delete",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-privacy-doc",
+      "to_key": "p9-retention",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p9-privacy-doc",
+      "to_key": "p9-logs",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-prod-infra",
+      "to_key": "p9-load",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-prod-infra",
+      "to_key": "p0-host",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-secrets",
+      "to_key": "p10-prod-infra",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-backups",
+      "to_key": "p10-prod-infra",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-backups",
+      "to_key": "p10-secrets",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-cd",
+      "to_key": "p10-prod-infra",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-cd",
+      "to_key": "p1-staging",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-dns-tls",
+      "to_key": "p10-prod-infra",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-monitoring",
+      "to_key": "p10-dns-tls",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-content-release",
+      "to_key": "p4-real-content",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-content-release",
+      "to_key": "p4-registry",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-content-release",
+      "to_key": "p10-cd",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-codes",
+      "to_key": "p2-code-cli",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-codes",
+      "to_key": "p10-secrets",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-codes",
+      "to_key": "p0-open-decisions",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-accounts",
+      "to_key": "p10-dns-tls",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-accounts",
+      "to_key": "p3-invites",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-smoke",
+      "to_key": "p10-content-release",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-smoke",
+      "to_key": "p10-codes",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-smoke",
+      "to_key": "p10-backups",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-smoke",
+      "to_key": "p10-monitoring",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-school-test",
+      "to_key": "p0-school-it",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-school-test",
+      "to_key": "p10-dns-tls",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-school-test",
+      "to_key": "p5-e2e",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-runbook",
+      "to_key": "p10-smoke",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-dry-run",
+      "to_key": "p10-runbook",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-dry-run",
+      "to_key": "p10-accounts",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-dry-run",
+      "to_key": "p10-school-test",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-go-live",
+      "to_key": "p10-dry-run",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-go-live",
+      "to_key": "p0-consent",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-go-live",
+      "to_key": "p9-privacy-doc",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-go-live",
+      "to_key": "p9-authz-sweep",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-go-live",
+      "to_key": "p9-headers",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-go-live",
+      "to_key": "p9-ratelimit",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-go-live",
+      "to_key": "p6-nolog-invariant",
+      "type": "blocks"
+    },
+    {
+      "from_key": "p10-go-live",
+      "to_key": "p8-export",
+      "type": "blocks"
+    }
+  ]
+}

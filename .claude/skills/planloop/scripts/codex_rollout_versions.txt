@@ -1,0 +1,4 @@
+# Codex CLI versions whose session rollout files have been validated against planloop's
+# codex-rollout/1 parser. One version per line, then the date and how it was validated.
+# Add a line only through `planloop.py rollout-check --artifacts <runner dir> --accept`.
+0.156.1 2026-10-22 real gate rollout (e0n gate 7, session 01a161c4); fixture tests/fixtures/codex-0.156.1-rollout-shape.json
