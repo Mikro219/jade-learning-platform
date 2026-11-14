@@ -7,13 +7,14 @@ Planner handback contract: ../references/handback.md. Every file format:
 ../references/formats.md.
 
   init      --run R --bead B --track ordinary|escalated --risk-domains LIST|none --rationale TEXT
-            [--reviewer-model M] [--gate-model G]
+            [--reviewer-backend claude|codex] [--reviewer-model M] [--gate-model G]
   handback  --run R --revision N --nonce X --transcript AGENT.jsonl
             --run R --check [--revision N] < DRAFT   read-only self-check of plan content (planners may run it)
   bundle    --run R --revision N --nonce X --inputs INPUTS.json
   publish   --run R --revision N --nonce X     |   publish --run R --recover
   dispatch  --run R --call C --attempt A --kind K --effort E
-  receipt   --run R --call C --attempt A [--artifacts DIR]
+  receipt   --run R --call C --attempt A [--artifacts DIR]     (codex backend)
+            --run R --call C --attempt A --transcript AGENT.jsonl|none   (claude backend)
   findings  ingest --run R --call C --attempt A --map MAP.json
             propose --run R
             decide --run R --decision decisions/Dn.json
@@ -22,6 +23,8 @@ Planner handback contract: ../references/handback.md. Every file format:
   state     --run R --set active|blocked|needs_decision --reason TEXT
   planner   --run R --model opus --quote TEXT   (Mike's escalated-track planner override)
   reviewers --run R --model M --gate-model G --quote TEXT   (Mike's Codex model choice for this run)
+  backend   --run R --set claude|codex --quote TEXT   (Mike's reviewer backend choice for this run)
+  signoff   --run R --quote TEXT   (records Mike's sign-off of a claude-backend gate as decisions/A<n>.json)
   ledger    --run R
   gate      --run R [--publish]
   rollout-check --artifacts RUNNER_DIR [--accept]   validate a new Codex version
@@ -101,6 +104,19 @@ KINDS = ("working", "focused", "adjudication", "gate", "triage")
 STATES = ("open", "fix_proposed", "reopened", "verified", "withdrawn", "decided")
 OPEN_STATES = ("open", "fix_proposed", "reopened")
 DEFAULT_REVIEWER_MODEL, DEFAULT_GATE_MODEL = "gpt-6-astra", "gpt-6-astra"
+# Reviewer backends (Mike, 2026-11-14): JADE reviews with a fresh, read-only Claude Opus agent at high effort by
+# default; Codex reviews a run only when Mike says so. A run.json without `reviewer_backend` is a Codex run.
+BACKENDS = ("claude", "codex")
+DEFAULT_BACKEND = "claude"
+CLAUDE_MODEL, CLAUDE_EFFORT, CLAUDE_AGENT = "opus", "high", "Plan"
+CLAUDE_PARSER = "claude-subagent/1"
+CLAUDE_TOOLS = ("Read", "Grep", "Glob", "Bash", "SubagentHandback")
+WRITE_TOOLS = ("Edit", "Write", "NotebookEdit", "MultiEdit")
+PATH_KEYS = ("file_path", "path", "notebook_path")
+CALL_DIR = ".planloop-call"
+SIGNOFF_NAME = re.compile(r"^A[1-9]\d*\.json$")
+NO_TRANSCRIPT = ("no reviewer transcript is recorded for this call (the agent did not run or never finished, and "
+                 "`receipt --transcript none` recorded the attempt without one)")
 BEAD_FIELDS = ("title", "description", "acceptance_criteria", "design", "notes")
 DEFAULT_BEAD_FIELDS = ("title", "description", "acceptance_criteria", "design")
 PLAN_ID = re.compile(r"\b(OB|INV|RR|AC|EV)\d+\b")
@@ -132,7 +148,10 @@ EVIDENCE_DEFAULT = {"max_rows": 1000, "max_bytes": 1 << 20}
 EVIDENCE_CAP = {"max_rows": 100000, "max_bytes": 64 << 20}
 RETRY_BACKOFF = (5, 15)
 RISK_DOMAINS = ("recovery", "reconciliation", "persistence", "ordering", "idempotency", "session-identity",
-                "state-machine", "cross-system-consistency", "silent-corruption", "concurrency")
+                "state-machine", "cross-system-consistency", "silent-corruption", "concurrency",
+                # JADE (2026-11-14): the consent gate, child/adult privacy, route authorization, kit-code and
+                # token secrecy, and forward-only migrations are escalated domains too (SKILL.md, Risk classification).
+                "consent-gate", "privacy", "authorization", "secrets", "schema-migration")
 MAX_ATTEMPTS = 3
 RUNNER_WAIT, STOP_GRACE, PIPE_GRACE, PROBE_WAIT = 1900, 10, 5, 10
 CGROUP, MARKER, PROC, PROC_MAGIC = "/sys/fs/cgroup", ".planloop-reserve", "/proc", 0x9FA0
@@ -1154,6 +1173,20 @@ class Beads:
             raise Unverifiable(f"update of {after['id']} did not read back ({bad or after.get('status')}); re-run")
         return after
 
+    def note(self, bead: dict, text: str) -> dict:
+        """Append one line to the bead's notes unless it is there already, and read it back."""
+        current = self.get(bead["id"])
+        if current is None:
+            raise Conflict(f"{bead['id']} no longer exists")
+        if text in (current.get("notes") or ""):
+            return current
+        self._run(["update", current["id"], "--append-notes", text])
+        crash_point("bead_updated")
+        after = self.get(bead["id"])
+        if after is None or text not in (after.get("notes") or ""):
+            raise Unverifiable(f"the note on {bead['id']} did not read back; re-run")
+        return after
+
     def children(self, parent: str) -> list:
         value = self._json(self._run(["list", "--all", "--parent", parent, "-n", "0", "--json"]),
                            f"list --parent {parent}")
@@ -1188,12 +1221,30 @@ class Run:
         if isinstance(value, dict):
             value.setdefault("gate_model", None)
             value.setdefault("model_changes", [])
+            value.setdefault("reviewer_backend", "codex")
+            value.setdefault("backend_changes", [])
         value = shape(value, {"schema": {"planloop-run/1"}, "run_id": "str", "bead": "str",
                               "reviewer_model": "str?", "gate_model": "str?", "model_changes": "list",
+                              "reviewer_backend": set(BACKENDS), "backend_changes": "list",
                               "policy": "str", "created_at": "str"}, "run.json")
         if value["run_id"] != self.id or value["bead"] != self.bead:
             raise Fail("run.json does not describe this run")
+        for i, change in enumerate(value["backend_changes"]):
+            shape(change, {"at": "str", "from": set(BACKENDS), "to": set(BACKENDS), "quote": "str",
+                           "after_call": "int"}, f"run.json.backend_changes[{i}]")
         return value
+
+    @staticmethod
+    def stored(config: dict) -> bytes:
+        """run.json bytes. A Codex run never switched keeps the fields older planloop code reads, so a process
+        running that code can still read it; absent means codex."""
+        if config["reviewer_backend"] == "codex" and not config["backend_changes"]:
+            config = {k: v for k, v in config.items() if k not in ("reviewer_backend", "backend_changes")}
+        return canon(config)
+
+    def voided_after(self, config: dict) -> int:
+        """Calls up to this number were dispatched before the last backend switch and never count toward a gate."""
+        return max((c["after_call"] for c in config["backend_changes"]), default=0)
 
     def head(self):
         path = self.dir / "HEAD"
@@ -1545,17 +1596,21 @@ def cmd_init(args) -> int:
         raise Fail("--rationale must say why, in a sentence naming what the work changes")
     run = Run(args.run)
     path = run.dir / "run.json"
-    old = run.config() if probe(path) else {"reviewer_model": DEFAULT_REVIEWER_MODEL, "gate_model": DEFAULT_GATE_MODEL}
+    old = run.config() if probe(path) else {"reviewer_model": DEFAULT_REVIEWER_MODEL, "gate_model": DEFAULT_GATE_MODEL,
+                                            "reviewer_backend": DEFAULT_BACKEND}
     config = {"schema": "planloop-run/1", "run_id": run.id, "bead": run.bead,
               "reviewer_model": args.reviewer_model or old["reviewer_model"],
               "gate_model": args.gate_model or old["gate_model"], "model_changes": [],
+              "reviewer_backend": args.reviewer_backend or old["reviewer_backend"], "backend_changes": [],
               "policy": POLICY, "created_at": iso(now())}
     if probe(path):
-        fixed = ("created_at", "model_changes")
+        fixed = ("created_at", "model_changes", "backend_changes")
         if {k: v for k, v in old.items() if k not in fixed} != {k: v for k, v in config.items() if k not in fixed}:
-            raise Fail("run.json exists with different settings")
+            raise Fail("run.json exists with different settings" + (
+                " (its reviewer backend is changed only with `backend --quote`)"
+                if old["reviewer_backend"] != config["reviewer_backend"] else ""))
     else:
-        save(path, canon(config), "the run was not created, and nothing else was changed")
+        save(path, Run.stored(config), "the run was not created, and nothing else was changed")
     if run.beads.get(run.bead) is None:
         raise Fail(f"implementation bead {run.bead} does not exist")
     classification = {"planloop_risk_domains": ",".join(domains) or "none",
@@ -1580,7 +1635,9 @@ def cmd_init(args) -> int:
                 {"planloop_escalated_revision": next_revision}
             bead = run.beads.update(bead, {**classification, **flip, "planloop_track": "escalated",
                                            "planloop_min_effort": "high"})
-        print(f"run {run.id}: bead {bead['id']}, track {meta_of(bead).get('planloop_track')}, directory {run.dir}")
+        print(f"run {run.id}: bead {bead['id']}, track {meta_of(bead).get('planloop_track')}, directory {run.dir}"
+              + (f"; reviews by a fresh {CLAUDE_AGENT} agent on {CLAUDE_MODEL} at {CLAUDE_EFFORT} effort (claude backend)"
+                 if config["reviewer_backend"] == "claude" else ""))
     return 0
 
 
@@ -1874,9 +1931,11 @@ def check_handback(run: Run, head, args, pol: dict) -> int:
     return 1
 
 
-def tree_hash(root: Path) -> str:
+def tree_hash(root: Path, skip: str | None = None) -> str:
     lines = []
     for dirpath, dirnames, filenames in walk(root):
+        if skip is not None and dirpath == str(root) and skip in dirnames:
+            dirnames.remove(skip)
         dirnames.sort()
         for name in sorted(filenames + [d for d in dirnames if probe(Path(dirpath) / d, "is_symlink")]):
             path = Path(dirpath) / name
@@ -3094,18 +3153,25 @@ def findings_table(run: Run) -> str:
         "\n".join(rows) if rows else "(no findings yet)"
 
 
-def feedback_text(run: Run, n: int, rev: dict, kind: str, call: int, attempt: int, extra: list = ()) -> str:
+def feedback_text(run: Run, n: int, rev: dict, kind: str, call: int, attempt: int, extra: list = (),
+                  workdir: Path | None = None) -> str:
     rev_dir = run.rev_dir(n)
     handback = load(rev_dir / "handback.json")
     frozen = rev_dir / "bundle" / "frozen"
     obligations = load(frozen / "obligations.json")
+    where = [
+        "Your working directory is a frozen, read-only snapshot of the repository for this revision. Read",
+        "only files under it, using relative paths. Never read the original checkout or any other path",
+        "outside this directory: such reads are detected in the event log and void the review.",
+        ".planloop-bundle/ holds the frozen plan, brief, obligations, binding bead text, evidence and the",
+        "discovery record; bead text cannot be fetched any other way (no bd in your sandbox)."] if workdir is None else [
+        f"{workdir} is a frozen, read-only snapshot of the repository for this revision. Read only files",
+        "under it; a relative path below is relative to it. Never read the original checkout or any other path",
+        "outside it: such reads are detected in your transcript and void the review.",
+        f"{workdir}/.planloop-bundle/ holds the frozen plan, brief, obligations, binding bead text, evidence and",
+        "the discovery record; bead text cannot be fetched any other way (never run bd)."]
     lines = [f"PLANLOOP-BUNDLE run={run.id} revision={n} call={call} attempt={attempt} sha256={rev['bundle_sha256']}",
-             f"Policy {POLICY}.", "",
-             "Your working directory is a frozen, read-only snapshot of the repository for this revision. Read",
-             "only files under it, using relative paths. Never read the original checkout or any other path",
-             "outside this directory: such reads are detected in the event log and void the review.",
-             ".planloop-bundle/ holds the frozen plan, brief, obligations, binding bead text, evidence and the",
-             "discovery record; bead text cannot be fetched any other way (no bd in your sandbox).", "",
+             f"Policy {POLICY}.", "", *where, "",
              "Coverage must contain, for every finding listed below in state fix_proposed, exactly one entry",
              "`finding R<k>: resolved` or `finding R<k>: unresolved`. To withdraw an open finding you judge invalid,",
              "write `finding R<k>: withdrawn: <evidence that its failure scenario cannot occur, at least 40 chars>`.",
@@ -3249,6 +3315,72 @@ def runner_path() -> list:
     return [sys.executable, found[-1]]
 
 
+def claude_prompt(d: dict) -> str:
+    """The exact first user turn of a claude-backend review: short, so the orchestrator can pass it verbatim; the plan
+    and the call's frozen feedback are read from the private copy, bound by their sha256 here and in the receipt."""
+    copy = d["snapshot"]
+    return "\n".join([
+        f"PLANLOOP-REVIEW run={d['run_id']} revision={d['revision']} call={d['call']} attempt={d['attempt']} "
+        f"kind={d['kind']} bundle={d['bundle_sha256']}",
+        "",
+        "You are planloop's independent plan reviewer, a fresh read-only agent. Review the plan against the feedback "
+        "and the repository snapshot as the feedback asks. Earlier reviews and approvals are not evidence.",
+        "",
+        "Read both of these in full first:",
+        f"- the plan: {copy}/.planloop-bundle/plan.md (sha256 {d['plan_sha256']})",
+        f"- this call's feedback (bundle marker, brief, obligations, dispositions, findings table and the coverage "
+        f"lines you must write): {copy}/{CALL_DIR}/feedback.md (sha256 {d['feedback_sha256']})",
+        "",
+        "Rules. planloop checks each one in your transcript; breaking one voids the review:",
+        f"- Read only inside {copy}. Use only the Read, Grep, Glob and Bash tools. Give Read an absolute path inside "
+        "it, and Grep and Glob a `path` inside it.",
+        f"- Your Bash tool does not start there: begin every Bash command with exactly `cd {copy} && `. Never refer "
+        "to a path above it (no `..` out of it, not the original checkout, ~/.codex or planloop's state directories).",
+        "- Write nothing: no Edit, Write or NotebookEdit, no output redirected into a file, and no command that "
+        "creates, changes or removes a file (rm, mv, cp, mkdir, touch, tee, sed -i, git add/commit/checkout, bd).",
+        "- Your final report (the SubagentHandback message, or your final message) is exactly one JSON object and "
+        "nothing else: no prose and no code fence. Its keys are exactly verdict, summary, findings, coverage and "
+        "limitations:",
+        '  {"verdict": "APPROVED" | "REVISE" | "BLOCKED", "summary": "<text>", "findings": [{"id": "<id>", '
+        '"severity": "high" | "medium" | "low", "path": "<file or plan section>", "evidence": "<the failure '
+        'scenario>", "fix": "<the fix>"}], "coverage": ["<what you checked>"], "limitations": ["<what you could '
+        'not check>"]}',
+        "  Every string is non-empty. APPROVED only with no high or medium finding; REVISE needs a finding; BLOCKED "
+        "needs limitations; coverage is empty only when BLOCKED and holds every `finding R<k>: ...` and "
+        "`meaning revision ...` line the feedback asks for, exactly as it specifies.",
+    ])
+
+
+def place_feedback(copy: Path, feedback: bytes) -> None:
+    """Put the call's frozen feedback in the private copy, at .planloop-call/feedback.md, read-only."""
+    mode = copy.stat().st_mode
+    copy.chmod(mode | stat.S_IWUSR)
+    try:
+        (copy / CALL_DIR).mkdir(0o755)
+        (copy / CALL_DIR / "feedback.md").write_bytes(feedback)
+        (copy / CALL_DIR / "feedback.md").chmod(0o444)
+        (copy / CALL_DIR).chmod(0o555)
+    finally:
+        copy.chmod(mode)
+
+
+def claude_launch(run: Run, args, call_dir: Path, copy: Path, prompt: bytes) -> int:
+    path = call_dir / "input" / "prompt.txt"
+    print(f"call {args.call} attempt {args.attempt} ({args.kind}) is reserved for the claude backend; the reviewer's "
+          f"private snapshot copy is {copy}")
+    print(f"prompt: {path} (sha256 {sha(prompt)}, {len(prompt)} bytes)")
+    print(f"Launch one background Agent: subagent_type \"{CLAUDE_AGENT}\", model \"{CLAUDE_MODEL}\", effort "
+          f"\"{CLAUDE_EFFORT}\", a fresh context (never resumed, never sent a message), and as its prompt exactly the "
+          "bytes of that file, printed between the markers below (nothing added or removed):")
+    print("-----BEGIN PLANLOOP PROMPT-----")
+    print(prompt.decode("utf-8"))
+    print("-----END PLANLOOP PROMPT-----")
+    print(f"Once the agent has finished: receipt --run {run.id} --call {args.call} --attempt {args.attempt} "
+          "--transcript <its agent-*.jsonl transcript> (or --transcript none if it never ran or will never finish, "
+          "which records the attempt invalid)")
+    return 0
+
+
 def effort_policy(run_meta: dict, kind: str, effort: str) -> str | None:
     if effort not in EFFORTS:
         return f"effort {effort!r} is not used by planloop (xhigh/max need Mike)"
@@ -3316,12 +3448,18 @@ def clear_reserve(run: Run, left: Path) -> None:
 def cmd_dispatch(args) -> int:
     run = Run(args.run)
     config = run.config()
-    if pid_ns() is None:
+    claude = config["reviewer_backend"] == "claude"
+    if claude and args.kind == "triage":
+        raise Fail("the claude backend has no triage call (triage is a low-effort Codex check); nothing was reserved")
+    if claude and args.effort != CLAUDE_EFFORT:
+        raise Fail(f"the claude backend reviews at {CLAUDE_EFFORT} effort only, every kind of call; nothing was "
+                   "reserved")
+    if not claude and pid_ns() is None:
         raise Unverifiable("this dispatch cannot tell its own PID namespace (/proc/self/ns/pid cannot be read, or "
                            "/proc is not mounted for it: /proc/self is not its pid), so no planloop command could "
                            "ever check the process its records name; nothing was reserved and Codex did not run: "
                            "dispatch where /proc is that of its PID namespace (`unshare --pid` needs --mount-proc)")
-    seen = scope_ready()
+    seen = None if claude else scope_ready()
     with Lock(run.dir) as lock:
         prepare(run)
         for left in listing(run.dir / "reviews", ".reserve-*"):
@@ -3377,19 +3515,21 @@ def cmd_dispatch(args) -> int:
                       f"{n - 1}: check that every cut is explained by the finding it answers or by its disposition."]
         for entry in mandate:
             extra += meaning_block(pol, n, entry)
-        runner = runner_path()
+        runner = None if claude else runner_path()
         call_dir = run.call_dir(args.call, args.attempt)
-        model = config["gate_model"] if args.kind == "gate" and config["gate_model"] else config["reviewer_model"]
-        feedback = feedback_text(run, n, rev, args.kind, args.call, args.attempt, extra).encode("utf-8")
+        model = CLAUDE_MODEL if claude else \
+            config["gate_model"] if args.kind == "gate" and config["gate_model"] else config["reviewer_model"]
+        private = run.isolated / f"r-{uuid.uuid4().hex[:16]}"
+        artifacts, copy, made = run.state / "calls" / f"{call_dir.name}-{private.name}", private / "repo", {}
+        feedback = feedback_text(run, n, rev, args.kind, args.call, args.attempt, extra,
+                                 workdir=copy if claude else None).encode("utf-8")
         expect = expected_coverage(run, args.kind)
         reserve = call_dir.parent / f".reserve-{uuid.uuid4().hex}"
         frozen_snap = next(i for i in rev["manifest"]["items"] if i["type"] == "snapshot")
         unreserved = f"could not prepare call {args.call} attempt {args.attempt} ({{}}); nothing was reserved and " \
             "Codex did not run: run the command again once the path it names can be read and written"
-        private = run.isolated / f"r-{uuid.uuid4().hex[:16]}"
-        artifacts, copy, made = run.state / "calls" / f"{call_dir.name}-{private.name}", private / "repo", {}
         nonce = uuid.uuid4().hex
-        scope = scope_of(run.id, str(artifacts))
+        scope = None if claude else scope_of(run.id, str(artifacts))
         dispatch = {"schema": "planloop-dispatch/1", "run_id": run.id, "revision": n, "revision_sha256": head[1],
                     "bundle_sha256": rev["bundle_sha256"], "plan_sha256": rev["plan_sha256"], "call": args.call,
                     "attempt": args.attempt, "kind": args.kind, "effort": args.effort,
@@ -3399,9 +3539,16 @@ def cmd_dispatch(args) -> int:
                     "expected_coverage": expect, "dispatched_at": iso(now())}
         if mandate:
             dispatch["meaning_check"] = mandate
+        prompt = None
+        if claude:
+            dispatch["backend"] = "claude"
+            prompt = claude_prompt(dispatch).encode("utf-8")
+            dispatch["prompt_sha256"] = sha(prompt)
         try:
             (reserve / "input").mkdir(parents=True)
             (reserve / "input" / "feedback.md").write_bytes(feedback)
+            if claude:
+                (reserve / "input" / "prompt.txt").write_bytes(prompt)
             run.isolated.mkdir(parents=True, exist_ok=True)
             run.isolated.chmod(0o300)
             with contextlib.suppress(PermissionError):
@@ -3416,8 +3563,11 @@ def cmd_dispatch(args) -> int:
             shutil.copytree(frozen_snap["path"], copy, symlinks=True)
             if tree_hash(copy) != frozen_snap["tree_sha256"]:
                 raise Fail("the frozen snapshot changed since publication; republish")
-            (reserve / "running.json").write_bytes(canon({**identity(), "nonce": nonce, "scope": scope,
-                                                          "view": seen}))
+            if claude:
+                place_feedback(copy, feedback)
+            else:
+                (reserve / "running.json").write_bytes(canon({**identity(), "nonce": nonce, "scope": scope,
+                                                              "view": seen}))
             crash_point("before_reserve")
             if probe(call_dir):
                 raise Conflict(f"{call_dir} appeared concurrently")
@@ -3427,7 +3577,10 @@ def cmd_dispatch(args) -> int:
             rename(reserve, call_dir, then=f"if {call_dir} exists now, {unrun(run, args.call, args.attempt)}; "
                    "otherwise run the command again")
             lock.done = f"call {args.call} attempt {args.attempt} is reserved and Codex has not run; " \
-                f"{unrun(run, args.call, args.attempt)}"
+                f"{unrun(run, args.call, args.attempt)}" if not claude else \
+                f"call {args.call} attempt {args.attempt} is reserved and its reviewer prompt is written in " \
+                f"{call_dir / 'input' / 'prompt.txt'}: launch the reviewer as that file says, then record it with " \
+                f"`receipt --run {run.id} --call {args.call} --attempt {args.attempt} --transcript <agent>.jsonl`"
         except BaseException as failed:
             left = []
             for path, what in made.items():
@@ -3457,6 +3610,8 @@ def cmd_dispatch(args) -> int:
                     f"Codex did not run, but {kept}: run the command again once the path it names can be read and "
                     "written")) from failed
             raise
+    if claude:
+        return claude_launch(run, args, call_dir, copy, prompt)
     argv = runner + ["review", "--host", "claude", "--repo", str(copy), "--plan", ".planloop-bundle/plan.md",
                      "--effort", args.effort, "--timeout", "1800", "--artifacts", str(artifacts), "--feedback",
                      str(call_dir / "input" / "feedback.md")]
@@ -3918,13 +4073,19 @@ def dispatch_record(run: Run, call: int, attempt: int) -> dict:
         dispatch.setdefault("meaning_check", None)
         dispatch.setdefault("scope", None)
         dispatch.setdefault("view", None)
+        dispatch.setdefault("backend", "codex")
+        dispatch.setdefault("prompt_sha256", None)
     dispatch = shape(dispatch,
                      {"schema": {"planloop-dispatch/1"}, "run_id": "str", "revision": "int", "revision_sha256": "hex",
                       "bundle_sha256": "hex", "plan_sha256": "hex", "call": "int", "attempt": "int",
                       "kind": set(KINDS), "effort": set(EFFORTS), "model": "str?", "snapshot": "path",
                       "snapshot_tree_sha256": "hex", "feedback_sha256": "hex", "artifacts_root": "path",
                       "scope": "path?", "view": "any", "live_repo": "path", "expected_coverage": "list",
-                      "dispatched_at": "str", "meaning_check": "any"}, "dispatch.json")
+                      "dispatched_at": "str", "meaning_check": "any", "backend": set(BACKENDS),
+                      "prompt_sha256": "hex?"}, "dispatch.json")
+    if (dispatch["backend"] == "claude") != (dispatch["prompt_sha256"] is not None) or \
+            dispatch["backend"] == "claude" and (dispatch["scope"], dispatch["view"]) != (None, None):
+        raise Fail("dispatch.json backend, prompt_sha256 and scope disagree")
     if (dispatch["run_id"], dispatch["call"], dispatch["attempt"]) != (run.id, call, attempt):
         raise Fail("dispatch.json belongs to another call")
     mandate = dispatch["meaning_check"]
@@ -3938,7 +4099,7 @@ def dispatch_record(run: Run, call: int, attempt: int) -> dict:
 
 
 def verify_call(run: Run, call: int, attempt: int, artifacts_override: str | None = None,
-                recorded=None, revalidation=None) -> dict:
+                recorded=None, revalidation=None, transcript: str | None = None) -> dict:
     call_dir, dispatch = run.call_dir(call, attempt), dispatch_record(run, call, attempt)
     mandate = dispatch["meaning_check"]
     feedback = present(call_dir / "input" / "feedback.md", "feedback.md")
@@ -3954,6 +4115,8 @@ def verify_call(run: Run, call: int, attempt: int, artifacts_override: str | Non
                                     "verdicts": {}} for e in mandate]
     if sha(feedback) != dispatch["feedback_sha256"]:
         reasons.append("feedback.md changed after dispatch")
+    if dispatch["backend"] == "claude":
+        return verify_claude(run, call, attempt, dispatch, record, reasons, infra, transcript, recorded, revalidation)
     artifacts = artifacts_override
     if artifacts is None and probe(call_dir / "call.json"):
         try:
@@ -4159,9 +4322,18 @@ def verify_call(run: Run, call: int, attempt: int, artifacts_override: str | Non
     if record["live_reads"]:
         reasons.append(f"reviewer reached outside its private snapshot (live checkout, planloop state, Codex "
                        f"home, or a relative path climbing above the snapshot root): {record['live_reads'][:3]}")
+    record["usage"] = result.get("usage")
+    record["cli_version"] = result.get("cli_version")
+    return judge_response(run, dispatch, record, response, reasons, infra, snap, recorded, revalidation)
+
+
+def judge_response(run: Run, dispatch: dict, record: dict, response, reasons: list, infra: list, snap: Path,
+                   recorded, revalidation, skip: str | None = None) -> dict:
+    """What a verified review's response, snapshot and inputs say, the same for every backend."""
+    mandate = dispatch["meaning_check"]
     changed = "frozen snapshot changed during the review"
     kept = recorded.get("reasons") if isinstance(recorded, dict) and not probe(snap.parent) else None
-    if changed in kept if isinstance(kept, list) else tree_hash(snap) != dispatch["snapshot_tree_sha256"]:
+    if changed in kept if isinstance(kept, list) else tree_hash(snap, skip) != dispatch["snapshot_tree_sha256"]:
         reasons.append(changed)
     if isinstance(response, dict) and isinstance(response.get("coverage"), list):
         seen = {}
@@ -4191,8 +4363,6 @@ def verify_call(run: Run, call: int, attempt: int, artifacts_override: str | Non
     record["verdict"] = response.get("verdict") if isinstance(response, dict) else None
     record["findings"] = response.get("findings", []) if isinstance(response, dict) else []
     record["coverage"] = response.get("coverage", []) if isinstance(response, dict) else []
-    record["usage"] = result.get("usage")
-    record["cli_version"] = result.get("cli_version")
     try:
         record["revalidation"], failure = revalidation or (
             revalidate(run, dispatch["revision"], dispatch["bundle_sha256"]), None)
@@ -4205,6 +4375,313 @@ def verify_call(run: Run, call: int, attempt: int, artifacts_override: str | Non
     if record["revalidation"]:
         reasons.append(f"{REVALIDATION[0]}{record['revalidation'][:5]}")
     return finalize(record, reasons, infra)
+
+
+WRITE_COMMANDS = {"rm", "rmdir", "mv", "cp", "mkdir", "touch", "tee", "ln", "chmod", "chown", "chgrp", "truncate",
+                  "dd", "install", "rsync", "patch", "shred", "unlink", "mkfifo", "mknod", "bd"}
+GIT_WRITES = {"add", "commit", "checkout", "reset", "restore", "stash", "apply", "merge", "rebase", "clean", "rm",
+              "mv", "switch", "init", "clone", "push", "pull", "fetch", "tag", "worktree", "am", "cherry-pick",
+              "revert", "gc", "config", "update-index", "notes", "branch"}
+
+
+def writes_files(command: str) -> bool:
+    """As well as text can tell: a redirection into a file, or a command that writes, at a command position. A write
+    by an interpreter's inline code or as a program's side effect is not detected."""
+    bare = re.sub(r"'[^']*'|\"(?:[^\"\\]|\\.)*\"", "''", command)
+    for target in re.findall(r"(?:\d*|&)>>?\|?(?!&)\s*([^\s;|&()<>]*)", bare):
+        if target != "/dev/null":
+            return True
+    for segment in re.split(r"\$\(|`|\|\||&&|[;|&()\n]", bare):
+        words = segment.split()
+        while words and (re.match(r"^[A-Za-z_]\w*=", words[0]) or words[0] in
+                         ("sudo", "command", "env", "time", "nice", "nohup", "xargs", "exec", "builtin")):
+            words.pop(0)
+        if not words:
+            continue
+        name = words[0].rsplit("/", 1)[-1]
+        if name in WRITE_COMMANDS or any("planloop.py" in w for w in words):
+            return True
+        if name == "git" and any(w in GIT_WRITES for w in words[1:3] if not w.startswith("-")):
+            return True
+        if name in ("sed", "perl") and any(w == "-i" or w.startswith(("-i", "--in-place")) for w in words[1:]):
+            return True
+        if name == "find" and any(w in ("-delete", "-fprint", "-fprintf", "-fls") for w in words[1:]):
+            return True
+    return False
+
+
+def claude_tool_problems(tools: list, dispatch: dict, run: Run) -> tuple:
+    """(writes, reads outside the private copy, tools not allowed) among a reviewer's tool calls. Paths use the
+    Codex isolation check: forbidden_patterns for absolute references, climbs_out for relative climbs."""
+    own = dispatch["snapshot"].rstrip("/")
+    patterns = forbidden_patterns(dispatch, run)
+    above = re.compile(r"<SNAPSHOT>/\.\.(?=/|$|[\s'\"`;|&)<>])")
+
+    def outside(text: str) -> bool:
+        text = text.replace(own, "<SNAPSHOT>")
+        return bool(above.search(text)) or any(p.search(text) for p in patterns)
+
+    def inside(path) -> bool:
+        if not isinstance(path, str) or not os.path.isabs(path):
+            return False
+        path = os.path.normpath(path)
+        return path == own or path.startswith(own + "/")
+    q = re.escape(own)
+    prefix = re.compile(rf"""^\s*cd\s+(?:'{q}/?'|"{q}/?"|{q}/?)\s*&&\s*""")
+    writes, reads, other = [], [], []
+    for name, value in tools:
+        text = json.dumps(value, ensure_ascii=False, sort_keys=True)
+        if name in WRITE_TOOLS:
+            writes.append(f"{name}: {text[:160]}")
+            continue
+        if name not in CLAUDE_TOOLS:
+            other.append(f"{name}: {text[:160]}")
+            continue
+        if name == "SubagentHandback":
+            continue
+        if not isinstance(value, dict):
+            reads.append(f"{name}: input is not an object: {text[:160]}")
+            continue
+        if name == "Bash":
+            command = value.get("command")
+            start = prefix.match(command) if isinstance(command, str) else None
+            if start is None:
+                reads.append(f"Bash command does not begin with `cd {own} && ` (it would run in the agent's own "
+                             f"working directory): {str(command)[:160]}")
+                continue
+            rest = command[start.end():]
+            if outside(command) or climbs_out(rest, Path(own)):
+                reads.append(f"Bash: {command[:200]}")
+            if writes_files(rest):
+                writes.append(f"Bash: {command[:200]}")
+            continue
+        bad = [f"{name} {key}: {str(value[key])[:160]}" for key in PATH_KEYS if key in value and not inside(value[key])]
+        if name in ("Grep", "Glob") and "path" not in value:
+            bad.append(f"{name} without a path searches the agent's own working directory: {text[:160]}")
+        pattern = value.get("pattern") if name == "Glob" else None
+        if isinstance(pattern, str) and (".." in pattern.split("/") or os.path.isabs(pattern) and not inside(pattern)):
+            bad.append(f"Glob pattern: {pattern[:160]}")
+        if not bad and outside(text):
+            bad.append(f"{name}: {text[:160]}")
+        reads += bad
+    return writes, sorted(set(reads)), other
+
+
+def claude_transcript(path: Path) -> dict:
+    """Facts from a Claude Code subagent transcript (claude-subagent/1, the shape Claude Code 2.1.325 writes): the
+    first user turn, later user turns, the models and effort recorded on every assistant turn (`message.model`,
+    `requestedModel`, `effort`, `perTurnEffort`) and API request (`params.model`, `params.output_config.effort`),
+    tool calls, agent id and version. An unfamiliar shape is unverifiable, never accepted."""
+    rows = []
+    for number, line in enumerate(read_file(path, "reviewer transcript", text=True).splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+            canon(row)
+        except (ValueError, RecursionError) as exc:
+            raise Unverifiable(f"transcript line {number} is not JSON text") from exc
+        if not isinstance(row, dict) or not isinstance(row.get("type"), str):
+            raise Unverifiable(f"transcript line {number} has an unfamiliar shape")
+        rows.append(row)
+    users = [r for r in rows if r["type"] == "user"]
+    if not rows or rows[0]["type"] != "user" or not isinstance(rows[0].get("message"), dict):
+        raise Unverifiable("transcript does not open with the agent's first user turn")
+    first = rows[0]["message"].get("content")
+    later = []
+    for r in users[1:]:
+        message = r.get("message")
+        content = message.get("content") if isinstance(message, dict) else None
+        if r.get("isMeta") is True:
+            continue
+        if not isinstance(content, list) or any(not isinstance(b, dict) or b.get("type") != "tool_result"
+                                                for b in content):
+            later.append(r.get("uuid"))
+    agents = {r.get("agentId") for r in rows if "agentId" in r}
+    if len(agents) != 1 or not isinstance(next(iter(agents)), str):
+        raise Unverifiable(f"transcript names {len(agents)} agent ids")
+    models, efforts, tools, missing = set(), set(), [], 0
+    for r in rows:
+        params = r.get("params") if r["type"] == "api-request" else None
+        if isinstance(params, dict):
+            if isinstance(params.get("model"), str):
+                models.add(params["model"])
+            effort = (params.get("output_config") or {}).get("effort") \
+                if isinstance(params.get("output_config") or {}, dict) else None
+            if isinstance(effort, str):
+                efforts.add(effort)
+        if r["type"] != "assistant":
+            continue
+        message = r.get("message")
+        if not isinstance(message, dict) or not isinstance(message.get("model"), str) \
+                or not isinstance(message.get("content"), list):
+            raise Unverifiable("an assistant turn has no model or content list")
+        models.add(message["model"])
+        if isinstance(r.get("requestedModel"), str):
+            models.add(r["requestedModel"])
+        if not isinstance(r.get("effort"), str):
+            missing += 1
+        else:
+            efforts.add(r["effort"])
+        if isinstance(r.get("perTurnEffort"), str):
+            efforts.add(r["perTurnEffort"])
+        for block in message["content"]:
+            if isinstance(block, dict) and block.get("type") == "tool_use":
+                if not isinstance(block.get("name"), str):
+                    raise Unverifiable("a tool call has no name")
+                tools.append((block["name"], block.get("input")))
+    if not models:
+        raise Unverifiable("transcript has no assistant turn")
+    versions = sorted({r["version"] for r in rows if isinstance(r.get("version"), str)})
+    return {"first_parent": rows[0].get("parentUuid", "absent"), "first": first, "later_users": later,
+            "agent_id": next(iter(agents)), "models": sorted(models), "efforts": sorted(efforts),
+            "unrecorded_effort": missing, "tools": tools, "version": versions[-1] if versions else None}
+
+
+def keep_transcript(root: Path, given: Path) -> None:
+    """Copy the reviewer's transcript and agent meta into the call's artifact directory, with where they came from,
+    so the receipt and every later gate re-derive from the same bytes."""
+    meta = given.with_name(given.name[:-len(".jsonl")] + ".meta.json")
+    data = present(given, f"reviewer transcript {given}")
+    meta_data = present(meta, f"agent meta {meta}")
+    value = parse(meta_data, "agent meta")
+    if not isinstance(value, dict) or value.get("finished") is not True:
+        raise Conflict(f"the agent of {given} has not finished (its meta file records no finished run), so its review "
+                       "cannot be recorded yet and nothing was recorded: wait for it to finish, then run receipt "
+                       "again; if it was stopped and will never finish, record the attempt with `--transcript none` "
+                       "(it is then invalid)")
+    try:
+        root.mkdir(parents=True, exist_ok=True)
+        write_atomic(root / "transcript.meta.json", meta_data)
+        write_atomic(root / "transcript.jsonl", data)
+        write_atomic(root / "transcript-source.json", canon({"path": str(given), "sha256": sha(data),
+                                                             "meta_sha256": sha(meta_data)}))
+    except OSError as exc:
+        raise Unverifiable(f"could not keep a copy of the reviewer transcript in {root} ({exc}); nothing was "
+                           "recorded: run the same receipt command again once it can be written") from exc
+
+
+def verify_claude(run: Run, call: int, attempt: int, dispatch: dict, record: dict, reasons: list, infra: list,
+                  transcript: str | None, recorded, revalidation) -> dict:
+    call_dir = run.call_dir(call, attempt)
+    record.update({"backend": "claude", "transcript": None, "usage": None, "cli_version": None})
+    prompt = present(call_dir / "input" / "prompt.txt", "prompt.txt")
+    if sha(prompt) != dispatch["prompt_sha256"]:
+        reasons.append("prompt.txt changed after dispatch")
+    root = Path(dispatch["artifacts_root"])
+    keep, keep_meta, origin = root / "transcript.jsonl", root / "transcript.meta.json", root / "transcript-source.json"
+    if not probe(origin):
+        if transcript in (None, "none"):
+            infra.append(NO_TRANSCRIPT)
+            return finalize(record, reasons, infra)
+        given = Path(transcript).expanduser().absolute()
+        if not given.name.endswith(".jsonl"):
+            raise Fail(f"--transcript {transcript} is not an agent's .jsonl transcript; nothing was recorded")
+        keep_transcript(root, given)
+    source = shape(load(origin, "transcript-source.json"), {"path": "path", "sha256": "hex", "meta_sha256": "hex"},
+                   "transcript-source.json")
+    data, meta_data = present(keep, "kept reviewer transcript"), present(keep_meta, "kept agent meta")
+    record["artifacts"] = {"dir": str(root), "files": {"transcript.jsonl": sha(data),
+                                                       "transcript.meta.json": sha(meta_data),
+                                                       "transcript-source.json": sha_file(origin)}}
+    record["transcript"] = {"source": source["path"], "sha256": source["sha256"], "meta_sha256": source["meta_sha256"],
+                            "kept": str(keep), "parser": CLAUDE_PARSER}
+    if (sha(data), sha(meta_data)) != (source["sha256"], source["meta_sha256"]):
+        reasons.append("the kept copy of the reviewer transcript differs from the transcript it was recorded from")
+    if transcript not in (None, "none") and sha(present(Path(transcript).expanduser(), "reviewer transcript")) \
+            != source["sha256"]:
+        reasons.append(f"--transcript {transcript} differs from the transcript recorded for this call")
+    try:
+        meta = shape(parse(meta_data, "agent meta"), {"agentType": "str", "model": "str?", "finished": "any"},
+                     "agent meta", exact=False)
+        facts = claude_transcript(keep)
+    except (Unreadable, NotFile):
+        raise
+    except Unverifiable as exc:
+        infra.append(f"reviewer transcript unverifiable: {exc}")
+        return finalize(record, reasons, infra)
+    except Fail as exc:
+        reasons.append(f"reviewer transcript: {exc}")
+        return finalize(record, reasons, infra)
+    record["session_id"], record["cli_version"] = facts["agent_id"], facts["version"]
+    if meta["agentType"] != CLAUDE_AGENT:
+        reasons.append(f"the reviewer must be the read-only {CLAUDE_AGENT} agent, not {meta['agentType']!r}")
+    if meta["finished"] is not True:
+        reasons.append("agent meta does not record a finished run")
+    if meta["model"] != CLAUDE_MODEL:
+        reasons.append(f"agent meta records model {meta['model']!r}, not {CLAUDE_MODEL!r}")
+    if "effort" in meta and meta["effort"] != CLAUDE_EFFORT:
+        reasons.append(f"agent meta records effort {meta['effort']!r}, not {CLAUDE_EFFORT!r}")
+    opus = [m for m in facts["models"] if not m.startswith("claude-opus-")]
+    if opus:
+        reasons.append(f"effective model {', '.join(opus)} is not an Opus model")
+    if facts["unrecorded_effort"]:
+        infra.append(f"effective effort unverifiable: {facts['unrecorded_effort']} assistant turn(s) record no effort")
+    effort = facts["efforts"][0] if len(facts["efforts"]) == 1 else None
+    record["effective"] = {"model": facts["models"][0] if len(facts["models"]) == 1 else ",".join(facts["models"]),
+                           "effort": effort if effort is not None else ",".join(facts["efforts"]) or None,
+                           "sandbox": f"read-only {CLAUDE_AGENT} agent; tool calls checked in its transcript",
+                           "source": f"Claude Code subagent transcript ({CLAUDE_PARSER})",
+                           "transcript_sha256": source["sha256"]}
+    if facts["efforts"] and facts["efforts"] != [CLAUDE_EFFORT]:
+        reasons.append(f"effective effort {', '.join(facts['efforts'])} differs from requested {CLAUDE_EFFORT}")
+    text = prompt.decode("utf-8", "replace")
+    first_is_prompt = isinstance(facts["first"], str) and facts["first"].encode("utf-8") == prompt \
+        and facts["first_parent"] is None
+    if not first_is_prompt:
+        reasons.append("the transcript's first user turn is not this call's prompt.txt byte for byte")
+    earlier = {r.get("session_id") for c, a, p, r in receipts(run) if r and (c, a) != (call, attempt)
+               and isinstance(r.get("session_id"), str)}
+    fresh = first_is_prompt and not facts["later_users"] and facts["agent_id"] not in earlier
+    record["fresh"] = fresh
+    if first_is_prompt and not fresh:
+        reasons.append("context is not provably fresh (a later user turn, such as a resume or a message sent to the "
+                       "agent, or an agent id an earlier call used)")
+    writes, reads, other = claude_tool_problems(facts["tools"], dispatch, run)
+    record["live_reads"] = reads
+    if writes:
+        reasons.append(f"reviewer made a tool call that writes (Edit, Write, NotebookEdit, or a shell command that "
+                       f"writes a file): {writes[:3]}")
+    if reads:
+        reasons.append(f"reviewer reached outside its private snapshot copy (a path outside it, a Bash command not "
+                       f"started there, the live checkout, planloop state or Codex home): {reads[:3]}")
+    if other:
+        reasons.append(f"reviewer used a tool planloop does not allow a reviewer ({', '.join(CLAUDE_TOOLS[:4])} "
+                       f"only): {other[:3]}")
+    snap = Path(dispatch["snapshot"])
+    for label, rel in (("plan", ".planloop-bundle/plan.md"), ("feedback", f"{CALL_DIR}/feedback.md")):
+        full = f"{snap}/{rel}"
+        if not any(name == "Read" and isinstance(v, dict) and v.get("file_path") == full or
+                   name == "Bash" and isinstance(v, dict) and isinstance(v.get("command"), str) and rel in v["command"]
+                   for name, v in facts["tools"]):
+            reasons.append(f"the reviewer never opened the {label} ({full})")
+    if "PLANLOOP-REVIEW " not in text or f"bundle={dispatch['bundle_sha256']}" not in text:
+        reasons.append("prompt.txt does not carry this call's bundle marker")
+    changed = "the feedback in the private snapshot copy changed during the review"
+    if isinstance(recorded, dict) and not probe(snap.parent):
+        if changed in (recorded.get("reasons") or []):
+            reasons.append(changed)
+    elif not probe(snap / CALL_DIR / "feedback.md", "is_file") or \
+            sha_file(snap / CALL_DIR / "feedback.md") != dispatch["feedback_sha256"]:
+        reasons.append(changed)
+    response = message = None
+    if meta["agentType"] == CLAUDE_AGENT and meta["finished"] is True:
+        try:
+            message, _ = extract_handback(keep)
+        except (Unreadable, NotFile):
+            raise
+        except Unverifiable as exc:
+            infra.append(f"reviewer's final message unverifiable: {exc}")
+            return finalize(record, reasons, infra)
+        except Fail as exc:
+            reasons.append(f"the reviewer's final message: {exc}")
+    if message is not None:
+        try:
+            response = loads(message.strip(), "the reviewer's final message")
+        except Fail as exc:
+            reasons.append(f"the reviewer's final message is not one strict JSON object ({exc})")
+        reasons += response_problems(response)
+    return judge_response(run, dispatch, record, response, reasons, infra, snap, recorded, revalidation, skip=CALL_DIR)
 
 
 REVALIDATION = ("relevant inputs changed during the review: ", "live inputs could not be revalidated: ")
@@ -4257,10 +4734,12 @@ def revalidate(run: Run, n: int, bundle_sha: str) -> list:
     return changes
 
 
-def finish_receipt(run: Run, call: int, attempt: int, artifacts: str | None = None) -> int:
+def finish_receipt(run: Run, call: int, attempt: int, artifacts: str | None = None,
+                   transcript: str | None = None) -> int:
     call_dir = run.call_dir(call, attempt)
     running = call_dir / "running.json"
-    command = f"receipt --run {run.id} --call {call} --attempt {attempt}"
+    command = f"receipt --run {run.id} --call {call} --attempt {attempt}" + \
+        ("" if transcript is None else f" --transcript {transcript}")
     with Lock(run.dir) as lock:
         owner = held = None
         if probe(running):
@@ -4345,6 +4824,19 @@ def finish_receipt(run: Run, call: int, attempt: int, artifacts: str | None = No
         path = call_dir / "receipt.json"
         have = probe(path)
         old = load(path) if have else None
+        claude = dispatched["backend"] == "claude"
+        if claude and artifacts is not None:
+            raise Fail(f"call {call} attempt {attempt} is a claude-backend review, which has no runner artifacts: "
+                       "record it with --transcript; nothing was recorded")
+        if not claude and transcript is not None:
+            raise Fail(f"call {call} attempt {attempt} is a Codex review; --transcript records a claude-backend "
+                       "review: run receipt without it; nothing was recorded")
+        if claude and not have and transcript is None and \
+                not probe(Path(dispatched["artifacts_root"]) / "transcript-source.json"):
+            raise Fail(f"call {call} attempt {attempt} is a claude-backend review: record it with `{command} "
+                       "--transcript <agent>.jsonl`, the transcript of the background Plan agent given its prompt, "
+                       "once that agent has finished, or with `--transcript none` if it never ran or will never "
+                       "finish (the attempt is then invalid); nothing was recorded")
         bind = artifacts is not None and not have and not probe(call_dir / "call.json")
         if bind:
             adir, root = Path(artifacts), Path(dispatched["artifacts_root"])
@@ -4355,7 +4847,7 @@ def finish_receipt(run: Run, call: int, attempt: int, artifacts: str | None = No
                            f"{', '.join(p.name for p in found) or 'none'}); nothing was recorded: name that directory, "
                            f"or run `{command}` without --artifacts, which records the attempt invalid")
         command += "" if artifacts is None or bind else f" --artifacts {artifacts}"
-        record = verify_call(run, call, attempt, artifacts, recorded=old)
+        record = verify_call(run, call, attempt, artifacts, recorded=old, transcript=transcript)
         if bind:
             try:
                 write_new(call_dir / "call.json", canon({"schema": "planloop-call/1", "runner_exit": None,
@@ -4372,7 +4864,7 @@ def finish_receipt(run: Run, call: int, attempt: int, artifacts: str | None = No
             if stored != record:
                 was = revalidation_of(stored) if stored is not None else None
                 if was is None or canon(stored) != canon(verify_call(run, call, attempt, artifacts, recorded=old,
-                                                                     revalidation=was)):
+                                                                     revalidation=was, transcript=transcript)):
                     raise Conflict(f"{path} exists and differs from a fresh verification in more than the live-input "
                                    "revalidation; it was left unchanged and is not printed: compare it with the call's "
                                    "runner artifacts and Codex records before relying on it")
@@ -4476,7 +4968,7 @@ def prune_copies(run: Run, rerun: str) -> list:
 def cmd_receipt(args) -> int:
     run = Run(args.run)
     run.config()
-    return finish_receipt(run, args.call, args.attempt, args.artifacts)
+    return finish_receipt(run, args.call, args.attempt, args.artifacts, args.transcript)
 
 
 def intents_dir(run: Run) -> Path:
@@ -4883,10 +5375,101 @@ def cmd_reviewers(args) -> int:
         config["model_changes"].append({"at": iso(now()), "from": [config["reviewer_model"], config["gate_model"]],
                                         "to": [args.model, args.gate_model], "quote": args.quote})
         config.update({"reviewer_model": args.model, "gate_model": args.gate_model})
-        save(run.dir / "run.json", canon(config), "the model change was not recorded (any interrupted publication or "
-             "unfinished Beads intent the lock replayed first stays completed)")
+        save(run.dir / "run.json", Run.stored(config), "the model change was not recorded (any interrupted "
+             "publication or unfinished Beads intent the lock replayed first stays completed)")
         print(f"run {run.id}: Codex reviews on {args.model!r}, the final gate on {args.gate_model!r}, from the next "
-              "dispatch")
+              "dispatch" + ("" if config["reviewer_backend"] == "codex" else
+                            " under the codex backend (this run reviews with the claude backend now)"))
+    return 0
+
+
+def cmd_backend(args) -> int:
+    run = Run(args.run)
+    if not args.quote.strip():
+        raise Fail("a reviewer backend choice needs Mike's exact words")
+    with Lock(run.dir):
+        prepare(run)
+        config = run.config()
+        if config["reviewer_backend"] == args.set:
+            raise Fail(f"run {run.id} already reviews with the {args.set} backend; nothing was changed")
+        last_call = max((c for c, _, _ in call_dirs(run)), default=0)
+        config["backend_changes"].append({"at": iso(now()), "from": config["reviewer_backend"], "to": args.set,
+                                          "quote": args.quote, "after_call": last_call})
+        config["reviewer_backend"] = args.set
+        save(run.dir / "run.json", Run.stored(config), "the backend change was not recorded (any interrupted "
+             "publication or unfinished Beads intent the lock replayed first stays completed)")
+        print(f"run {run.id}: reviews by the {args.set} backend from the next dispatch (call {last_call + 1}); no "
+              f"gate of call {last_call} or earlier counts toward approval")
+    return 0
+
+
+def load_signoff(run: Run, path: Path) -> dict:
+    value = shape(load(path, path.name), {"schema": {"planloop-signoff/1"}, "id": "str", "by": {"Mike"},
+                                          "quote": "str", "recorded_at": "str", "recorded_by": "str",
+                                          "revision": "int", "plan_sha256": "hex", "gate_call": "int",
+                                          "gate_attempt": "int", "gate_receipt_sha256": "hex"}, path.name)
+    parse_time(value["recorded_at"])
+    if path.name != f"{value['id']}.json":
+        raise Fail(f"sign-off {value['id']} must live at decisions/{value['id']}.json")
+    return value
+
+
+def signoffs(run: Run) -> tuple:
+    """(well-formed sign-offs by number, [(name, why) malformed], notes) from decisions/A<n>.json."""
+    good, bad, notes = [], [], []
+    for path in listing(run.dir / "decisions", "[Aa]*.json"):
+        if not SIGNOFF_NAME.match(path.name):
+            notes.append(f"NOTE  decisions/{path.name} is not named A<positive integer>.json, so it is not read as a "
+                         "sign-off")
+            continue
+        try:
+            good.append(load_signoff(run, path))
+        except Fail as exc:
+            bad.append((path.name, str(exc)))
+    return sorted(good, key=lambda d: int(d["id"][1:])), bad, notes
+
+
+def gate_receipt(run: Run, config: dict):
+    """The latest call if it is a counted gate of the current backend on HEAD's revision, else None."""
+    head, rows = run.head(), receipts(run, deep=True)
+    if head is None or not rows:
+        return None
+    c, a, path, r = rows[-1]
+    if not r or r["kind"] != "gate" or r["status"] != "counted" or r["revision"] != head[0] \
+            or r.get("backend", "codex") != config["reviewer_backend"] or c <= run.voided_after(config):
+        return None
+    return c, a, path, r
+
+
+def cmd_signoff(args) -> int:
+    run = Run(args.run)
+    if not args.quote.strip():
+        raise Fail("a sign-off needs Mike's exact words")
+    with Lock(run.dir):
+        prepare(run)
+        config = run.config()
+        if config["reviewer_backend"] != "claude":
+            raise Fail("a sign-off file is part of a claude-backend approval; this run reviews with codex")
+        found = gate_receipt(run, config)
+        if found is None:
+            raise Fail("the latest review call is not a counted claude gate on the published revision; dispatch and "
+                       "record the gate first, then show Mike its review")
+        c, a, path, r = found
+        taken = [int(p.name[1:-5]) for p in listing(run.dir / "decisions", "A*.json") if SIGNOFF_NAME.match(p.name)]
+        n = max(taken, default=0) + 1
+        record = {"schema": "planloop-signoff/1", "id": f"A{n}", "by": "Mike", "quote": args.quote,
+                  "recorded_at": iso(now()), "recorded_by": "orchestrator (planloop.py signoff)",
+                  "revision": r["revision"], "plan_sha256": r["plan_sha256"], "gate_call": c, "gate_attempt": a,
+                  "gate_receipt_sha256": sha_file(path / "receipt.json")}
+        target = run.dir / "decisions" / f"A{n}.json"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            write_new(target, canon(record))
+        except OSError as exc:
+            raise Unverifiable(f"could not write {target} ({exc}); the sign-off was not recorded: run the command "
+                               "again once it can be written") from exc
+        print(f"run {run.id}: Mike's sign-off of revision {r['revision']} (gate call {c} attempt {a}) recorded in "
+              f"decisions/A{n}.json; `gate --run {run.id} --publish` publishes the approval")
     return 0
 
 
@@ -4987,15 +5570,35 @@ def readiness(run: Run, report: Report, at_publication: bool) -> dict | None:
     if not gate_ok:
         return None
     c, a, _, stored = last
+    config = run.config()
+    claude = config["reviewer_backend"] == "claude"
+    if claude or config["backend_changes"]:
+        after, by = run.voided_after(config), stored.get("backend", "codex")
+        if not report.check(by == config["reviewer_backend"] and c > after, "[mechanical] the gate was reviewed by "
+                            f"this run's reviewer backend ({config['reviewer_backend']}) and dispatched after its last "
+                            "backend change", f"call {c} was reviewed by {by}" + (
+                                f"; calls up to {after} predate the switch to {config['reviewer_backend']}"
+                                if after else "")):
+            return None
     fresh = verify_call(run, c, a, recorded=stored if stored["status"] != "counted" else None)
     same = {k: v for k, v in stored.items() if k != "created_at"} == fresh
-    report.check(same, "[mechanical] gate receipt re-derived from runner and Codex records matches the stored receipt")
+    report.check(same, "[mechanical] gate receipt re-derived from " + (
+        "the reviewer's kept transcript" if claude else "runner and Codex records") + " matches the stored receipt")
     report.check(fresh["status"] == "counted", "[mechanical] gate call verified",
                  "; ".join(fresh["reasons"]))
     report.check(fresh["verdict"] == "APPROVED", "[mechanical] gate verdict APPROVED", str(fresh["verdict"]))
-    report.check(fresh["requested"]["effort"] == "high" and (fresh["effective"] or {}).get("effort") == "high",
-                 "[mechanical] gate requested and effective effort high (effective = Codex CLI's turn_context)")
-    report.check(fresh["fresh"], "[mechanical] gate context fresh (invocation, session lineage, first user turn)")
+    if claude:
+        report.check(fresh["requested"] == {"model": CLAUDE_MODEL, "effort": CLAUDE_EFFORT}
+                     and (fresh["effective"] or {}).get("effort") == CLAUDE_EFFORT
+                     and str((fresh["effective"] or {}).get("model")).startswith("claude-opus-"),
+                     "[mechanical] gate requested Opus at high effort, and the reviewer's transcript records an Opus "
+                     "model and high effort on every assistant turn (as Claude Code recorded them)")
+        report.check(fresh["fresh"], "[mechanical] gate context fresh (the prompt is the transcript's first user turn "
+                     "byte for byte, no later user turn, an agent id no other call used)")
+    else:
+        report.check(fresh["requested"]["effort"] == "high" and (fresh["effective"] or {}).get("effort") == "high",
+                     "[mechanical] gate requested and effective effort high (effective = Codex CLI's turn_context)")
+        report.check(fresh["fresh"], "[mechanical] gate context fresh (invocation, session lineage, first user turn)")
     report.check(not fresh["live_reads"], "[mechanical] gate reviewer read no live-checkout path")
     report.check(fresh["bundle_sha256"] == rev["bundle_sha256"], "[mechanical] the gate was given exactly this "
                  "revision's plan and bundle (delivery and input consistency, not proof each source was examined)")
@@ -5055,11 +5658,32 @@ def readiness(run: Run, report: Report, at_publication: bool) -> dict | None:
     report.check(not missing, "[host-attested] every residual risk accepted by Mike for its current wording "
                  "(the record and its binding are mechanical; that Mike said it is attested by the recorder)",
                  ", ".join(missing))
+    receipt_sha = sha_file(run.call_dir(c, a) / "receipt.json")
+    extra = {}
+    if claude:
+        good, bad, notes = signoffs(run)
+        for line in notes:
+            print(line)
+        for name, why in bad:
+            report.check(False, f"[mechanical] sign-off {name} well formed", why)
+        bound = [d for d in good if (d["revision"], d["plan_sha256"], d["gate_call"], d["gate_attempt"],
+                                     d["gate_receipt_sha256"]) == (n, rev["plan_sha256"], c, a, receipt_sha)]
+        for d in good:
+            if d not in bound:
+                print(f"NOTE  decisions/{d['id']}.json signs off revision {d['revision']} gate call {d['gate_call']} "
+                      f"attempt {d['gate_attempt']}, not this revision's gate receipt, so it does not count")
+        report.check(bool(bound), f"[host-attested] Mike signed off revision {n} after the gate (decisions/A<n>.json "
+                     "binds his words to this plan_sha256 and this gate receipt's sha256; the binding is mechanical, "
+                     "that Mike said it is attested by the recorder)", "no sign-off file binds them: show Mike the "
+                     f"plan and the gate review, then `signoff --run {run.id} --quote \"<his words>\"`")
+        if bound:
+            extra = {"reviewer_backend": "claude", "signoff": {
+                "id": bound[0]["id"], "sha256": sha_file(run.dir / "decisions" / f"{bound[0]['id']}.json")}}
     return {"revision": n, "revision_sha256": rev_sha, "plan_sha256": rev["plan_sha256"],
             "bundle_sha256": rev["bundle_sha256"], "gate_call": c, "gate_attempt": a,
-            "gate_receipt_sha256": sha_file(run.call_dir(c, a) / "receipt.json"),
+            "gate_receipt_sha256": receipt_sha,
             "risk_acceptances": sorted(set(accepted.values())), "observations": observations,
-            **(st["facts"] if st else {})}
+            **(st["facts"] if st else {}), **extra}
 
 
 def cmd_rollout_check(args) -> int:
@@ -5097,6 +5721,20 @@ def cmd_rollout_check(args) -> int:
     else:
         print(f"Codex {version} matches {ROLLOUT_PARSER}; re-run with --accept to record it")
     return 0
+
+
+def gate_note(run: Run, facts: dict) -> str:
+    """The run bead's note for a claude-backend approval: the gate review's outcome and Mike's sign-off. It names no
+    approval record, so publishing the same approval again (after a crash, or by hand) adds no second note."""
+    c, a = facts["gate_call"], facts["gate_attempt"]
+    r = load_receipt(run.call_dir(c, a) / "receipt.json", c, a)
+    signoff = load_signoff(run, run.dir / "decisions" / f"{facts['signoff']['id']}.json")
+    findings = "; ".join(f"{f['id']} [{f['severity']}] {f['evidence'][:120]}" for f in r["findings"]) or "none"
+    return (f"planloop approval of revision {facts['revision']} (plan sha256 "
+            f"{facts['plan_sha256'][:12]}): gate call {c} attempt {a} by a fresh {CLAUDE_AGENT} agent on "
+            f"{(r['effective'] or {}).get('model')} at {(r['effective'] or {}).get('effort')} effort, verdict "
+            f"{r['verdict']}, receipt sha256 {facts['gate_receipt_sha256'][:12]}; gate findings: {findings}. "
+            f"Mike's sign-off {signoff['id']}: \"{signoff['quote']}\"")
 
 
 def cmd_gate(args) -> int:
@@ -5172,6 +5810,8 @@ def cmd_gate(args) -> int:
             "--publish` again, which publishes the approval afresh"
         run.beads.update(run.run_bead(), {"planloop_state": "approved", "planloop_approval": sha(data),
                                           "planloop_reason": f"text: approved revision {facts['revision']}"})
+        if facts.get("reviewer_backend") == "claude":
+            run.beads.note(run.run_bead(), gate_note(run, facts))
         print(f"PLAN APPROVED: revision {facts['revision']}, {name}. Implementation still needs Mike's separate "
               "authorization; the implementation bead stays open.")
     return 0
@@ -5183,6 +5823,7 @@ def main(argv=None) -> int:
     p = sub.add_parser("init")
     p.add_argument("--run", required=True)
     p.add_argument("--bead", required=True)
+    p.add_argument("--reviewer-backend", choices=BACKENDS)
     p.add_argument("--reviewer-model")
     p.add_argument("--gate-model")
     p.add_argument("--track", choices=("ordinary", "escalated"), required=True)
@@ -5215,6 +5856,7 @@ def main(argv=None) -> int:
     p.add_argument("--call", type=int, required=True)
     p.add_argument("--attempt", type=int, required=True)
     p.add_argument("--artifacts")
+    p.add_argument("--transcript")
     p = sub.add_parser("findings")
     p.add_argument("action", choices=("ingest", "propose", "decide", "check"))
     p.add_argument("--run", required=True)
@@ -5238,6 +5880,13 @@ def main(argv=None) -> int:
     p.add_argument("--model", required=True)
     p.add_argument("--gate-model", required=True)
     p.add_argument("--quote", required=True)
+    p = sub.add_parser("backend")
+    p.add_argument("--run", required=True)
+    p.add_argument("--set", choices=BACKENDS, required=True)
+    p.add_argument("--quote", required=True)
+    p = sub.add_parser("signoff")
+    p.add_argument("--run", required=True)
+    p.add_argument("--quote", required=True)
     p = sub.add_parser("ledger")
     p.add_argument("--run", required=True)
     p = sub.add_parser("gate")
@@ -5260,7 +5909,8 @@ def main(argv=None) -> int:
             parser.error(f"findings {args.action} needs {', '.join('--' + k for k in need)}")
     handlers = {"init": cmd_init, "handback": cmd_handback, "bundle": cmd_bundle, "publish": cmd_publish,
                 "dispatch": cmd_dispatch, "receipt": cmd_receipt, "findings": cmd_findings, "evidence": cmd_evidence,
-                "state": cmd_state, "planner": cmd_planner, "reviewers": cmd_reviewers, "ledger": cmd_ledger, "gate": cmd_gate, "rollout-check": cmd_rollout_check}
+                "state": cmd_state, "planner": cmd_planner, "reviewers": cmd_reviewers, "backend": cmd_backend,
+                "signoff": cmd_signoff, "ledger": cmd_ledger, "gate": cmd_gate, "rollout-check": cmd_rollout_check}
     try:
         try:
             return handlers[args.command](args)

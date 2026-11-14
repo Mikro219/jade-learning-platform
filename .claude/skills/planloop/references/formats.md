@@ -1,4 +1,4 @@
-# planloop file formats (planloop/3, quartz-rs-lur)
+# planloop file formats (planloop/3, from quartz-rs-lur; JADE example paths)
 
 Every JSON file planloop writes is canonical (sorted keys, no spaces, one trailing newline). Host-written inputs, runner artifacts, receipts, decisions, evidence and the HEAD/APPROVAL pointers are parsed strictly: duplicate keys, NaN/Infinity, missing fields, unknown fields and out-of-range enums are errors. Codex's rollout and the agent transcript are third-party formats: they are parsed line by line and any unfamiliar shape makes the input unverifiable rather than accepted. Paths in records are repository-relative unless noted.
 
@@ -8,7 +8,10 @@ The plan text itself (markers, change log, inventory, lost lines) is specified f
 
 ```
 plans/planloop/<run>/                 (<run> = <bead>.pl<N>)
-  run.json                            settings (schema planloop-run/1): reviewer_model, gate_model, model_changes
+  run.json                            settings (schema planloop-run/1): reviewer_model, gate_model, model_changes,
+                                      reviewer_backend (claude|codex) and backend_changes [{at, from, to, quote,
+                                      after_call}]; both are written only for a claude run or one ever switched, so
+                                      a Codex run's run.json stays readable by older planloop; absent means codex
   HEAD                                the single revision pointer {revision, revision_sha256}
   .publishing-rev-NNN                 publishing intent {schema: "planloop-publishing/1", revision, revision_sha256},
                                       written before the rename, removed once HEAD names that revision
@@ -88,7 +91,9 @@ plans/planloop/<run>/                 (<run> = <bead>.pl<N>)
                                       the scope is not empty after it was killed, receipt removes it once the
                                       attempt is recorded. receipt reads it, dispatch.json and the scope under
                                       the run lock, the one that guards the receipt it writes
-    input/feedback.md                 the exact feedback given to the runner
+    input/feedback.md                 the exact feedback given to the runner (claude backend: to the reviewer, also
+                                      copied read-only into its private copy as .planloop-call/feedback.md)
+    input/prompt.txt                  claude backend only: the reviewer agent's exact prompt (its first user turn)
     call.json                         {schema: "planloop-call/1", runner_exit, artifacts, runner_stdout_sha256} (output):
                                       runner exit and artifact directory; `receipt --artifacts DIR` writes it, with
                                       runner_exit and runner_stdout_sha256 null, when the call has no call.json and no
@@ -105,6 +110,7 @@ plans/planloop/<run>/                 (<run> = <bead>.pl<N>)
   intents/*.json                      planned Beads changes: planned -> applied -> verified
   decisions/D<n>.json                 Mike's decisions and risk acceptances
   decisions/S<n>.json                 Mike's size decisions (planloop-size-decision/1)
+  decisions/A<n>.json                 Mike's sign-off of a claude-backend gate (planloop-signoff/1)
   approvals/approval-rNNN-<sha12>.json   approval records (pending until APPROVAL names one)
   APPROVAL                            the approval pointer {record, sha256}
   ledger.md                           generated projection, never edited
@@ -121,7 +127,10 @@ plans/planloop/<run>/                 (<run> = <bead>.pl<N>)
                                       private snapshot copy (`r-XXXXXXXX`), so it is unique to one dispatch even
                                       when checkouts share this state directory and a run id; `dispatch` creates
                                       it when it reserves the call and refuses one that already exists (exit 2,
-                                      nothing reserved); calls dispatched before this have `calls/call-CCC-aA`
+                                      nothing reserved); calls dispatched before this have `calls/call-CCC-aA`.
+                                      A claude call holds no claudex-* directory but transcript.jsonl and
+                                      transcript.meta.json (the reviewer agent's, kept by its first `receipt
+                                      --transcript`) and transcript-source.json {path, sha256, meta_sha256}
 ~/.local/state/planloop-isolated/r-*/repo/   a call's private copy of the snapshot, the reviewer's working directory;
                                       (the parent is mode 0300: not listable); removed once the receipt exists,
                                       except for the latest counted gate, which re-verification needs; renamed to
@@ -130,6 +139,8 @@ plans/planloop/<run>/                 (<run> = <bead>.pl<N>)
                                       first)
 ```
 
+**Claude-backend dispatch record.** `dispatch.json` adds `backend: "claude"` and `prompt_sha256` (both absent on a Codex call, which reads as `backend: "codex"`), has `model: "opus"`, `effort: "high"`, `scope` and `view` null, and no `running.json` is written: nothing runs under planloop's control. A record whose backend, prompt hash and scope disagree fails.
+
 Inputs (frozen before dispatch) and outputs (written by or after the review) are kept apart: nothing in `reviews/*/` other than `input/` is ever an input to the call that produced it.
 
 ## inputs.json (host-written, `planloop-inputs/1`)
@@ -137,11 +148,11 @@ Inputs (frozen before dispatch) and outputs (written by or after the review) are
 ```json
 {"schema": "planloop-inputs/1",
  "brief": "plans/planloop/<run>/brief-r2.md",
- "repo_files": ["backend/persist-service/src/gaps/audit.rs", "plans/PLAN_5g9_audit_close_boundary_2026-10-10.md"],
- "dir_inventories": ["backend/ci/sql"],
- "beads": [{"id": "quartz-rs-e0n", "fields": []}],
- "obligations": [{"id": "OB1", "source": "plans/PLAN_5g9_audit_close_boundary_2026-10-10.md",
-                  "section": "§8", "text": "<exact normative text>"}],
+ "repo_files": ["src/lib/server/events/ingest.ts", "docs/handoff/EVENTS.md", "docs/handoff/phases/phase-06-event-pipeline.md"],
+ "dir_inventories": ["migrations"],
+ "beads": [{"id": "jade-zg3", "fields": []}],
+ "obligations": [{"id": "OB1", "source": "docs/handoff/EVENTS.md",
+                  "section": "Server rules", "text": "<exact normative text>"}],
  "evidence": ["plans/planloop/<run>/evidence/EV1.json"],
  "discovery": "plans/planloop/<run>/discovery.json"}
 ```
@@ -185,6 +196,10 @@ Manifest item `{"type": "meaning_obligation", "revision": S, "before_sha256", "a
 
 `dispatch.json` of a call carrying obligations has `meaning_check: [{revision, previous_revision, before_sha256, after_sha256, index_sha256, units}, ...]`; the receipt then has `meaning_check: [{revision, previous_revision, verdicts: {<unit>: preserved|changed}}, ...]`. Both keys are absent on every other call. A counted receipt with `meaning_check` judges a shrink only when it and its dispatch record name the authenticated revision's hashes and its mandate equals that revision's frozen item; otherwise it is an integrity error.
 
+## Sign-off (`planloop-signoff/1`, claude backend)
+
+`{schema, id: "A<n>", by: "Mike", quote: <his exact words>, recorded_at, recorded_by, revision, plan_sha256, gate_call, gate_attempt, gate_receipt_sha256}` at `decisions/A<n>.json`, parsed strictly like a size decision (a malformed one fails `gate`'s `sign-off A<n>.json well formed` check). `signoff --run R --quote` writes the next one for the latest counted claude gate on HEAD; one may also be written by hand. Only files named exactly `A<positive integer>.json` are read; any other `A*`/`a*` JSON there is a NOTE. It counts only when it names the published revision, its `plan_sha256`, and the gate call and attempt with the sha256 of that gate's `receipt.json` as it is now; the lowest-numbered such file is bound into the approval. A well-formed one that binds another revision or gate receipt is a NOTE and fails nothing, but leaves the sign-off check failing.
+
 ## Size decision (`planloop-size-decision/1`)
 
 `{schema, id: "S<n>", by: "Mike", quote: <his exact words>, recorded_at, recorded_by, revision: <S>, plan_sha256: <revision S's>, ceiling_bytes: <int>}` at `decisions/S<n>.json`, parsed strictly: a missing field or a wrong value (an array or object where `"Mike"` or the schema string belongs included) fails `gate`'s `size decision S<n>.json well formed` check and refuses a gate `dispatch` (exit 1). Only files named exactly `S<positive integer>.json` are read; any other `S*.json` or `s*.json` in `decisions/` is ignored with a NOTE. It gives a policy head G a basis when revision S <= G is a judged shrink-only policy revision with that `plan_sha256`, and `ceiling_bytes` is at least the size of both S and G; a well-formed decision that does not is reported as a NOTE. The lowest-numbered covering decision is used, and only when the plan is neither within the threshold nor within the renewal margin after a judged anchor shrink with no policy revision since it past that margin; a lower-numbered covering decision added after approval therefore changes the bound decision and lapses the approval.
@@ -193,6 +208,10 @@ Manifest item `{"type": "meaning_obligation", "revision": S, "before_sha256", "a
 
 For a policy head only: `size: {plan_bytes, threshold_bytes, margin_bytes, basis, size_policy: {threshold_bytes, from_revision}, decision: null | {id, sha256}}` and `meaning_checks: [{revision, call, attempt, receipt_sha256, preserved, changed}, ...]` for every judged shrink-only policy revision. Readiness recomputes them; any difference lapses the approval.
 
+## Approval record, claude backend
+
+Adds `reviewer_backend: "claude"` and `signoff: {id, sha256}` (the bound sign-off file's hash); readiness recomputes both, so a changed sign-off file, a backend switch or a re-derived gate receipt that differs lapses the approval. A Codex approval has neither field.
+
 ## Reviewer coverage lines
 
 For every finding in state `fix_proposed`: `finding R<k>: resolved` or `finding R<k>: unresolved`. Any later reviewer may withdraw an open finding with `finding R<k>: withdrawn: <evidence that its failure scenario cannot occur, 40+ characters>`. The final gate must answer each withdrawn finding with `finding R<k>: withdrawal confirmed` or re-raise it. Re-raising a known finding uses its `R<k>` as the finding id. A line that starts like a status but matches none of these, or a second line for the same finding, voids the call. On a call carrying meaning obligations: exactly one `meaning revision <S> <unit>: preserved` or `...: changed` per listed unit; a missing, duplicated or malformed line, or `changed` with no finding in the response, voids the call.
@@ -200,6 +219,8 @@ For every finding in state `fix_proposed`: `finding R<k>: resolved` or `finding 
 ## Receipt (`planloop-receipt/1`)
 
 Run, call, attempt, kind, revision and its hash, bundle and plan hashes, requested `{model, effort}`, effective `{model, effort, sandbox, source, rollout_sha256}`, session id, fresh, verdict, findings, coverage, live_reads, revalidation (list of changes), artifact hashes, usage, cli_version, dispatched_at, reasons, infrastructure, status `counted|invalid|triage`, created_at. The gate re-derives it from the artifacts and requires equality with the stored copy. Every command that reads a receipt checks its schema, status, call and attempt; `ledger`, `findings check` (for a finding's resolution receipt) and `findings ingest` also check that the other fields are present with their types (a counted or triage receipt's verdict a string, coverage a list of strings and findings objects with string id, severity and evidence). One that is not fails naming it (`<path> is not a planloop receipt for call C attempt A (<why>); it was edited or damaged: restore it ..., or delete it and run `receipt` for that call again, which re-derives it ...`, exit 1); a receipt re-derived after the call's private snapshot copy was removed is invalid. Intents (`intents/*.json`) and the run and finding beads' planloop counters, finding lists, finding severity (`low|medium|high`) and finding state (one of the finding states) are checked the same way (`intent <name> is not a planloop intent (<why>)`, `run|finding bead <id> holds malformed planloop metadata (<key>=<value>)`, exit 1) and nothing is applied from them. Re-running `receipt` on a recorded call prints the stored copy (with a NOTE) when it differs from the re-derived one but is exactly, `created_at` aside, what the same verification produces from the stored copy's own revalidation outcome: its `revalidation` list (strings) and at most one `live inputs could not be revalidated: ` reason, with the `relevant inputs changed during the review: ` reason, the order of `reasons`, `infrastructure` and `status` all recomputed from that outcome and every other field re-derived from the artifacts. Any other difference is a conflict, and the stored copy is never rewritten. That check shows the stored copy is consistent, not that it is the one first written: the revalidation outcome at the time of the review is recorded nowhere else, so a copy edited consistently in every field (for example an input-change invalidation removed together with its reason, `infrastructure` and `status`) is printed as recorded; hand-editing receipts is out of scope (Mike, 2026-11-11). A receipt recorded under an earlier wording of the reason it re-derives to (such as `runner left no artifact directory` where the call's `claudex-*/result.json` exists, or from a dispatcher that died while its runner continued) is a conflict on every re-run but still stands as recorded: invalid, never counted, and the next attempt dispatches normally.
+
+**Claude-backend receipt.** The same schema and fields, plus `backend: "claude"` and `transcript: {source, sha256, meta_sha256, kept, parser: "claude-subagent/1"}`; `requested` is `{model: "opus", effort: "high"}`, `effective` is `{model, effort, sandbox, source, transcript_sha256}` from the transcript (the Opus model and effort Claude Code recorded), `session_id` is the agent id, `cli_version` the Claude Code version, `artifacts` the kept files' hashes, `usage` null. It is re-derived from the kept copy; a `--transcript` that differs from it, or a kept copy that differs from `transcript-source.json`, invalidates the re-derivation (a conflict for `receipt`, NOT APPROVED for `gate`). `--transcript none` on an unrecorded call records it invalid (infrastructure, `no reviewer transcript is recorded for this call ...`).
 
 ## Exit status
 

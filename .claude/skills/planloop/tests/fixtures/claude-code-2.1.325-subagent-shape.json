@@ -1,0 +1,873 @@
+{
+ "source": "Claude Code 2.1.325 background subagent transcript (agent-*.jsonl beside agent-*.meta.json, under ~/.claude/projects/<project>/<session>/subagents/), 2026-11-14; content stripped, ids, models and cwd replaced by placeholders, record shapes and the effort fields kept (repeated attachment and api-request rows dropped); meta from a background Plan agent launched with model opus and effort high (it records both)",
+ "meta": {
+  "agentType": "<<AGENT_TYPE>>",
+  "isBuiltIn": true,
+  "description": "<stripped>",
+  "toolUseId": "<<ID0>>",
+  "parentAgentId": "<<ID50>>",
+  "spawnDepth": 2,
+  "requestShape": "background",
+  "requestNonInteractive": true,
+  "model": "<<MODEL_ALIAS>>",
+  "effort": "<<EFFORT>>",
+  "pickedEffortModel": "<stripped>",
+  "finished": true
+ },
+ "records": [
+  {
+   "parentUuid": null,
+   "isSidechain": true,
+   "promptId": "<<ID1>>",
+   "agentId": "<<ID2>>",
+   "type": "user",
+   "message": {
+    "role": "user",
+    "content": "<stripped>"
+   },
+   "uuid": "<<ID3>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID5>>",
+   "isSidechain": true,
+   "promptId": "<<ID1>>",
+   "agentId": "<<ID2>>",
+   "type": "user",
+   "message": {
+    "role": "user",
+    "content": "<stripped>"
+   },
+   "isMeta": true,
+   "uuid": "<<ID6>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID6>>",
+   "isSidechain": true,
+   "agentId": "<<ID2>>",
+   "attachment": {
+    "type": "environment",
+    "snapshot": {
+     "workingDirectory": "<<CWD>>",
+     "isWorktree": false,
+     "isGitRepo": false,
+     "additionalWorkingDirectories": [],
+     "platform": "<stripped>",
+     "shell": "<stripped>",
+     "osVersion": "<stripped>",
+     "scratchpadDirectory": "<stripped>"
+    }
+   },
+   "type": "attachment",
+   "uuid": "<<ID7>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "rendered": [
+    {
+     "content": "<stripped>"
+    }
+   ],
+   "renderedRole": "<stripped>",
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID7>>",
+   "isSidechain": true,
+   "agentId": "<<ID2>>",
+   "attachment": {
+    "type": "model",
+    "identity": {
+     "modelId": "<<MODEL>>",
+     "marketingName": "<stripped>",
+     "knowledgeCutoff": "<stripped>"
+    },
+    "text": "<stripped>"
+   },
+   "type": "attachment",
+   "uuid": "<<ID8>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "rendered": [
+    {
+     "content": "<stripped>"
+    }
+   ],
+   "renderedRole": "<stripped>",
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID9>>",
+   "isSidechain": true,
+   "agentId": "<<ID2>>",
+   "attachment": {
+    "type": "date",
+    "date": "<stripped>"
+   },
+   "type": "attachment",
+   "uuid": "<<ID10>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "rendered": [
+    {
+     "content": "<stripped>"
+    }
+   ],
+   "renderedRole": "<stripped>",
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID11>>",
+   "isSidechain": true,
+   "agentId": "<<ID2>>",
+   "attachment": {
+    "type": "prompt_snapshot",
+    "systemPrompt": [
+     "<stripped>",
+     "<stripped>"
+    ],
+    "reminderFold": false,
+    "echoWireToolInputs": true,
+    "contextRendering": "<stripped>"
+   },
+   "type": "attachment",
+   "uuid": "<<ID12>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "type": "api-request",
+   "sessionId": "<<ID4>>",
+   "agentId": "<<ID2>>",
+   "id": "<<ID13>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "version": "2.1.325",
+   "querySource": "agent:builtin:general-purpose",
+   "shapeHash": "<<ID14>>",
+   "params": {
+    "model": "<<MODEL>>",
+    "betas": [
+     "<stripped>",
+     "<stripped>"
+    ],
+    "max_tokens": 128000,
+    "thinking": {
+     "type": "adaptive",
+     "display": "<stripped>"
+    },
+    "context_management": {
+     "edits": [
+      {
+       "type": "clear_thinking_20251015",
+       "keep": "<stripped>"
+      }
+     ]
+    },
+    "output_config": {
+     "effort": "medium"
+    }
+   },
+   "keep": 0,
+   "tail": [
+    "<<ID15>>",
+    "<<ID16>>"
+   ],
+   "cacheControl": [
+    {
+     "path": [
+      "<stripped>",
+      0
+     ],
+     "value": {
+      "type": "ephemeral"
+     }
+    },
+    {
+     "path": [
+      "<stripped>",
+      1
+     ],
+     "value": {
+      "type": "ephemeral"
+     }
+    }
+   ],
+   "requestDigest": "<<ID17>>"
+  },
+  {
+   "parentUuid": "<<ID12>>",
+   "isSidechain": true,
+   "agentId": "<<ID2>>",
+   "message": {
+    "model": "<<MODEL>>",
+    "id": "<<ID18>>",
+    "type": "message",
+    "role": "assistant",
+    "content": [
+     {
+      "type": "tool_use",
+      "id": "<<ID19>>",
+      "name": "Bash",
+      "input": {
+       "command": "<stripped>"
+      },
+      "caller": {
+       "type": "direct"
+      }
+     }
+    ],
+    "container": null,
+    "stop_reason": "tool_use",
+    "stop_sequence": null,
+    "stop_details": null,
+    "usage": {
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 42552,
+     "cache_read_input_tokens": 0,
+     "output_tokens": 93,
+     "output_tokens_details": {
+      "thinking_tokens": 0
+     },
+     "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+     },
+     "service_tier": "<stripped>",
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 42552
+     },
+     "inference_geo": "<stripped>",
+     "iterations": [
+      {
+       "input_tokens": 2,
+       "output_tokens": 93,
+       "cache_read_input_tokens": 0,
+       "cache_creation_input_tokens": 42552,
+       "cache_creation": {
+        "ephemeral_5m_input_tokens": 42552,
+        "ephemeral_1h_input_tokens": 0
+       },
+       "type": "message"
+      }
+     ],
+     "speed": "<stripped>",
+     "fallback_credit": null
+    },
+    "input_transformations": [],
+    "diagnostics": null,
+    "context_management": null
+   },
+   "toolInputStreamMs": 585,
+   "wireToolInputs": {
+    "toolu_01UVGeMAcuoSaEUKpvxBGX4t": {
+     "command": "<stripped>"
+    }
+   },
+   "serverClassifierRequest": "<<ID20>>",
+   "apiBlockIndex": 0,
+   "requestId": "<<ID21>>",
+   "requestRef": "<<ID13>>",
+   "requestedModel": "<<MODEL>>",
+   "promptCacheRequested": "5m",
+   "attributionAgent": "general-purpose",
+   "type": "assistant",
+   "uuid": "<<ID22>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "advisorModel": "<<MODEL>>",
+   "effort": "medium",
+   "perTurnEffort": "medium",
+   "madeBy": "model",
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID22>>",
+   "isSidechain": true,
+   "agentId": "<<ID2>>",
+   "attachment": {
+    "type": "hook_success",
+    "hookName": "PreToolUse:Bash",
+    "toolUseID": "<<ID19>>",
+    "hookEvent": "PreToolUse",
+    "content": "<stripped>",
+    "stdout": "<stripped>",
+    "stderr": "<stripped>",
+    "exitCode": 0,
+    "command": "<stripped>",
+    "durationMs": 100
+   },
+   "type": "attachment",
+   "uuid": "<<ID23>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID22>>",
+   "isSidechain": true,
+   "promptId": "<<ID1>>",
+   "agentId": "<<ID2>>",
+   "type": "user",
+   "message": {
+    "role": "user",
+    "content": [
+     {
+      "tool_use_id": "<<ID19>>",
+      "type": "tool_result",
+      "content": "<stripped>",
+      "is_error": false
+     }
+    ]
+   },
+   "uuid": "<<ID24>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "toolUseResult": {
+    "stdout": "<stripped>",
+    "stderr": "<stripped>",
+    "interrupted": false,
+    "isImage": false,
+    "noOutputExpected": false
+   },
+   "serverClassifierContext": {
+    "request": "<<ID20>>",
+    "context": {
+     "git_state": {
+      "cwd": "<<CWD>>",
+      "root": "<stripped>",
+      "branch": "<stripped>",
+      "default_branch": null,
+      "status": {
+       "clean": false,
+       "counts": {
+        "staged": 0,
+        "modified": 7,
+        "untracked": null,
+        "untracked_normal": 3
+       },
+       "porcelain": null,
+       "truncated": false
+      },
+      "visibility": {
+       "origin": null,
+       "push_remote": "<stripped>",
+       "remotes": [],
+       "visibility_cache": []
+      }
+     },
+     "live_cwd": "<stripped>",
+     "platform": "<stripped>"
+    }
+   },
+   "sandboxed": false,
+   "sourceToolAssistantUUID": "<<ID22>>",
+   "permissionDecision": {
+    "decision": "<stripped>",
+    "source": "<stripped>",
+    "reasonType": "<stripped>"
+   },
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID25>>",
+   "isSidechain": true,
+   "agentId": "<<ID2>>",
+   "message": {
+    "model": "<<MODEL>>",
+    "id": "<<ID26>>",
+    "type": "message",
+    "role": "assistant",
+    "content": [
+     {
+      "type": "tool_use",
+      "id": "<<ID27>>",
+      "name": "Read",
+      "input": {
+       "file_path": "<stripped>",
+       "offset": 114,
+       "limit": 25
+      },
+      "caller": {
+       "type": "direct"
+      }
+     }
+    ],
+    "container": null,
+    "stop_reason": "tool_use",
+    "stop_sequence": null,
+    "stop_details": null,
+    "usage": {
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 5215,
+     "cache_read_input_tokens": 42552,
+     "output_tokens": 112,
+     "output_tokens_details": {
+      "thinking_tokens": 0
+     },
+     "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+     },
+     "service_tier": "<stripped>",
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 5215
+     },
+     "inference_geo": "<stripped>",
+     "iterations": [
+      {
+       "input_tokens": 2,
+       "output_tokens": 112,
+       "cache_read_input_tokens": 42552,
+       "cache_creation_input_tokens": 5215,
+       "cache_creation": {
+        "ephemeral_5m_input_tokens": 5215,
+        "ephemeral_1h_input_tokens": 0
+       },
+       "type": "message"
+      }
+     ],
+     "speed": "<stripped>",
+     "fallback_credit": null
+    },
+    "input_transformations": [],
+    "diagnostics": null,
+    "context_management": null
+   },
+   "toolInputStreamMs": 455,
+   "wireToolInputs": {
+    "toolu_01KebycvN2L1e1fZ8kyQtMnX": {
+     "file_path": "<stripped>",
+     "offset": 114,
+     "limit": 25
+    }
+   },
+   "serverClassifierRequest": "<<ID28>>",
+   "apiBlockIndex": 0,
+   "requestId": "<<ID29>>",
+   "requestRef": "<<ID30>>",
+   "requestedModel": "<<MODEL>>",
+   "promptCacheRequested": "5m",
+   "attributionAgent": "general-purpose",
+   "type": "assistant",
+   "uuid": "<<ID31>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "advisorModel": "<<MODEL>>",
+   "effort": "medium",
+   "perTurnEffort": "medium",
+   "madeBy": "model",
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID31>>",
+   "isSidechain": true,
+   "promptId": "<<ID1>>",
+   "agentId": "<<ID2>>",
+   "type": "user",
+   "message": {
+    "role": "user",
+    "content": [
+     {
+      "tool_use_id": "<<ID27>>",
+      "type": "tool_result",
+      "content": "<stripped>"
+     }
+    ]
+   },
+   "uuid": "<<ID32>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "toolUseResult": {
+    "type": "text",
+    "file": {
+     "filePath": "<stripped>",
+     "content": "<stripped>",
+     "numLines": 25,
+     "startLine": 114,
+     "totalLines": 163
+    }
+   },
+   "sourceToolAssistantUUID": "<<ID31>>",
+   "permissionDecision": {
+    "decision": "<stripped>",
+    "source": "<stripped>",
+    "reasonType": "<stripped>"
+   },
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID33>>",
+   "isSidechain": true,
+   "agentId": "<<ID2>>",
+   "message": {
+    "model": "<<MODEL>>",
+    "id": "<<ID34>>",
+    "type": "message",
+    "role": "assistant",
+    "content": [
+     {
+      "type": "tool_use",
+      "id": "<<ID35>>",
+      "name": "Bash",
+      "input": {
+       "command": "<stripped>"
+      },
+      "caller": {
+       "type": "direct"
+      }
+     }
+    ],
+    "container": null,
+    "stop_reason": "tool_use",
+    "stop_sequence": null,
+    "stop_details": null,
+    "usage": {
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 843,
+     "cache_read_input_tokens": 47767,
+     "output_tokens": 522,
+     "output_tokens_details": {
+      "thinking_tokens": 0
+     },
+     "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+     },
+     "service_tier": "<stripped>",
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 843
+     },
+     "inference_geo": "<stripped>",
+     "iterations": [
+      {
+       "input_tokens": 2,
+       "output_tokens": 522,
+       "cache_read_input_tokens": 47767,
+       "cache_creation_input_tokens": 843,
+       "cache_creation": {
+        "ephemeral_5m_input_tokens": 843,
+        "ephemeral_1h_input_tokens": 0
+       },
+       "type": "message"
+      }
+     ],
+     "speed": "<stripped>",
+     "fallback_credit": null
+    },
+    "input_transformations": [],
+    "diagnostics": null,
+    "context_management": null
+   },
+   "toolInputStreamMs": 2328,
+   "wireToolInputs": {
+    "toolu_01WYfa5GrLqyxP7poN98aq1v": {
+     "command": "<stripped>"
+    }
+   },
+   "serverClassifierRequest": "<<ID36>>",
+   "apiBlockIndex": 0,
+   "requestId": "<<ID37>>",
+   "requestRef": "<<ID38>>",
+   "requestedModel": "<<MODEL>>",
+   "promptCacheRequested": "5m",
+   "attributionAgent": "general-purpose",
+   "type": "assistant",
+   "uuid": "<<ID39>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "advisorModel": "<<MODEL>>",
+   "effort": "medium",
+   "perTurnEffort": "medium",
+   "madeBy": "model",
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID39>>",
+   "isSidechain": true,
+   "promptId": "<<ID1>>",
+   "agentId": "<<ID2>>",
+   "type": "user",
+   "message": {
+    "role": "user",
+    "content": [
+     {
+      "tool_use_id": "<<ID35>>",
+      "type": "tool_result",
+      "content": "<stripped>",
+      "is_error": false
+     }
+    ]
+   },
+   "uuid": "<<ID40>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "toolUseResult": {
+    "stdout": "<stripped>",
+    "stderr": "<stripped>",
+    "interrupted": false,
+    "isImage": false,
+    "noOutputExpected": false
+   },
+   "serverClassifierContext": {
+    "request": "<<ID36>>",
+    "context": {
+     "git_state": {
+      "cwd": "<<CWD>>",
+      "root": "<stripped>",
+      "branch": "<stripped>",
+      "default_branch": null,
+      "status": {
+       "clean": false,
+       "counts": {
+        "staged": 0,
+        "modified": 7,
+        "untracked": null,
+        "untracked_normal": 3
+       },
+       "porcelain": null,
+       "truncated": false
+      },
+      "visibility": {
+       "origin": null,
+       "push_remote": "<stripped>",
+       "remotes": [],
+       "visibility_cache": []
+      }
+     },
+     "live_cwd": "<stripped>",
+     "platform": "<stripped>"
+    }
+   },
+   "sandboxed": false,
+   "sourceToolAssistantUUID": "<<ID39>>",
+   "permissionDecision": {
+    "decision": "<stripped>",
+    "source": "<stripped>",
+    "reasonType": "<stripped>"
+   },
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID41>>",
+   "isSidechain": true,
+   "agentId": "<<ID2>>",
+   "message": {
+    "model": "<<MODEL>>",
+    "id": "<<ID42>>",
+    "type": "message",
+    "role": "assistant",
+    "content": [
+     {
+      "type": "tool_use",
+      "id": "<<ID43>>",
+      "name": "SubagentHandback",
+      "input": {
+       "message": "<stripped>"
+      },
+      "caller": {
+       "type": "direct"
+      }
+     }
+    ],
+    "container": null,
+    "stop_reason": "tool_use",
+    "stop_sequence": null,
+    "stop_details": null,
+    "usage": {
+     "input_tokens": 2,
+     "cache_creation_input_tokens": 1047,
+     "cache_read_input_tokens": 48610,
+     "output_tokens": 558,
+     "output_tokens_details": {
+      "thinking_tokens": 0
+     },
+     "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+     },
+     "service_tier": "<stripped>",
+     "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 1047
+     },
+     "inference_geo": "<stripped>",
+     "iterations": [
+      {
+       "input_tokens": 2,
+       "output_tokens": 558,
+       "cache_read_input_tokens": 48610,
+       "cache_creation_input_tokens": 1047,
+       "cache_creation": {
+        "ephemeral_5m_input_tokens": 1047,
+        "ephemeral_1h_input_tokens": 0
+       },
+       "type": "message"
+      }
+     ],
+     "speed": "<stripped>",
+     "fallback_credit": null
+    },
+    "input_transformations": [],
+    "diagnostics": null,
+    "context_management": null
+   },
+   "toolInputStreamMs": 2844,
+   "wireToolInputs": {
+    "toolu_011EPC8hv8Pd9E49BUqaNLR6": {
+     "message": "<stripped>"
+    }
+   },
+   "serverClassifierRequest": "<<ID44>>",
+   "apiBlockIndex": 0,
+   "requestId": "<<ID45>>",
+   "requestRef": "<<ID46>>",
+   "requestedModel": "<<MODEL>>",
+   "promptCacheRequested": "5m",
+   "attributionAgent": "general-purpose",
+   "type": "assistant",
+   "uuid": "<<ID47>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "advisorModel": "<<MODEL>>",
+   "effort": "medium",
+   "perTurnEffort": "medium",
+   "madeBy": "model",
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  },
+  {
+   "parentUuid": "<<ID47>>",
+   "isSidechain": true,
+   "promptId": "<<ID48>>",
+   "agentId": "<<ID2>>",
+   "type": "user",
+   "message": {
+    "role": "user",
+    "content": [
+     {
+      "tool_use_id": "<<ID43>>",
+      "type": "tool_result",
+      "content": [
+       {
+        "type": "text",
+        "text": "<stripped>"
+       }
+      ]
+     }
+    ]
+   },
+   "uuid": "<<ID49>>",
+   "timestamp": "2026-11-14T07:47:08.708Z",
+   "toolUseResult": {
+    "success": true,
+    "message": "<stripped>"
+   },
+   "serverClassifierContext": {
+    "request": "<<ID44>>",
+    "context": {
+     "git_state": {
+      "cwd": "<<CWD>>",
+      "root": "<stripped>",
+      "branch": "<stripped>",
+      "default_branch": null,
+      "status": {
+       "clean": false,
+       "counts": {
+        "staged": 0,
+        "modified": 7,
+        "untracked": null,
+        "untracked_normal": 3
+       },
+       "porcelain": null,
+       "truncated": false
+      },
+      "visibility": {
+       "origin": null,
+       "push_remote": "<stripped>",
+       "remotes": [],
+       "visibility_cache": []
+      }
+     },
+     "live_cwd": "<stripped>",
+     "platform": "<stripped>"
+    }
+   },
+   "toolEndsTurn": true,
+   "sourceToolAssistantUUID": "<<ID47>>",
+   "permissionDecision": {
+    "decision": "<stripped>",
+    "source": "<stripped>",
+    "reasonType": "<stripped>"
+   },
+   "userType": "external",
+   "entrypoint": "cli",
+   "cwd": "<<CWD>>",
+   "sessionId": "<<ID4>>",
+   "version": "2.1.325",
+   "gitBranch": "<stripped>"
+  }
+ ]
+}

@@ -4,3 +4,6 @@
 *.db
 .beads-credential-key
 .beads/proxieddb/
+
+# Python bytecode caches (they would otherwise land in planloop snapshots and bugfix patches)
+__pycache__/

@@ -1,6 +1,6 @@
 # bugfix walkthroughs (procedural validation, quartz-rs-p49, quartz-rs-3bm)
 
-Twelve scenarios traced through `../SKILL.md` as revised on 2026-10-23 (p49; 11 and 12 and the edits to 4 and 8 for `quartz-rs-3bm`). These are reasoning checks of the procedure, not tests: each names the step that catches the problem and whether the catch is **mechanical** (a script or exit status decides) or **judgement** (an agent or the orchestrator decides). The mechanical parts that rest on `scripts/fixpatch.sh` are exercised by `../tests/test_fixpatch.sh`; scenarios 4, 5, 7, 8, 11 and 12 cite those cases. A walkthrough never stands in for a test, and a test never shows that the procedure around it is followed.
+Twelve scenarios traced through `../SKILL.md` as revised on 2026-10-23 (p49; 11 and 12 and the edits to 4 and 8 for `quartz-rs-3bm`). Adapted for JADE on 2026-11-14: the examples now use JADE's files and gates; each scenario's logic and its test citations are unchanged, and the `quartz-rs-*` ids are provenance only. These are reasoning checks of the procedure, not tests: each names the step that catches the problem and whether the catch is **mechanical** (a script or exit status decides) or **judgement** (an agent or the orchestrator decides). The mechanical parts that rest on `scripts/fixpatch.sh` are exercised by `../tests/test_fixpatch.sh`; scenarios 4, 5, 7, 8, 11 and 12 cite those cases. A walkthrough never stands in for a test, and a test never shows that the procedure around it is followed.
 
 ## 1. A correction introduces a new regression
 Review of patch P1 finds F1 (MEDIUM); the implementer fixes it, producing P2, which breaks a path P1 left correct.
@@ -15,14 +15,14 @@ The implementer proposes "reject F3: the lock already covers this", citing code 
 - Outcome: the finding is fixed or goes to Mike; it is never closed by the implementer. Catch: judgement (reviewer), enforced by the closure checklist (every finding bead closed with an independent resolution).
 
 ## 3. A related failure appears in another file
-The fix in `gaps/audit.rs` changes a return value; `tbt.rs` consumes it and now mis-files a gap.
-- Step 3: "related" is causal, not by file: the fix exposes an unsafe interaction elsewhere → related, blocks closure, even though `tbt.rs` was not in the original scope.
-- Step 2: the corrected patch now includes `tbt.rs`; the orchestrator records why (caused by the bug fix), so the out-of-scope check does not reject it.
-- Contrast: an unrelated defect noticed in `tbt.rs` (present before the fix, independent of it) becomes a linked bead and does not enter the patch.
+The fix in `src/lib/server/events/ingest.ts` changes a return value; `src/lib/server/events/progress.ts` consumes it and now writes `kit_progress` for a rejected event.
+- Step 3: "related" is causal, not by file: the fix exposes an unsafe interaction elsewhere → related, blocks closure, even though `progress.ts` was not in the original scope.
+- Step 2: the corrected patch now includes `progress.ts`; the orchestrator records why (caused by the bug fix), so the out-of-scope check does not reject it.
+- Contrast: an unrelated defect noticed in `progress.ts` (present before the fix, independent of it) becomes a linked bead and does not enter the patch.
 - Catch: judgement (reviewer's causal test), with the "related until shown otherwise" default.
 
 ## 4. Unrelated edits share the file with the fix
-Mike has an uncommitted edit at the top of `sessions.rs`; the bug is lower in the same file.
+Mike has an uncommitted edit at the top of `src/lib/server/auth/sessions.ts`; the bug is lower in the same file.
 - Step 0.2–0.3: the baseline captures his edit as part of the starting state; it is listed as pre-existing work and never reset or stashed.
 - Step 2: `fixpatch.sh patch` diffs baseline → current, so his edit is absent from the patch (test: "unrelated edit in the same file is excluded, the fix is included").
 - Step 0.5: the fix will be committed, so the delivery candidate is HEAD + patch (`fixpatch.sh candidate`, tree `T`; test: "candidate holds HEAD + the fix only ..."); the review and the gates run there, so they describe the tree the commit will hold.
@@ -30,14 +30,14 @@ Mike has an uncommitted edit at the top of `sessions.rs`; the bug is lower in th
 - Catch: mechanical.
 
 ## 5. An untracked test is omitted from the review patch
-The implementer adds `tests/regress_gap.rs` (untracked); a plain `git diff -- <path>` would not show it.
+The implementer adds a new regression test file, `src/lib/server/auth/sessions.regress.test.ts` (untracked); a plain `git diff -- <path>` would not show it.
 - Step 2: fixpatch snapshots untracked non-ignored files, so the new test is in the patch and its file list (test: "untracked regression test is included"); the reviewer sees and judges it.
 - Catch: mechanical.
 
 ## 6. The regression test fails before the fix for the wrong reason
-On the original code the new test fails, but with a compile error (it calls a helper the fix adds).
-- Step 6.1: "fails" must be the bug's assertion or behaviour; a compile error, missing fixture, unrelated panic or timeout does not count. The orchestrator reads the recorded log, sees the compile error, and the evidence is not accepted.
-- Remedy: restructure the test so it compiles against the original code (exercise the public behaviour, not the new helper), re-run in the candidate's no-fix counterpart (step 6.1: `candidate <bead> none` for a HEAD + fix candidate), record the expected failure; then the pass on the fixed code with the same command.
+On the original code the new test fails, but with a TypeScript or import error (it imports a helper the fix adds, which does not exist in the original code).
+- Step 6.1: "fails" must be the bug's assertion or behaviour; a type or import error, missing fixture, unrelated exception or timeout does not count. The orchestrator reads the recorded log, sees the type or import error, and the evidence is not accepted.
+- Remedy: restructure the test so it type-checks and imports against the original code (exercise the public behaviour through the module's `index.ts`, not the new helper), re-run in the candidate's no-fix counterpart (step 6.1: `candidate <bead> none` for a HEAD + fix candidate), record the expected failure; then the pass on the fixed code with the same command.
 - Catch: judgement on the recorded log (the log and exit status are mechanical; "right reason" is read).
 
 ## 7. Files change after a clean review or passing gates
@@ -47,9 +47,9 @@ After a clean review of P3 and green gates, someone edits a file in the fix.
 - Catch: mechanical.
 
 ## 8. A gate fails for an independently demonstrated pre-existing reason
-`full.sh` fails one check on the fixed tree.
-- Step 6.2: it counts as a regression until the same command fails the same way on the same base without the fix: for a HEAD + fix candidate that is `candidate <bead> none` at the same HEAD, not `materialize <bead> none`, whose unrelated uncommitted work can hide or add failures (tests: "the dirty baseline passes the check the candidate fails ...", "candidate ... none (same HEAD, no fix) reproduces it ..."). Run it with `bash ci/full.sh`, so a missing executable bit cannot fake a failure, in an equivalent fresh worktree, and record both logs (paths, hashes, exit codes). If that run fails identically, it is pre-existing and gets its own linked bead. Closure may proceed without asking Mike only if the fix's relevant checks pass and the independent reviewer, shown both logs, confirms the failure does not undermine validation of the fix; the report then says "validated with a confirmed pre-existing gate failure", never "all gates green". If attribution is uncertain or the failure prevents meaningful validation, stop and ask Mike. If it passes, it is a regression. A gate that stopped before its own final status line has not run at all.
-- Not acceptable: "that's the known `t`/`f` rendering quirk" from memory without the baseline run.
+`pnpm e2e` fails one check on the fixed tree.
+- Step 6.2: it counts as a regression until the same command fails the same way on the same base without the fix: for a HEAD + fix candidate that is `candidate <bead> none` at the same HEAD, not `materialize <bead> none`, whose unrelated uncommitted work can hide or add failures (tests: "the dirty baseline passes the check the candidate fails ...", "candidate ... none (same HEAD, no fix) reproduces it ..."). Run it with the same `pnpm e2e` command, in an equivalent fresh worktree with its own Compose project and fresh database, and record both logs (paths, hashes, exit codes). If that run fails identically, it is pre-existing and gets its own linked bead. Closure may proceed without asking Mike only if the fix's relevant checks pass and the independent reviewer, shown both logs, confirms the failure does not undermine validation of the fix; the report then says "validated with a confirmed pre-existing gate failure", never "all gates green". If attribution is uncertain or the failure prevents meaningful validation, stop and ask Mike. If it passes, it is a regression. A gate that stopped before its own final status line has not run at all.
+- Not acceptable: "that's a known WebKit flake" from memory without the baseline run.
 - Catch: mechanical comparison of two recorded runs, plus judgement that "the same way" holds.
 
 ## 9. An interrupted run resumes with unresolved findings
@@ -61,7 +61,7 @@ The session ends after review of P2 raised F4 and F5 and the implementer was mid
 
 ## 10. Repeated corrections reveal an architectural problem
 F6 is still unresolved after two corrections; the reviewer argues the dispatch design itself cannot keep the invariant.
-- Routing: two failed corrections and an architectural disagreement → stop bugfix, record the reason on the bug bead, open a planloop run (`init --track escalated --risk-domains <e.g. ordering,idempotency> --rationale ...`).
+- Routing: two failed corrections and an architectural disagreement → stop bugfix, record the reason on the bug bead, open a planloop run (`init --track escalated --risk-domains <e.g. consent-gate,idempotency> --rationale ...`).
 - The partial patch stays on disk and in its baseline ref; nothing is reverted. No further code until planloop's plan is approved and Mike authorizes implementation.
 - Catch: judgement on the trigger (the correction count is recorded in the finding bead's notes; a third consecutive review with new related HIGH/MEDIUM findings also triggers it), then planloop's gates.
 
@@ -73,7 +73,7 @@ Mike has an uncommitted local change that adds a missing default (a config value
 - Catch: mechanical (the candidate's content, tree hash binding) plus judgement (the reviewer reads the right tree).
 
 ## 12. Cleanup while a gate is still running, next to a user's worktree
-After an interruption, the bead has two recorded worktrees: one with `ci/full.sh` still running in it, and one idle. Mike also has a worktree of his own.
+After an interruption, the bead has two recorded worktrees: one with `pnpm e2e` still running in it, and one idle. Mike also has a worktree of his own.
 - Resume 4: `fixpatch.sh cleanup <bead>` removes the idle one and refuses the busy one, so the running gate is not cut off (test: "cleanup refuses a worktree a running process ... is using"); that gate's result still counts only when its log has a final status line and `check` passes.
 - Mike's worktree is not in the record, so it is refused even if named explicitly; a recorded path he has since reused fails the owner check (tests: "cleanup refuses the user's worktree ...", "... a recorded path the user has since reused ...").
-- Catch: mechanical. Limit: a Windows process holding files there without a WSL-side process is not seen.
+- Catch: mechanical. Limit: a Docker container (the gate's Postgres, run by the Docker daemon) or a browser holding no file or cwd in the worktree is outside the process scan: check `docker ps` and the worktree's Compose project, and stop them before cleanup.

@@ -34,6 +34,9 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 TOOL = HERE.parent / "scripts" / "planloop.py"
+_spec = importlib.util.spec_from_file_location("fake_reviewer", HERE / "fake_reviewer.py")
+FAKE_REVIEWER = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(FAKE_REVIEWER)
 OLD_TOOL = HERE / "fixtures" / "planloop_c391e6b.py"
 BEAD = "qz-abc"
 RUN = "qz-abc.pl1"
@@ -293,9 +296,33 @@ class Fixture:
         return next(i for i in self.bd()["issues"].values()
                     if i["metadata"].get("planloop_key") == f"finding:{RUN}:{fid}")
 
-    def init(self, *extra, old=False):
+    def init(self, *extra, old=False, backend="codex"):
+        # A new run defaults to the claude backend (Mike, 2026-11-14); the Codex tests ask for codex explicitly.
+        # The old tool predates backends, and a run it creates is a Codex run.
         self.tool("init", "--run", RUN, "--bead", BEAD, *(extra or ("--track", "ordinary", "--risk-domains", "none",
-                  "--rationale", "test importer change with no persistence or ordering semantics")), old=old)
+                  "--rationale", "test importer change with no persistence or ordering semantics")),
+                  *(() if old or backend is None else ("--reviewer-backend", backend)), old=old)
+
+    def claude_review(self, response, kind="working", call=None, attempt=1, expect=0, prompt_edit=None,
+                      receipt=True, transcript=None, **opts):
+        """dispatch for the claude backend, then a fake background Plan agent's transcript, then receipt."""
+        if call is None:
+            self.call += 1 if attempt == 1 else 0
+            call = self.call
+        self.tool("dispatch", "--run", RUN, "--call", str(call), "--attempt", str(attempt), "--kind", kind,
+                  "--effort", "high")
+        self.launched = self.last.stdout
+        record = self.dispatched(call, attempt)
+        prompt = (self.rdir / "reviews" / f"call-{call:03d}-a{attempt}" / "input" / "prompt.txt").read_text()
+        if prompt_edit:
+            prompt = prompt_edit(prompt)
+        path = transcript or FAKE_REVIEWER.write(self.transcripts, uuid.uuid4().hex[:17], prompt, response,
+                                                 record["snapshot"], str(self.repo), **opts)
+        self.transcript_path = path
+        if receipt:
+            self.tool("receipt", "--run", RUN, "--call", str(call), "--attempt", str(attempt), "--transcript",
+                      str(path), expect=expect)
+        return call
 
     def transcript(self, text, finished=True, delivered=True, name=None, agent_type="Plan", model="opus"):
         name = name or uuid.uuid4().hex[:8]
@@ -917,6 +944,17 @@ class RiskClassification(unittest.TestCase):
         meta = self.f.run_bead()["metadata"]
         self.assertEqual((meta["planloop_track"], meta["planloop_min_effort"], meta["planloop_risk_domains"]),
                          ("escalated", "high", "ordering,persistence"))
+
+    def test_jade_risk_domains_are_accepted_and_escalate(self):
+        self.f.tool("init", "--run", RUN, "--bead", BEAD, "--track", "ordinary", "--risk-domains", "consent-gate",
+                    "--rationale", "the ingest endpoint reads logging_enabled", expect=1)
+        self.assertIn("require --track escalated", self.f.last.stderr)
+        self.f.tool("init", "--run", RUN, "--bead", BEAD, "--track", "escalated", "--risk-domains",
+                    "consent-gate,privacy,authorization,secrets,schema-migration",
+                    "--rationale", "ingest gate, kit-code HMAC and a forward-only migration")
+        meta = self.f.run_bead()["metadata"]
+        self.assertEqual((meta["planloop_track"], meta["planloop_risk_domains"]),
+                         ("escalated", "authorization,consent-gate,privacy,schema-migration,secrets"))
 
     def test_escalated_run_needs_a_fable_planner_and_high_reviews(self):
         self.f.init("--track", "escalated", "--risk-domains", "recovery",
@@ -5413,7 +5451,7 @@ class PolicyReviewFixes(unittest.TestCase):
     def test_a_lock_release_error_follows_each_commands_closing_line(self):
         f = self.f
         init = ("init", "--run", RUN, "--bead", BEAD, "--track", "ordinary", "--risk-domains", "none", "--rationale",
-                "test importer change with no persistence or ordering semantics")
+                "test importer change with no persistence or ordering semantics", "--reviewer-backend", "codex")
         self.assertEqual(self.driver(f, RELEASE_EIO, "1", *init), 2, f.last.stdout + f.last.stderr)
         self.assertIn(f"run {RUN}: bead ", f.last.stdout)
         f.to_gate_ready()
@@ -11153,6 +11191,318 @@ class Round34(unittest.TestCase):
         running.write_text(json.dumps(written))
         f.tool(*receipt)
         self.assertIn("call 1 attempt 1: counted", f.last.stdout)
+
+
+class ClaudeBackend(unittest.TestCase):
+    """The claude reviewer backend (Mike, 2026-11-14): a fresh read-only Opus Plan agent at high effort reviews each
+    round and the gate; a receipt verifies its transcript; approval also needs Mike's sign-off file."""
+
+    def setUp(self):
+        self.f = Fixture(self)
+
+    def claude_run(self, rev1=True):
+        f = self.f
+        f.init(backend=None)
+        if rev1:
+            f.publish(1, plan_text(1))
+        return f
+
+    def invalid(self, call, *reasons, attempt=1):
+        r = self.f.receipt(call, attempt)
+        self.assertEqual(r["status"], "invalid", r["reasons"])
+        for reason in reasons:
+            self.assertTrue(any(reason in x for x in r["reasons"]), (reason, r["reasons"]))
+        return r
+
+    def to_gate(self):
+        f = self.claude_run()
+        c = f.claude_review(review("REVISE", [finding("F1")]))
+        f.ingest(c, {"F1": "new"})
+        f.publish(2, plan_text(2, answers=["FIX R1: add the checksum lookup"]))
+        c = f.claude_review(review("APPROVED", coverage=["plan read in full", "finding R1: resolved"]))
+        f.ingest(c, {})
+        f.accept_risk()
+        g = f.claude_review(review(), kind="gate")
+        f.ingest(g, {})
+        return g
+
+    def test_a_new_run_defaults_to_claude_and_a_run_json_without_the_field_is_codex(self):
+        f = self.claude_run(rev1=False)
+        self.assertEqual(json.loads((f.rdir / "run.json").read_text())["reviewer_backend"], "claude")
+        self.assertIn("(claude backend)", f.last.stdout)
+        f.tool("init", "--run", RUN, "--bead", BEAD, "--track", "ordinary", "--risk-domains", "none", "--rationale",
+               "test importer change with no persistence or ordering semantics", "--reviewer-backend", "codex",
+               expect=1)
+        self.assertIn("its reviewer backend is changed only with `backend --quote`", f.last.stderr)
+        legacy = Fixture(self)
+        legacy.init(old=True)
+        run_json = (legacy.rdir / "run.json").read_bytes()
+        self.assertNotIn(b"reviewer_backend", run_json)
+        legacy.init(backend=None)
+        self.assertEqual((legacy.rdir / "run.json").read_bytes(), run_json)
+        legacy.publish(1, plan_text(1))
+        c = legacy.review(review())
+        r = legacy.receipt(c)
+        self.assertEqual(r["status"], "counted")
+        self.assertNotIn("backend", r)
+        self.assertIn("Codex rollout", r["effective"]["source"])
+        codex = Fixture(self)
+        codex.init()
+        self.assertNotIn(b"reviewer_backend", (codex.rdir / "run.json").read_bytes())
+
+    def test_a_valid_review_counts_and_binds_the_kept_transcript(self):
+        f = self.claude_run()
+        f.tool("dispatch", "--run", RUN, "--call", "1", "--attempt", "1", "--kind", "working", "--effort", "medium",
+               expect=1)
+        self.assertIn("reviews at high effort only", f.last.stderr)
+        f.tool("dispatch", "--run", RUN, "--call", "1", "--attempt", "1", "--kind", "triage", "--effort", "low",
+               expect=1)
+        self.assertFalse((f.rdir / "reviews" / "call-001-a1").exists())
+        c = f.claude_review(review(), receipt=False)
+        record = f.dispatched(c)
+        prompt = (f.rdir / "reviews" / "call-001-a1" / "input" / "prompt.txt").read_text()
+        self.assertIn("-----BEGIN PLANLOOP PROMPT-----\n" + prompt + "\n-----END PLANLOOP PROMPT-----", f.launched)
+        self.assertIn('subagent_type "Plan", model "opus", effort "high"', f.launched)
+        self.assertEqual((record["backend"], record["model"], record["effort"], record["scope"]),
+                         ("claude", "opus", "high", None))
+        self.assertIn(f"cd {record['snapshot']} && ", prompt)
+        copy = Path(record["snapshot"])
+        self.assertEqual((copy / ".planloop-call" / "feedback.md").read_text(), f.feedback(c))
+        self.assertIn(f"{copy} is a frozen, read-only snapshot", f.feedback(c))
+        self.assertFalse((f.rdir / "reviews" / "call-001-a1" / "running.json").exists())
+        f.tool("receipt", "--run", RUN, "--call", "1", "--attempt", "1", expect=1)
+        self.assertIn("record it with `receipt", f.last.stderr)
+        f.tool("receipt", "--run", RUN, "--call", "1", "--attempt", "1", "--artifacts", str(copy), expect=1)
+        self.assertFalse((f.rdir / "reviews" / "call-001-a1" / "receipt.json").exists())
+        f.tool("receipt", "--run", RUN, "--call", "1", "--attempt", "1", "--transcript", str(f.transcript_path))
+        r = f.receipt(c)
+        self.assertEqual(r["status"], "counted", r["reasons"])
+        self.assertEqual((r["backend"], r["requested"], r["effective"]["model"], r["effective"]["effort"], r["fresh"]),
+                         ("claude", {"model": "opus", "effort": "high"}, "claude-opus-5-5", "high", True))
+        kept = Path(r["transcript"]["kept"])
+        self.assertEqual(hashlib.sha256(kept.read_bytes()).hexdigest(), r["transcript"]["sha256"])
+        self.assertEqual(hashlib.sha256(f.transcript_path.read_bytes()).hexdigest(), r["transcript"]["sha256"])
+        self.assertEqual(r["transcript"]["source"], str(f.transcript_path))
+        f.tool("receipt", "--run", RUN, "--call", "1", "--attempt", "1")
+        self.assertIn("call 1 attempt 1: counted", f.last.stdout)
+        f.ingest(c, {})
+        f.tool("ledger", "--run", RUN)
+
+    def test_a_model_or_effort_other_than_opus_high_is_rejected(self):
+        f = self.claude_run()
+        c = f.claude_review(review(), model="claude-sonnet-5-5", expect=1)
+        self.invalid(c, "is not an Opus model")
+        c = f.claude_review(review(), attempt=2, call=c, alias="sonnet", expect=1)
+        self.invalid(c, "agent meta records model 'sonnet'", attempt=2)
+        c = f.claude_review(review(), attempt=3, call=c, effort="medium", expect=1)
+        self.invalid(c, "effective effort medium differs from requested high", attempt=3)
+        f.tool("state", "--run", RUN, "--set", "active", "--reason", "three bad reviewer launches")
+        c = f.claude_review(review(), drop_effort=True, expect=1)
+        r = self.invalid(c, "assistant turn(s) record no effort")
+        self.assertTrue(r["infrastructure"])
+
+    def test_an_edited_prompt_or_a_resumed_agent_is_rejected(self):
+        f = self.claude_run()
+        c = f.claude_review(review(), prompt_edit=lambda p: p.replace("fresh read-only", "fresh"), expect=1)
+        self.invalid(c, "first user turn is not this call's prompt.txt byte for byte")
+        c = f.claude_review(review(), attempt=2, call=c, prompt_edit=lambda p: p + "\n", expect=1)
+        self.invalid(c, "byte for byte", attempt=2)
+        c = f.claude_review(review(), attempt=3, call=c, later_user=True, expect=1)
+        self.invalid(c, "context is not provably fresh", attempt=3)
+
+    def test_a_tool_call_that_writes_is_rejected(self):
+        f = self.claude_run()
+        c = 1
+        for attempt, extra, why in (
+                (1, lambda copy: ("Edit", {"file_path": f"{copy}/src/a.rs", "old_string": "a", "new_string": "b"}),
+                 "writes"),
+                (2, lambda copy: ("Bash", {"command": f"cd {copy} && echo hi > src/b.rs"}), "writes"),
+                (3, lambda copy: ("Bash", {"command": f"cd {copy} && git commit -am x"}), "writes")):
+            f.claude_review(review(), call=c, attempt=attempt, receipt=False)
+            copy = f.dispatched(c, attempt)["snapshot"]
+            extra = extra(copy)
+            prompt = (f.rdir / "reviews" / f"call-{c:03d}-a{attempt}" / "input" / "prompt.txt").read_text()
+            path = FAKE_REVIEWER.write(f.transcripts, uuid.uuid4().hex[:17], prompt, review(), copy, str(f.repo),
+                                       tools=FAKE_REVIEWER.default_tools(copy) + [extra])
+            f.tool("receipt", "--run", RUN, "--call", str(c), "--attempt", str(attempt), "--transcript", str(path),
+                   expect=1)
+            self.invalid(c, why, attempt=attempt)
+        f.call = c
+        f.tool("state", "--run", RUN, "--set", "active", "--reason", "reviewer wrote files")
+        c = f.claude_review(review(), tools=[], expect=1)
+        self.invalid(c, "never opened the plan", "never opened the feedback")
+        ok = Fixture(self)
+        ok.init(backend=None)
+        ok.publish(1, plan_text(1))
+        c = ok.claude_review(review(), receipt=False)
+        copy = ok.dispatched(c)["snapshot"]
+        fine = [("Bash", {"command": f"cd {copy} && grep -rn x src 2>/dev/null | sort > /dev/null; ls -la docs"}),
+                ("Bash", {"command": f"cd '{copy}' && sed -n 1,5p src/a.rs && git log --oneline | head"})]
+        prompt = (ok.rdir / "reviews" / "call-001-a1" / "input" / "prompt.txt").read_text()
+        path = FAKE_REVIEWER.write(ok.transcripts, uuid.uuid4().hex[:17], prompt, review(), copy, str(ok.repo),
+                                   tools=FAKE_REVIEWER.default_tools(copy) + fine)
+        ok.tool("receipt", "--run", RUN, "--call", "1", "--attempt", "1", "--transcript", str(path))
+        self.assertEqual(ok.receipt(1)["status"], "counted", ok.receipt(1)["reasons"])
+
+    def test_a_path_outside_the_private_copy_is_rejected(self):
+        f = self.claude_run()
+        live = str(f.repo.resolve())
+        cases = (lambda copy: ("Read", {"file_path": f"{live}/src/a.rs"}),
+                 lambda copy: ("Bash", {"command": "grep -rn checksum docs"}),
+                 lambda copy: ("Bash", {"command": f"cd {copy} && cat ../../x"}),
+                 lambda copy: ("Grep", {"pattern": "checksum"}),
+                 lambda copy: ("Read", {"file_path": f"{copy}/../other/repo/src/a.rs"}),
+                 lambda copy: ("Bash", {"command": f"cd {copy} && cat {f.state}/{RUN}/x"}),
+                 lambda copy: ("WebFetch", {"url": "https://example.com"}))
+        call, attempt = 0, 3
+        for case in cases:
+            if attempt == 3:
+                call, attempt = call + 1, 1
+                if call > 1:
+                    f.tool("state", "--run", RUN, "--set", "active", "--reason", "next isolation case")
+            else:
+                attempt += 1
+            f.claude_review(review(), call=call, attempt=attempt, receipt=False)
+            f.call = call
+            copy = f.dispatched(call, attempt)["snapshot"]
+            prompt = (f.rdir / "reviews" / f"call-{call:03d}-a{attempt}" / "input" / "prompt.txt").read_text()
+            path = FAKE_REVIEWER.write(f.transcripts, uuid.uuid4().hex[:17], prompt, review(), copy, str(f.repo),
+                                       tools=FAKE_REVIEWER.default_tools(copy) + [case(copy)])
+            f.tool("receipt", "--run", RUN, "--call", str(call), "--attempt", str(attempt), "--transcript", str(path),
+                   expect=1)
+            r = self.invalid(call, attempt=attempt)
+            self.assertTrue(any("outside its private snapshot copy" in x or "does not allow a reviewer" in x
+                                for x in r["reasons"]), r["reasons"])
+
+    def test_malformed_json_or_coverage_is_rejected(self):
+        f = self.claude_run()
+        good = json.dumps(review())
+        c = f.claude_review(good[:-1] + ', "verdict": "APPROVED"}', expect=1)
+        self.invalid(c, "not one strict JSON object", "duplicate JSON key")
+        c = f.claude_review("```json\n" + good + "\n```", call=c, attempt=2, expect=1)
+        self.invalid(c, "not one strict JSON object", attempt=2)
+        c = f.claude_review({**review(), "extra": 1}, call=c, attempt=3, expect=1)
+        self.invalid(c, "does not have exactly the runner's fields", attempt=3)
+        f.tool("state", "--run", RUN, "--set", "active", "--reason", "malformed responses")
+        c = f.claude_review(review("REVISE", [finding("F1")]))
+        f.ingest(c, {"F1": "new"})
+        f.publish(2, plan_text(2, answers=["FIX R1: add the checksum lookup"]))
+        c = f.claude_review(review(), expect=1)
+        self.invalid(c, "reviewer did not report on findings ['R1']")
+        c = f.claude_review(review(coverage=["plan read in full", "finding R1: resolved."]), call=c, attempt=2, expect=1)
+        self.invalid(c, "looks like a finding status", attempt=2)
+        c = f.claude_review(review(coverage=["plan read in full", "finding R1: resolved"]), call=c, attempt=3,
+                            final="end_turn")
+        self.assertEqual(f.receipt(c, 3)["status"], "counted", f.receipt(c, 3)["reasons"])
+
+    def test_an_unfinished_agent_is_not_recorded_until_it_finishes_or_is_given_up(self):
+        f = self.claude_run()
+        c = f.claude_review(review(), finished=False, expect=3)
+        self.assertIn("has not finished", f.last.stderr)
+        self.assertFalse((f.rdir / "reviews" / "call-001-a1" / "receipt.json").exists())
+        self.assertFalse((f.artifacts(c) / "transcript.jsonl").exists())
+        f.tool("receipt", "--run", RUN, "--call", "1", "--attempt", "1", "--transcript", "none", expect=1)
+        self.invalid(c, "no reviewer transcript is recorded")
+        f.tool("receipt", "--run", RUN, "--call", "1", "--attempt", "1", expect=1)
+        self.assertIn("call 1 attempt 1: invalid", f.last.stdout)
+        c = f.claude_review(review(), call=1, attempt=2, delivered=False, expect=1)
+        self.invalid(c, "not acknowledged as delivered", attempt=2)
+        c = f.claude_review(review(), call=1, attempt=3, agent_type="general-purpose", expect=1)
+        self.invalid(c, "read-only Plan agent", attempt=3)
+
+    def test_the_gate_needs_mikes_sign_off_and_reverifies_after_approval(self):
+        f = self.f
+        g = self.to_gate()
+        f.tool("gate", "--run", RUN, expect=1)
+        self.assertIn("FAIL  [host-attested] Mike signed off revision 2", f.last.stdout)
+        self.assertIn("PASS  [mechanical] gate requested Opus at high effort", f.last.stdout)
+        f.tool("gate", "--run", RUN, "--publish", expect=1)
+        self.assertFalse((f.rdir / "APPROVAL").exists())
+        receipt_sha = hashlib.sha256((f.rdir / "reviews" / f"call-{g:03d}-a1" / "receipt.json").read_bytes()).hexdigest()
+        plan_sha = f.receipt(g)["plan_sha256"]
+        wrong = {"schema": "planloop-signoff/1", "id": "A1", "by": "Mike", "quote": "ship it",
+                 "recorded_at": "2026-11-14T12:00:00Z", "recorded_by": "orchestrator", "revision": 2,
+                 "plan_sha256": plan_sha, "gate_call": g, "gate_attempt": 1, "gate_receipt_sha256": "0" * 64}
+        (f.rdir / "decisions" / "A1.json").write_text(json.dumps(wrong))
+        f.tool("gate", "--run", RUN, expect=1)
+        self.assertIn("NOTE  decisions/A1.json signs off revision 2", f.last.stdout)
+        (f.rdir / "decisions" / "A1.json").write_text(json.dumps({**wrong, "by": "Someone"}))
+        f.tool("gate", "--run", RUN, expect=1)
+        self.assertIn("FAIL  [mechanical] sign-off A1.json well formed", f.last.stdout)
+        (f.rdir / "decisions" / "A1.json").unlink()
+        f.tool("signoff", "--run", RUN, "--quote", "Approved, go ahead with the plan as reviewed.")
+        signed = json.loads((f.rdir / "decisions" / "A1.json").read_text())
+        self.assertEqual((signed["gate_receipt_sha256"], signed["plan_sha256"], signed["by"]),
+                         (receipt_sha, plan_sha, "Mike"))
+        f.tool("gate", "--run", RUN, "--publish")
+        self.assertIn("PLAN APPROVED: revision 2", f.last.stdout)
+        bead = f.run_bead()
+        self.assertEqual(bead["metadata"]["planloop_state"], "approved")
+        self.assertIn(f"gate call {g} attempt 1 by a fresh Plan agent on claude-opus-5-5 at high effort, verdict "
+                      "APPROVED", bead["notes"])
+        self.assertIn('Mike\'s sign-off A1: "Approved, go ahead with the plan as reviewed."', bead["notes"])
+        approval = json.loads((f.rdir / "approvals" / json.loads((f.rdir / "APPROVAL").read_text())["record"])
+                              .read_text())
+        self.assertEqual((approval["reviewer_backend"], approval["signoff"]["id"]), ("claude", "A1"))
+        f.tool("gate", "--run", RUN, "--publish")
+        self.assertEqual(f.run_bead()["notes"].count("planloop approval"), 1)
+        f.tool("gate", "--run", RUN)
+        self.assertIn("PASS  [mechanical] gate receipt re-derived from the reviewer's kept transcript matches",
+                      f.last.stdout)
+        self.assertIn("PLAN APPROVED", f.last.stdout)
+        proc = subprocess.run([str(HERE.parent / "check_receipt.sh"), "--run", RUN], cwd=f.repo, env=f.env,
+                              capture_output=True, text=True, timeout=300)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        kept = Path(f.receipt(g)["transcript"]["kept"])
+        original = kept.read_bytes()
+        kept.chmod(0o644)
+        kept.write_bytes(original.replace(b"claude-opus-5-5", b"claude-opus-5-6", 1))
+        f.tool("gate", "--run", RUN, expect=1)
+        self.assertIn("FAIL  [mechanical] gate receipt re-derived from the reviewer's kept transcript", f.last.stdout)
+        kept.write_bytes(original)
+        f.tool("gate", "--run", RUN)
+        signed_path = f.rdir / "decisions" / "A1.json"
+        signed_path.write_text(json.dumps({**signed, "quote": "Approved."}))
+        f.tool("gate", "--run", RUN, expect=1)
+        self.assertIn("FAIL  [mechanical] the published approval matches the current state", f.last.stdout)
+
+    def test_a_backend_switch_voids_a_prior_gate(self):
+        f = self.f
+        g = self.to_gate()
+        f.tool("signoff", "--run", RUN, "--quote", "Approved.")
+        f.tool("gate", "--run", RUN, "--publish")
+        f.tool("backend", "--run", RUN, "--set", "claude", "--quote", "stay on claude", expect=1)
+        f.tool("backend", "--run", RUN, "--set", "codex", "--quote", "", expect=1)
+        f.tool("backend", "--run", RUN, "--set", "codex", "--quote", "Use Codex for this one, usage is low.")
+        self.assertIn(f"no gate of call {g} or earlier counts", f.last.stdout)
+        config = json.loads((f.rdir / "run.json").read_text())
+        self.assertEqual(config["reviewer_backend"], "codex")
+        self.assertEqual({k: v for k, v in config["backend_changes"][0].items() if k != "at"},
+                         {"from": "claude", "to": "codex", "quote": "Use Codex for this one, usage is low.",
+                          "after_call": g})
+        f.tool("gate", "--run", RUN, expect=1)
+        self.assertIn("FAIL  [mechanical] the gate was reviewed by this run's reviewer backend (codex)", f.last.stdout)
+        f.tool("state", "--run", RUN, "--set", "active", "--reason", "Mike moved this run to Codex")
+        c = f.review(review(), kind="gate", effort="high")
+        self.assertNotIn("backend", f.receipt(c))
+        f.ingest(c, {})
+        f.tool("gate", "--run", RUN, "--publish")
+        self.assertIn("PLAN APPROVED: revision 2", f.last.stdout)
+        f.tool("backend", "--run", RUN, "--set", "claude", "--quote", "Back to Opus.")
+        f.tool("gate", "--run", RUN, expect=1)
+        self.assertIn("FAIL  [mechanical] the gate was reviewed by this run's reviewer backend (claude)",
+                      f.last.stdout)
+        self.assertIn(f"calls up to {c} predate the switch to claude", f.last.stdout)
+        f.tool("state", "--run", RUN, "--set", "active", "--reason", "Mike moved this run back to claude")
+        g2 = f.claude_review(review(), kind="gate", call=c + 1)
+        f.ingest(g2, {})
+        f.tool("gate", "--run", RUN, expect=1)
+        self.assertIn("FAIL  [host-attested] Mike signed off", f.last.stdout)
+        self.assertIn("NOTE  decisions/A1.json signs off revision 2 gate call", f.last.stdout)
+        f.tool("signoff", "--run", RUN, "--quote", "Approved again.")
+        self.assertTrue((f.rdir / "decisions" / "A2.json").exists())
+        f.tool("gate", "--run", RUN, "--publish")
+        self.assertIn("PLAN APPROVED: revision 2", f.last.stdout)
 
 
 atexit.register(lambda: [f.cleanup() for f in FIXTURES])

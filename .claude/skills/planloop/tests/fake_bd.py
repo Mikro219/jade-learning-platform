@@ -136,6 +136,8 @@ def main():
             for field in ("--notes", "--description", "--title"):
                 if field in args:
                     issue[field[2:]] = opt(args, field)
+            if "--append-notes" in args:
+                issue["notes"] = (issue.get("notes") + "\n" if issue.get("notes") else "") + opt(args, "--append-notes")
         db_save(db)
         return 1 if mode == "lost_reply" else 0
     elif cmd == "close":
