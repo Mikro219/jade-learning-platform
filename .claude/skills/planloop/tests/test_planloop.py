@@ -11379,6 +11379,39 @@ class ClaudeBackend(unittest.TestCase):
                                                      run)
         self.assertTrue(writes)
 
+    def test_a_list_only_git_branch_is_not_a_write(self):
+        """jade-ahw: `git branch` that only lists or shows branches is read-only; one that could create, delete,
+        rename, copy or reconfigure a branch, or uses an option off the allowlist, still counts as a write. git's
+        global options are skipped to find the subcommand; `-c`, `--exec-path` and an unknown one count as a write,
+        and --version/--help alone do not."""
+        sys.path.insert(0, str(TOOL.parent))
+        import planloop
+        reads = ["git branch", "git branch -a", "git branch -r", "git branch --list", "git branch --list 'feat*'",
+                 "git branch --show-current", "git branch -vv", "git branch --contains HEAD", "git branch --merged main",
+                 "git log --oneline | head -5; git branch -a; cat .gitignore", "git -C x log", "git --no-pager diff",
+                 "git -C x branch -a", "git --version", "git --help"]
+        writes = ["git branch foo", "git branch -d foo", "git branch -D foo", "git branch -m a b", "git branch -c a b",
+                  "git branch -f foo HEAD", "git branch -u origin/x", "git branch --set-upstream-to=origin/x",
+                  "git branch --edit-description", "git branch --unknown-opt", "git branch -- foo",
+                  "git branch -a; git commit -m x", "git branch -a > out.txt", "git -C x branch foo",
+                  "git -C x commit -m y", "git -c a=b commit", "git --git-dir=.git add x",
+                  "git --no-pager -C x reset --hard", "git --weird-opt status", "git -c core.pager=touch log",
+                  "git -c a=b status", "git --exec-path=/x log", "git --exec-path log"]
+        self.assertEqual([c for c in reads if planloop.writes_files(c)], [])
+        self.assertEqual([c for c in writes if not planloop.writes_files(c)], [])
+        self.assertIn("branch", planloop.GIT_WRITES)
+        f = Fixture(self)
+        f.init(backend=None)
+        f.publish(1, plan_text(1))
+        c = f.claude_review(review(), receipt=False)
+        copy = f.dispatched(c)["snapshot"]
+        voided = [("Bash", {"command": f"cd {copy} && git log --oneline | head -5; git branch -a; cat .gitignore"})]
+        prompt = (f.rdir / "reviews" / "call-001-a1" / "input" / "prompt.txt").read_text()
+        path = FAKE_REVIEWER.write(f.transcripts, uuid.uuid4().hex[:17], prompt, review(), copy, str(f.repo),
+                                   tools=FAKE_REVIEWER.default_tools(copy) + voided)
+        f.tool("receipt", "--run", RUN, "--call", "1", "--attempt", "1", "--transcript", str(path))
+        self.assertEqual(f.receipt(1)["status"], "counted", f.receipt(1)["reasons"])
+
     def test_a_path_outside_the_private_copy_is_rejected(self):
         f = self.claude_run()
         live = str(f.repo.resolve())

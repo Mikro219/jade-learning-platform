@@ -4387,6 +4387,80 @@ GIT_WRITES = {"add", "commit", "checkout", "reset", "restore", "stash", "apply",
               "revert", "gc", "config", "update-index", "notes", "branch"}
 
 
+GIT_BRANCH_LIST_FLAGS = {"-a", "--all", "-r", "--remotes", "-l", "--list", "--show-current", "-v", "-vv", "--verbose",
+                         "--column", "--no-column", "--color", "--no-color", "-i", "--ignore-case", "--no-abbrev"}
+GIT_BRANCH_LIST_VALUED = {"--sort", "--format", "--points-at", "--abbrev", "--column", "--color"}
+GIT_BRANCH_LIST_COMMIT = {"--contains", "--no-contains", "--merged", "--no-merged"}
+
+
+def git_branch_lists_only(args: list) -> bool:
+    """True when the words after `git branch` only list or show branches. Fails closed: any option not on the
+    allowlist, `--`, or a bare word that is not a commit for --contains/--merged and its kin, a value for
+    --sort/--format/--points-at, or a pattern after -l/--list, counts as a possible write."""
+    listing, patterns, i = False, False, 0
+    while i < len(args):
+        word = args[i]
+        i += 1
+        if not word.startswith("-") or word == "-":
+            patterns = True
+            continue
+        if re.fullmatch(r"-[arlvi]+", word):
+            listing = listing or "l" in word
+            continue
+        key, eq, _ = word.partition("=")
+        if eq and key in GIT_BRANCH_LIST_VALUED | GIT_BRANCH_LIST_COMMIT:
+            continue
+        if word in ("--sort", "--format", "--points-at"):
+            if i >= len(args):
+                return False
+            i += 1
+            continue
+        if word in GIT_BRANCH_LIST_COMMIT:
+            if i < len(args) and not args[i].startswith("-"):
+                i += 1
+            continue
+        if word in GIT_BRANCH_LIST_FLAGS:
+            listing = listing or word == "--list"
+            continue
+        return False
+    return listing or not patterns
+
+
+GIT_GLOBAL_FLAGS = {"-P", "--no-pager", "-p", "--paginate", "--no-replace-objects", "--bare", "--literal-pathspecs",
+                    "--glob-pathspecs", "--noglob-pathspecs", "--icase-pathspecs", "--no-optional-locks"}
+GIT_GLOBAL_VALUED = {"-C", "--git-dir", "--work-tree", "--namespace"}
+GIT_GLOBAL_EQUALS = {"--git-dir", "--work-tree", "--namespace"}
+GIT_GLOBAL_ALONE = {"--version", "--help", "-h"}
+
+
+def git_writes(args: list) -> bool:
+    """Whether the words after `git` may write: git's global options (and their arguments) are skipped to find the
+    subcommand, which is then checked against GIT_WRITES, with a list-only `git branch` allowed. `-c` and
+    `--exec-path` count as writes (`-c core.pager=...` or an exec path runs an arbitrary program), as do an unknown
+    global option and a valued one missing its value. --version, --help and -h are read-only only as the last word."""
+    i = 0
+    while i < len(args) and args[i].startswith("-"):
+        word = args[i]
+        i += 1
+        key, eq, _ = word.partition("=")
+        if word in GIT_GLOBAL_ALONE:
+            return i < len(args)
+        if word in GIT_GLOBAL_FLAGS or (eq and key in GIT_GLOBAL_EQUALS):
+            continue
+        if word in GIT_GLOBAL_VALUED:
+            if i >= len(args):
+                return True
+            i += 1
+            continue
+        return True
+    if i >= len(args):
+        return False
+    sub = args[i]
+    if sub == "branch":
+        return not git_branch_lists_only(args[i + 1:])
+    return sub in GIT_WRITES
+
+
 def writes_files(command: str) -> bool:
     """As well as text can tell: a redirection into a file, or a command that writes, at a command position. A write
     by an interpreter's inline code or as a program's side effect is not detected."""
@@ -4404,7 +4478,7 @@ def writes_files(command: str) -> bool:
         name = words[0].rsplit("/", 1)[-1]
         if name in WRITE_COMMANDS or any("planloop.py" in w for w in words):
             return True
-        if name == "git" and any(w in GIT_WRITES for w in words[1:3] if not w.startswith("-")):
+        if name == "git" and git_writes(words[1:]):
             return True
         if name in ("sed", "perl") and any(w == "-i" or w.startswith(("-i", "--in-place")) for w in words[1:]):
             return True
