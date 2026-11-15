@@ -2,6 +2,8 @@
 
 This describes what the platform is built to do. It is not legal advice. The consent form, the school board research application and any pre-launch legal review need a person to check them against this document (`p0-consent`). Phase 9 (`p9-privacy-doc`) rewrites this file against what was actually built.
 
+> Amended 2026-11-14 by [ADR 0016](../adr/0016-step-views-and-retention-post-launch-ok.md), [ADR 0017](../adr/0017-live-stuck-alerts-for-no-log-kits.md), [ADR 0020](../adr/0020-rate-limit-keys-for-redemption-and-signup.md) and [ADR 0023](../adr/0023-tiered-retention-for-kit-keyed-data.md); [ADR 0019](../adr/0019-participant-letters-a-to-d.md) confirms "A to D". The handoff text is in git commit 079e846 and jade-handoff.zip.
+
 ## Who the data is about
 
 | Person | What the system holds |
@@ -17,6 +19,7 @@ This describes what the platform is built to do. It is not legal advice. The con
 | Adult email, password hash | `users` | Account creation | The adult; staff |
 | Kit activity events | `events` | Only while logging is on for that kit | Staff. Owner of the class sees progress and stuck state, not raw events |
 | Step progress | Device (always); `kit_progress` (logging on) | | The group's device; class owner; staff |
+| Live stuck alerts for kits with logging off (whether kits with logging on use the same store is open) | App memory, per class | From "I'm stuck" until resolved or the session closes; never written to the database or logs ([ADR 0017](../adr/0017-live-stuck-alerts-for-no-log-kits.md)) | Class owner; staff |
 | Facilitator notes | `facilitator_notes` | When an adult writes one | Class owner; staff |
 | Quiz and exit-card entries | `quiz_responses`, `exit_cards` | When an adult enters them, logging on | Class owner; staff |
 | Audit trail | `audit_log` | Staff and consent actions | Staff |
@@ -25,16 +28,19 @@ This describes what the platform is built to do. It is not legal advice. The con
 
 Not collected at all: child names, photos, audio, free text from students, IP addresses, location, device identifiers, advertising identifiers, third-party cookies.
 
+An optional per-IP limit on code-gated signup holds IP addresses in memory only. It is off by default, and IP addresses are never stored or logged ([ADR 0020](../adr/0020-rate-limit-keys-for-redemption-and-signup.md)).
+
 ## Consent and opt-out
 
 - Logging is off for every kit until an adult confirms that consent is in hand for each child in that group. The confirmation records who and when.
 - A group without consent takes part fully. Their tablet shows the same steps and videos. Nothing about what they do is stored on the server.
+- For such a group, "I'm stuck" still alerts the facilitator in the moment. The alert is held in the server's memory only, until it is resolved or the session closes, and is never stored or logged ([ADR 0017](../adr/0017-live-stuck-alerts-for-no-log-kits.md)).
 - Consent withdrawn later: the facilitator switches logging off (collection stops at once) and staff run the kit deletion, which removes everything recorded for that kit.
 - Because consent is per group, one child without consent means the whole group is not logged. Facilitators should group children accordingly, or accept the smaller sample.
 
 ## Retention
 
-Raw events are kept until 12 months after the class ends (configurable; confirm against the research approval), then replaced by per-step aggregates that contain no kit IDs. Adult accounts are deleted on request.
+Retention is tiered ([ADR 0023](../adr/0023-tiered-retention-for-kit-keyed-data.md)). When `RETENTION_MONTHS` (default 12, configurable; confirm against the research approval) have passed since the class ended: raw events are replaced by per-step aggregates that contain no kit IDs; step progress and device sessions are deleted; facilitator notes are kept, no longer linked to a kit; quiz and exit-card entries are reduced to per-question and per-module counts with no kit IDs, then deleted. The job that does this ships after launch and runs in production before the first class reaches that date ([ADR 0016](../adr/0016-step-views-and-retention-post-launch-ok.md)). Adult accounts are deleted on request.
 
 ## Where it runs
 

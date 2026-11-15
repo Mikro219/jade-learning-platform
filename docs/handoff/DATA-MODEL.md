@@ -2,6 +2,8 @@
 
 PostgreSQL 16. This is the target shape; Phase 2 and Phase 6 implement it as Drizzle schema plus SQL migrations. Names are binding, exact column types may be adjusted if a test shows a reason.
 
+> Amended 2026-11-14 by [ADR 0016](../adr/0016-step-views-and-retention-post-launch-ok.md), [ADR 0017](../adr/0017-live-stuck-alerts-for-no-log-kits.md) and [ADR 0023](../adr/0023-tiered-retention-for-kit-keyed-data.md); [ADR 0019](../adr/0019-participant-letters-a-to-d.md) confirms the `^[A-D]$` checks. The handoff text is in git commit 079e846 and jade-handoff.zip.
+
 Conventions: `id uuid primary key default gen_random_uuid()` unless stated, `created_at timestamptz not null default now()`, all timestamps `timestamptz`, text enums as `text` with a `check`.
 
 ## 1. Products, kits, codes
@@ -179,6 +181,8 @@ create table kit_progress (                     -- written only when logging is 
 
 The application's database role has `insert` and `select` on `events`, no `update`, and `delete` only through the `delete_kit_data(kit_id)` function added in Phase 9.
 
+Live stuck alerts for kits with logging off ([ADR 0017](../adr/0017-live-stuck-alerts-for-no-log-kits.md)) have no table. The app holds them in memory per class until resolved or the session closes; they are never written to the database or logs. Whether kits with logging on use the same store is open.
+
 ## 5. Adult-entered data
 
 ```sql
@@ -227,7 +231,13 @@ Rows in section 5 that name a kit are only accepted when that kit's `logging_ena
 ## 6. Deletion and retention
 
 - `delete_kit_data(kit_id)` removes the kit's rows from `events`, `kit_progress`, `facilitator_notes`, `quiz_responses`, `exit_cards` and `device_sessions` in one transaction and writes an `audit_log` row with counts. A test enumerates every table that has a `kit_id` column so a table added later cannot be forgotten.
-- Retention: after `classes.ended_at + RETENTION_MONTHS`, raw `events` for that class are replaced by rows in `step_aggregates` (same shape as the `step_metrics` view). Default 12 months, set by config.
+- Retention ([ADR 0023](../adr/0023-tiered-retention-for-kit-keyed-data.md)): at `classes.ended_at + RETENTION_MONTHS` (default 12 months, set by config), for that class:
+  - `events` are reduced to rows in `step_aggregates` (same shape as the `step_metrics` view, no kit id) and the raw rows removed;
+  - `kit_progress` and `device_sessions` rows are deleted;
+  - `facilitator_notes` are kept with `kit_id` set to null;
+  - `quiz_responses` and `exit_cards` are reduced to per-question and per-module counts with no kit id, then deleted.
+
+  `step_aggregates` and the quiz and exit-card aggregate tables are defined by the retention job's migration (p9-retention, jade-8vo) and documented here when it lands. The job ships after launch and must run in production before the first class reaches `classes.ended_at + RETENTION_MONTHS` ([ADR 0016](../adr/0016-step-views-and-retention-post-launch-ok.md)).
 
 ## 7. Analytics views (Phase 8)
 

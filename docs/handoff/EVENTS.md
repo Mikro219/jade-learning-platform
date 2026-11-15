@@ -2,6 +2,8 @@
 
 Phase 6 implements this as a zod discriminated union in `src/lib/shared/events/` and generates `docs/events.md` from the code. If this file and the generated one ever disagree, the code wins and this file gets fixed.
 
+> Amended 2026-11-14 by [ADR 0017](../adr/0017-live-stuck-alerts-for-no-log-kits.md) and [ADR 0018](../adr/0018-stale-timestamps-flagged-not-clamped.md). The handoff text is in git commit 079e846 and jade-handoff.zip.
+
 ## Envelope
 
 Sent by the client on every event:
@@ -49,14 +51,14 @@ Default stuck reason ids: `cant_find_part`, `wont_fit`, `dont_understand`, `does
 2. Batch limit 100 events and 64 KB.
 3. Retry with exponential backoff. Because ingest is idempotent, resending is always safe.
 4. If the queue exceeds its cap, drop the oldest `step_time` and `video_ranges` first. Never drop `stuck`, `stuck_resolved`, `checkpoint_answer` or `step_complete`.
-5. If the join response or any ingest response says logging is off, clear the queue and stop queueing.
+5. If the join response or any ingest response says logging is off, clear the queue and stop queueing. From then on the client sends only `stuck` and `stuck_resolved`, live, to the live alert endpoint (p7-live-stuck); they are never queued offline, and nothing else is sent ([ADR 0017](../adr/0017-live-stuck-alerts-for-no-log-kits.md)).
 
 ## Server rules
 
 1. Authenticate by device session. Reject revoked sessions.
-2. If `class_kits.logging_enabled` is false: respond 204, write nothing.
+2. If `class_kits.logging_enabled` is false: respond 204, write nothing. That kit's `stuck` and `stuck_resolved` go to the separate live alert endpoint, which authenticates by device session, takes class and kit from the session, holds alerts in memory per class until resolved or the session closes, and never writes them to the database or logs ([ADR 0017](../adr/0017-live-stuck-alerts-for-no-log-kits.md)).
 3. Validate the whole batch against the catalog. Reject the batch on any invalid event (a client bug should be loud).
-4. `client_ts` more than 5 minutes in the future is clamped to `received_at` and flagged `future`; older than 14 days is flagged `stale`.
+4. `client_ts` more than 5 minutes in the future is clamped to `received_at` and flagged `future`; older than 14 days keeps its `client_ts` and is flagged `stale`, not clamped ([ADR 0018](../adr/0018-stale-timestamps-flagged-not-clamped.md)).
 5. Insert with `on conflict (event_id) do nothing`.
 6. Update `kit_progress` from `step_view` and `step_complete` in the same transaction.
 
