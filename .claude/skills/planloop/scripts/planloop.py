@@ -82,6 +82,7 @@ import glob
 import hashlib
 import json
 import os
+import posixpath
 import re
 import shlex
 import shutil
@@ -3334,7 +3335,7 @@ def claude_prompt(d: dict) -> str:
         "Rules. planloop checks each one in your transcript; breaking one voids the review:",
         f"- Read only inside {copy}. Use only the Read, Grep, Glob and Bash tools. Give Read an absolute path inside "
         "it, and Grep and Glob a `path` inside it.",
-        f"- Your Bash tool does not start there: begin every Bash command with exactly `cd {copy} && `. Never refer "
+        f"- Your Bash tool does not start there: begin every Bash command with `cd {copy} && ` (or `cd ` to a directory inside it, then ` && `). Never refer "
         "to a path above it (no `..` out of it, not the original checkout, ~/.codex or planloop's state directories).",
         "- Write nothing: no Edit, Write or NotebookEdit, no output redirected into a file, and no command that "
         "creates, changes or removes a file (rm, mv, cp, mkdir, touch, tee, sed -i, git add/commit/checkout, bd).",
@@ -3992,7 +3993,9 @@ def forbidden_patterns(dispatch: dict, run: Run) -> list:
     return out
 
 
-def climbs_out(command: str, root: Path | None = None) -> bool:
+def climbs_out(command: str, root: Path | None = None, start: tuple = ()) -> bool:
+    """Whether a command's relative paths or cds climb above the directory it starts in. `start` is the starting
+    directory as path parts relative to `root` (the root itself when empty)."""
     wrapped = re.match(r"""^\S*/(?:ba)?sh\s+-l?c\s+(['"])(.*)\1\s*$""", command, re.S)
     inner = wrapped.group(2).replace('\\"', '"') if wrapped else command
     tokens = []
@@ -4005,7 +4008,7 @@ def climbs_out(command: str, root: Path | None = None) -> bool:
             tokens.append((m.group(5), False))
         else:
             tokens += [(t, True) for t in (m.group(1) if m.group(1) is not None else m.group(2)).split()]
-    cwd, stack = [], []
+    cwd, stack = list(start), []
     for i, (token, quoted) in enumerate(tokens):
         if token == "(" and not quoted:
             stack.append(list(cwd))
@@ -4416,9 +4419,10 @@ def claude_tool_problems(tools: list, dispatch: dict, run: Run) -> tuple:
     own = dispatch["snapshot"].rstrip("/")
     patterns = forbidden_patterns(dispatch, run)
     above = re.compile(r"<SNAPSHOT>/\.\.(?=/|$|[\s'\"`;|&)<>])")
+    own_ref = re.compile(re.escape(own) + r"(?=/|$|[\s'\"`;|&)<>])")
 
     def outside(text: str) -> bool:
-        text = text.replace(own, "<SNAPSHOT>")
+        text = own_ref.sub("<SNAPSHOT>", text)
         return bool(above.search(text)) or any(p.search(text) for p in patterns)
 
     def inside(path) -> bool:
@@ -4426,8 +4430,24 @@ def claude_tool_problems(tools: list, dispatch: dict, run: Run) -> tuple:
             return False
         path = os.path.normpath(path)
         return path == own or path.startswith(own + "/")
-    q = re.escape(own)
-    prefix = re.compile(rf"""^\s*cd\s+(?:'{q}/?'|"{q}/?"|{q}/?)\s*&&\s*""")
+    prefix = re.compile(r"""^\s*cd\s+(?:'([^']*)'|"([^"$`\\]*)"|([^\s'"$`\\;|&()<>*?\[{~]+))\s*&&\s*""")
+
+    def start_dir(command: str):
+        """(match, parts of the cd target below the copy) when the command begins `cd <copy or a directory inside
+        it> && `, else None. Lexical: the target is absolute, has no `..` segment, and normalises to the copy or a
+        path under it."""
+        m = prefix.match(command)
+        if m is None:
+            return None
+        target = next(g for g in m.groups() if g is not None)
+        if not os.path.isabs(target) or ".." in target.split("/"):
+            return None
+        target = posixpath.normpath(target)
+        if target == own:
+            return m, ()
+        if not target.startswith(own + "/"):
+            return None
+        return m, tuple(target[len(own) + 1:].split("/"))
     writes, reads, other = [], [], []
     for name, value in tools:
         text = json.dumps(value, ensure_ascii=False, sort_keys=True)
@@ -4444,13 +4464,13 @@ def claude_tool_problems(tools: list, dispatch: dict, run: Run) -> tuple:
             continue
         if name == "Bash":
             command = value.get("command")
-            start = prefix.match(command) if isinstance(command, str) else None
+            start = start_dir(command) if isinstance(command, str) else None
             if start is None:
-                reads.append(f"Bash command does not begin with `cd {own} && ` (it would run in the agent's own "
-                             f"working directory): {str(command)[:160]}")
+                reads.append(f"Bash command does not begin with `cd {own} && ` or `cd ` to a directory inside it "
+                             f"(it would run in the agent's own working directory): {str(command)[:160]}")
                 continue
-            rest = command[start.end():]
-            if outside(command) or climbs_out(rest, Path(own)):
+            rest = command[start[0].end():]
+            if outside(command) or climbs_out(rest, Path(own), start[1]):
                 reads.append(f"Bash: {command[:200]}")
             if writes_files(rest):
                 writes.append(f"Bash: {command[:200]}")

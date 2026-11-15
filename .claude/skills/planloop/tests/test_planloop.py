@@ -11337,12 +11337,47 @@ class ClaudeBackend(unittest.TestCase):
         c = ok.claude_review(review(), receipt=False)
         copy = ok.dispatched(c)["snapshot"]
         fine = [("Bash", {"command": f"cd {copy} && grep -rn x src 2>/dev/null | sort > /dev/null; ls -la docs"}),
-                ("Bash", {"command": f"cd '{copy}' && sed -n 1,5p src/a.rs && git log --oneline | head"})]
+                ("Bash", {"command": f"cd '{copy}' && sed -n 1,5p src/a.rs && git log --oneline | head"}),
+                ("Bash", {"command": f"cd {copy}/.planloop-bundle && sed -n 1,5p plan.md && cat ../src/a.rs"})]
         prompt = (ok.rdir / "reviews" / "call-001-a1" / "input" / "prompt.txt").read_text()
         path = FAKE_REVIEWER.write(ok.transcripts, uuid.uuid4().hex[:17], prompt, review(), copy, str(ok.repo),
                                    tools=FAKE_REVIEWER.default_tools(copy) + fine)
         ok.tool("receipt", "--run", RUN, "--call", "1", "--attempt", "1", "--transcript", str(path))
         self.assertEqual(ok.receipt(1)["status"], "counted", ok.receipt(1)["reasons"])
+
+    def test_a_bash_command_may_start_in_a_directory_inside_the_copy(self):
+        """jade-8n2.pl1: `cd <copy>/<sub> && ` is as good as `cd <copy> && `; a cd target outside the copy, a sibling
+        sharing its prefix, or a later climb above it still voids the call."""
+        from types import SimpleNamespace
+        sys.path.insert(0, str(TOOL.parent))
+        import planloop
+        base = self.f.root / "iso-check"
+        copy = base / "isolated" / "r-1" / "repo"
+        (copy / "src" / "sub").mkdir(parents=True)
+        (copy / ".planloop-bundle").mkdir()
+        run = SimpleNamespace(state=base / "state" / RUN, isolated=base / "isolated")
+        dispatch = {"snapshot": str(copy), "live_repo": str(base / "live")}
+        cases = [(f"cd {copy} && cat src/a.rs", True), (f"cd {copy}/ && ls", True),
+                 (f"cd {copy}/src/sub && ls && cat ../a.rs", True),
+                 (f"cd {copy}/.planloop-bundle && sed -n 1,5p plan.md", True),
+                 (f"cd '{copy}/src/sub' && ls", True), (f'cd "{copy}/src" && ls', True),
+                 (f"cd {copy}/./src && ls", True),
+                 (f"cd {copy}/../x && ls", False), (f"cd {copy}/src/../.. && ls", False),
+                 (f"cd {copy}-evil && ls", False), (f"cd {copy}2 && ls", False),
+                 (f"cd '{copy}-evil' && ls", False), (f"cd {copy}-evil/src && ls", False),
+                 (f"cd {copy}/src && cd ../.. && cat x", False), (f"cd {copy}/src/sub && cat ../../../x", False),
+                 (f"cd {copy}/src && cat {copy}-evil/x", False), (f'cd "{copy}/$X" && ls', False),
+                 (f"cd {copy}/src* && ls", False), (f"cd src && ls", False), ("cat src/a.rs", False),
+                 (f"cd {base / 'live'} && ls", False), (f"cd {copy} ; ls", False)]
+        wrong = []
+        for command, ok in cases:
+            writes, reads, other = planloop.claude_tool_problems([("Bash", {"command": command})], dispatch, run)
+            if (not writes and not reads and not other) != ok:
+                wrong.append((command, reads))
+        self.assertEqual(wrong, [])
+        writes, _, _ = planloop.claude_tool_problems([("Bash", {"command": f"cd {copy}/src && rm a.rs"})], dispatch,
+                                                     run)
+        self.assertTrue(writes)
 
     def test_a_path_outside_the_private_copy_is_rejected(self):
         f = self.claude_run()
