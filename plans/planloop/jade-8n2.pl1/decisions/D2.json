@@ -1,0 +1,16 @@
+{
+ "schema": "planloop-decision/1",
+ "id": "D2",
+ "by": "Mike",
+ "quote": "Decide: implementer fixes it (Recommended)",
+ "recorded_at": "2026-11-15T01:35:14.651631+00:00",
+ "recorded_by": "orchestrator",
+ "subjects": [
+  {
+   "id": "R16",
+   "text_sha256": null
+  }
+ ],
+ "outcome": "deferred",
+ "follow_up": "jade-okb"
+}

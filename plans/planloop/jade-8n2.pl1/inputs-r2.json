@@ -1,0 +1,331 @@
+{
+ "schema": "planloop-inputs/1",
+ "brief": "plans/planloop/jade-8n2.pl1/brief-r2.md",
+ "repo_files": [
+  "CLAUDE.md",
+  "AGENTS.md",
+  "jade-handoff.zip",
+  "docs/handoff/beads/id-map.json",
+  "docs/handoff/tools/build_plan.py",
+  "docs/handoff/DECISIONS.md",
+  "docs/handoff/ARCHITECTURE.md",
+  "docs/handoff/DATA-MODEL.md",
+  "docs/handoff/EVENTS.md",
+  "docs/handoff/PRIVACY.md",
+  "docs/handoff/REVIEW.md",
+  "docs/handoff/START-HERE.md",
+  "docs/handoff/CLAUDE-SECTION.md",
+  "docs/handoff/phases/phase-00-architecture-lock.md",
+  "docs/handoff/phases/phase-01-foundation.md",
+  "docs/handoff/phases/phase-09-privacy-security-hardening.md"
+ ],
+ "dir_inventories": [
+  "docs/handoff/phases"
+ ],
+ "beads": [
+  {
+   "id": "jade-hqq",
+   "fields": []
+  },
+  {
+   "id": "jade-okb",
+   "fields": []
+  },
+  {
+   "id": "jade-8n2",
+   "fields": []
+  },
+  {
+   "id": "jade-8n2.1",
+   "fields": []
+  },
+  {
+   "id": "jade-8n2.2",
+   "fields": []
+  },
+  {
+   "id": "jade-8n2.3",
+   "fields": []
+  },
+  {
+   "id": "jade-8n2.4",
+   "fields": []
+  },
+  {
+   "id": "jade-8n2.5",
+   "fields": []
+  },
+  {
+   "id": "jade-8n2.6",
+   "fields": []
+  },
+  {
+   "id": "jade-8n2.7",
+   "fields": []
+  },
+  {
+   "id": "jade-8n2.8",
+   "fields": []
+  },
+  {
+   "id": "jade-8vo",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-771",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-lx4",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-p99",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-4a7",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-zg3",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-hhp",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-e6m",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-7if",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-vcy",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-6cq",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-6is",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-x94",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-fgs",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-t17",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-873",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-buf.1",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-buf.2",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-lnn.1",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-lnn.2",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-lnn.3",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-sio",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  }
+ ],
+ "obligations": [
+  {
+   "id": "OB1",
+   "source": "bead:jade-hqq",
+   "section": "acceptance_criteria",
+   "text": "One file per ADR, numbered, each with Context / Decision / Consequences"
+  },
+  {
+   "id": "OB2",
+   "source": "bead:jade-hqq",
+   "section": "acceptance_criteria",
+   "text": "docs/adr/README.md indexes them"
+  },
+  {
+   "id": "OB3",
+   "source": "bead:jade-hqq",
+   "section": "acceptance_criteria",
+   "text": "CLAUDE.md links to docs/adr/ and docs/handoff/ARCHITECTURE.md"
+  },
+  {
+   "id": "OB4",
+   "source": "bead:jade-hqq",
+   "section": "acceptance_criteria",
+   "text": "Decisions jade-8n2.1 to jade-8n2.8 (decided 2026-11-14, see each bead's close reason) recorded as ADRs after ADR-15, and DATA-MODEL.md, EVENTS.md and PRIVACY.md corrected to match them"
+  },
+  {
+   "id": "OB5",
+   "source": "bead:jade-okb",
+   "section": "acceptance_criteria",
+   "text": "Every abuse case has a named mitigation and the phase that implements it"
+  },
+  {
+   "id": "OB6",
+   "source": "bead:jade-okb",
+   "section": "acceptance_criteria",
+   "text": "Data-flow diagram shows every place adult PII and kit-level data is stored"
+  }
+ ],
+ "evidence": [],
+ "discovery": "plans/planloop/jade-8n2.pl1/discovery.json"
+}

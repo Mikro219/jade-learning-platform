@@ -1,0 +1,52 @@
+{
+ "schema": "planloop-decision/1",
+ "id": "D1",
+ "by": "Mike",
+ "quote": "Accept all as open risks (Recommended) [RR1-RR9, selected 2026-11-14]; Accept RR10 as open (Recommended) [RR10, selected 2026-11-14]",
+ "recorded_at": "2026-11-15T01:35:14.651631+00:00",
+ "recorded_by": "orchestrator",
+ "subjects": [
+  {
+   "id": "RR1",
+   "text_sha256": "b3f22db71b231dd9eb6354d40d1a95320812b51ea99afc7cc6bbda3bf84c3941"
+  },
+  {
+   "id": "RR2",
+   "text_sha256": "53976d867932fd5aca7f593d39262a1f5690e44296de4a655cec2b2edb7eda7f"
+  },
+  {
+   "id": "RR3",
+   "text_sha256": "6af0d83acda611a6b5a200da1cad85bc039fb15e571a7499bfd133827f3d45bf"
+  },
+  {
+   "id": "RR4",
+   "text_sha256": "8089a7889de6fcb7aa617d1b6165553666db0674d4d498bb6aa03fd6b3477b9c"
+  },
+  {
+   "id": "RR5",
+   "text_sha256": "c8dcac67d9d03a5ddc34737eb61a3191b87b22e74ac77680f9c405e864591a8b"
+  },
+  {
+   "id": "RR6",
+   "text_sha256": "6b342ac732a6151bdf822c528f09f4d024e1497b9b38377a664f645cf047c17c"
+  },
+  {
+   "id": "RR7",
+   "text_sha256": "67dadc46678c5717007bdd275974422691c01a390eb8b17b7000e8f67f75a8ed"
+  },
+  {
+   "id": "RR8",
+   "text_sha256": "af3ed334dcf7d7f5380d44b51bb90eb95ad819ae29a42fc247f75f73ec032a41"
+  },
+  {
+   "id": "RR9",
+   "text_sha256": "10ca400337ceaa164647ce34f8f98f685982982cc0fc01d50de0bcfcad436bb9"
+  },
+  {
+   "id": "RR10",
+   "text_sha256": "be5685f12ed38ffd341bf2f184f991831962c5b71dfc15be4e2903d7ade90b58"
+  }
+ ],
+ "outcome": "accepted-risk",
+ "follow_up": null
+}

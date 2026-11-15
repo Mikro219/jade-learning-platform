@@ -1,0 +1,125 @@
+{
+ "schema": "planloop-discovery/1",
+ "searches": [
+  {
+   "command": "command grep -rln -- 'jade-hqq' docs plans CLAUDE.md AGENTS.md (excluding plans/planloop/)",
+   "purpose": "bead id; hits: docs/handoff/beads/id-map.json",
+   "hits": 1,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rln -- 'p0-adr' docs plans CLAUDE.md AGENTS.md (excluding plans/planloop/)",
+   "purpose": "plan key of jade-hqq; hits: docs/handoff/tools/build_plan.py, docs/handoff/beads/id-map.json, docs/handoff/beads/expected.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-00-architecture-lock.md",
+   "hits": 6,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rln -- 'jade-okb' docs plans CLAUDE.md AGENTS.md (excluding plans/planloop/)",
+   "purpose": "bead id; hits: docs/handoff/beads/id-map.json",
+   "hits": 1,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rln -- 'p0-threat' docs plans CLAUDE.md AGENTS.md (excluding plans/planloop/)",
+   "purpose": "plan key of jade-okb; hits: docs/handoff/tools/build_plan.py, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-00-architecture-lock.md, docs/handoff/phases/phase-09-privacy-security-hardening.md",
+   "hits": 5,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rln -- 'threat-model' docs plans CLAUDE.md AGENTS.md (excluding plans/planloop/)",
+   "purpose": "consumers of the threat model doc; hits: docs/handoff/tools/build_plan.py, docs/handoff/beads/plan.json, docs/handoff/phases/phase-00-architecture-lock.md, docs/handoff/phases/phase-09-privacy-security-hardening.md",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rln -- 'docs/adr' docs plans CLAUDE.md AGENTS.md (excluding plans/planloop/)",
+   "purpose": "consumers of the ADR directory; hits: docs/handoff/CLAUDE-SECTION.md, docs/handoff/DECISIONS.md, docs/handoff/ARCHITECTURE.md, docs/handoff/tools/build_plan.py, docs/handoff/beads/plan.json, docs/handoff/phases/phase-00-architecture-lock.md, CLAUDE.md",
+   "hits": 7,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rln -- 'jade-8n2' docs plans CLAUDE.md AGENTS.md (excluding plans/planloop/)",
+   "purpose": "epic id; hits: docs/handoff/beads/id-map.json",
+   "hits": 1,
+   "match_proof": null
+  }
+ ],
+ "sources": [
+  {
+   "path": "CLAUDE.md",
+   "class": "candidate",
+   "reason": "rules 1-8, CLAUDE.md link requirement in p0-adr acceptance; its requirements for this run are carried by OB1-OB6 (the beads acceptance criteria, frozen as bead fields) and by the brief rubric (CLAUDE.md rules 1-8); supplied to the reviewer in full"
+  },
+  {
+   "path": "docs/handoff/phases/phase-00-architecture-lock.md",
+   "class": "candidate",
+   "reason": "p0-adr and p0-threat task sections and exit criteria; its requirements for this run are carried by OB1-OB6 (the beads acceptance criteria, frozen as bead fields) and by the brief rubric (CLAUDE.md rules 1-8); supplied to the reviewer in full"
+  },
+  {
+   "path": "docs/handoff/DECISIONS.md",
+   "class": "candidate",
+   "reason": "ADR-01..15, assumptions A1-A7, open questions: the ADR source; its requirements for this run are carried by OB1-OB6 (the beads acceptance criteria, frozen as bead fields) and by the brief rubric (CLAUDE.md rules 1-8); supplied to the reviewer in full"
+  },
+  {
+   "path": "docs/handoff/ARCHITECTURE.md",
+   "class": "candidate",
+   "reason": "section 9 abuse cases (threat model), sections 3/5/6/8/10/12 data flow; its requirements for this run are carried by OB1-OB6 (the beads acceptance criteria, frozen as bead fields) and by the brief rubric (CLAUDE.md rules 1-8); supplied to the reviewer in full"
+  },
+  {
+   "path": "docs/handoff/DATA-MODEL.md",
+   "class": "candidate",
+   "reason": "storage locations for the data-flow diagram; corrected per decisions; its requirements for this run are carried by OB1-OB6 (the beads acceptance criteria, frozen as bead fields) and by the brief rubric (CLAUDE.md rules 1-8); supplied to the reviewer in full"
+  },
+  {
+   "path": "docs/handoff/EVENTS.md",
+   "class": "candidate",
+   "reason": "event integrity and consent gate; corrected per decisions; its requirements for this run are carried by OB1-OB6 (the beads acceptance criteria, frozen as bead fields) and by the brief rubric (CLAUDE.md rules 1-8); supplied to the reviewer in full"
+  },
+  {
+   "path": "docs/handoff/PRIVACY.md",
+   "class": "candidate",
+   "reason": "data inventory and retention; corrected per decisions; its requirements for this run are carried by OB1-OB6 (the beads acceptance criteria, frozen as bead fields) and by the brief rubric (CLAUDE.md rules 1-8); supplied to the reviewer in full"
+  },
+  {
+   "path": "docs/handoff/phases/phase-09-privacy-security-hardening.md",
+   "class": "candidate",
+   "reason": "p9-authz-sweep walks every abuse case in docs/threat-model.md; its requirements for this run are carried by OB1-OB6 (the beads acceptance criteria, frozen as bead fields) and by the brief rubric (CLAUDE.md rules 1-8); supplied to the reviewer in full"
+  },
+  {
+   "path": "docs/handoff/phases/phase-01-foundation.md",
+   "class": "candidate",
+   "reason": "p1-scaffold depends on p0-adr"
+  },
+  {
+   "path": "docs/handoff/REVIEW.md",
+   "class": "candidate",
+   "reason": "context for why the ADRs exist"
+  },
+  {
+   "path": "docs/handoff/beads/id-map.json",
+   "class": "candidate",
+   "reason": "plan key to bead id for mitigations"
+  },
+  {
+   "path": "docs/handoff/tools/build_plan.py",
+   "class": "candidate",
+   "reason": "generator of phase files; must not be hand-edited downstream"
+  },
+  {
+   "path": "docs/handoff/CLAUDE-SECTION.md",
+   "class": "irrelevant",
+   "reason": "merged into CLAUDE.md already"
+  },
+  {
+   "path": "docs/handoff/beads/plan.json",
+   "class": "irrelevant",
+   "reason": "generated seed graph; beads are authoritative"
+  },
+  {
+   "path": "docs/handoff/beads/expected.json",
+   "class": "irrelevant",
+   "reason": "seed verification counts only"
+  }
+ ],
+ "known_omissions": []
+}
