@@ -81,7 +81,7 @@ _Add your project-specific conventions here_
 
 Web platform that hosts the learning modules for JADE STEM kits. Kit codes unlock content; kit-level usage data is collected, with consent, to redesign the modules.
 
-**Read before any work:** [docs/handoff/ARCHITECTURE.md](docs/handoff/ARCHITECTURE.md) and the accepted decisions in [docs/adr/](docs/adr/README.md) (0001 to 0015 are DECISIONS.md ADR-01 to ADR-15; 0016 to 0023 are the decisions of 2026-11-14, and the README lists which handoff statements they amend). Data shapes: `docs/handoff/DATA-MODEL.md`, `docs/handoff/EVENTS.md`. Privacy promises: `docs/handoff/PRIVACY.md`. Phase detail: `docs/handoff/phases/` (generated before the beads were seeded; where a bead's acceptance criteria cite a decision, the bead is current).
+**Read before any work:** [docs/handoff/ARCHITECTURE.md](docs/handoff/ARCHITECTURE.md) and the accepted decisions in [docs/adr/](docs/adr/README.md) (0001 to 0015 are DECISIONS.md ADR-01 to ADR-15; 0016 to 0023 are the decisions of 2026-11-14, and the README lists which handoff statements they amend). Data shapes: `docs/handoff/DATA-MODEL.md`, `docs/handoff/EVENTS.md`. Privacy promises: `docs/handoff/PRIVACY.md`. Phase detail: `docs/handoff/phases/` (generated before the beads were seeded; where a bead's acceptance criteria cite a decision, the bead is current). Threat model: [docs/threat-model.md](docs/threat-model.md).
 
 ### Rules that are not up for negotiation
 
