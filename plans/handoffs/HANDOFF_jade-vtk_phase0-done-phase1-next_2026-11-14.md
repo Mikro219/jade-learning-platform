@@ -230,3 +230,8 @@ python3 .claude/skills/planloop/tests/test_planloop.py 2>&1 | tail -3   # expect
 # Classify Phase 1 risk, create the run bead, `planloop.py init --run <bead>.pl1 ...`,
 # and brief a planner (Fable if escalated) on Phase 1's 8 agent beads with binding sources as OB rows.
 ```
+
+## Session Closed
+**Closed at:** 2026-11-14T23:00:01-05:00
+**Commit:** b922011
+**Session status:** Handed off to next session
