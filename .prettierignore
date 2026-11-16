@@ -1,0 +1,19 @@
+# Package managers
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lock
+bun.lockb
+
+# Static assets are served as they are
+/static/
+
+# Files that predate the app and are not formatted by it
+/docs/
+/plans/
+/.beads/
+/.claude/
+/.agents/
+/.codex/
+/AGENTS.md
+/CLAUDE.md

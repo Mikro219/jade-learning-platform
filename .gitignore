@@ -7,3 +7,14 @@
 
 # Python bytecode caches (they would otherwise land in planloop snapshots and bugfix patches)
 __pycache__/
+
+# App build, test and gate output (jade-h8i)
+node_modules/
+.svelte-kit/
+build/
+test-results/
+playwright-report/
+blob-report/
+coverage/
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*

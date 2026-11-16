@@ -18,3 +18,4 @@ pnpm, current Node LTS (pinned), ESLint + Prettier, Vitest, Playwright (Chromium
 - p1-ci (jade-xu0) runs the GitHub Actions workflow, with Playwright on Chromium and WebKit (jade-xu0 description). GitHub hosting is assumption A6, which is unconfirmed ([README](README.md#assumptions-unconfirmed)).
 - p9-load (jade-0d8) runs the load test with k6 (jade-0d8 description).
 - Work is tracked in beads (`bd`), and planning and bug work use the `planloop` and `bugfix` skills, as CLAUDE.md describes ("Work tracking: beads", "How each bead is worked").
+- The pinned Node LTS line is Node 24 ([0024](0024-node-24-pinned.md)).
