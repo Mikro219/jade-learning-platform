@@ -1,0 +1,593 @@
+{
+ "schema": "planloop-inputs/1",
+ "brief": "plans/planloop/jade-vtk.pl1/brief-r2.md",
+ "repo_files": [
+  "CLAUDE.md",
+  "docs/handoff/phases/phase-01-foundation.md",
+  "docs/adr/0002-modular-monolith-in-sveltekit.md",
+  "docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md",
+  "docs/adr/0004-one-canadian-vm-docker-compose.md",
+  "docs/adr/0007-self-hosted-same-origin-video.md",
+  "docs/adr/0009-consent-gated-logging.md",
+  "docs/adr/0011-kit-code-format-and-storage.md",
+  "docs/adr/0013-no-third-party-requests-from-the-browser.md",
+  "docs/adr/0014-staging-from-phase-1.md",
+  "docs/adr/0015-tooling.md",
+  "docs/adr/README.md",
+  "docs/handoff/ARCHITECTURE.md",
+  "docs/handoff/DATA-MODEL.md",
+  "docs/handoff/PRIVACY.md",
+  "docs/threat-model.md",
+  "docs/handoff/EVENTS.md",
+  "docs/handoff/DECISIONS.md",
+  "docs/handoff/phases/phase-09-privacy-security-hardening.md",
+  "docs/handoff/phases/phase-10-production-deploy.md",
+  "docs/handoff/phases/phase-06-event-pipeline.md",
+  "docs/handoff/phases/phase-04-content-pipeline.md",
+  "docs/handoff/phases/phase-02-data-model-and-kit-codes.md",
+  "docs/handoff/phases/phase-05-student-experience.md",
+  "docs/handoff/phases/phase-03-accounts-classes-sessions.md",
+  "docs/handoff/beads/id-map.json",
+  "docs/handoff/START-HERE.md",
+  "docs/handoff/REVIEW.md",
+  "docs/handoff/CLAUDE-SECTION.md",
+  "docs/adr/0006-content-as-markdown-version-locked.md",
+  "docs/adr/0020-rate-limit-keys-for-redemption-and-signup.md",
+  "docs/adr/0021-split-human-and-agent-work.md",
+  "plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+  ".claude/skills/bugfix/SKILL.md",
+  ".claude/skills/planloop/SKILL.md"
+ ],
+ "dir_inventories": [
+  "docs/adr",
+  "docs/handoff/phases"
+ ],
+ "beads": [
+  {
+   "id": "jade-vtk",
+   "fields": []
+  },
+  {
+   "id": "jade-h8i",
+   "fields": [
+    "title",
+    "description",
+    "acceptance_criteria",
+    "design",
+    "notes"
+   ]
+  },
+  {
+   "id": "jade-urd",
+   "fields": []
+  },
+  {
+   "id": "jade-8v4",
+   "fields": []
+  },
+  {
+   "id": "jade-xu0",
+   "fields": []
+  },
+  {
+   "id": "jade-80h",
+   "fields": []
+  },
+  {
+   "id": "jade-4zw",
+   "fields": []
+  },
+  {
+   "id": "jade-alt",
+   "fields": []
+  },
+  {
+   "id": "jade-lhq",
+   "fields": []
+  },
+  {
+   "id": "jade-0za",
+   "fields": []
+  },
+  {
+   "id": "jade-ada",
+   "fields": []
+  },
+  {
+   "id": "jade-lnn.1",
+   "fields": []
+  },
+  {
+   "id": "jade-kn0",
+   "fields": []
+  },
+  {
+   "id": "jade-u8z",
+   "fields": []
+  }
+ ],
+ "obligations": [
+  {
+   "id": "OB1",
+   "source": "bead:jade-h8i",
+   "section": "acceptance_criteria",
+   "text": "`pnpm lint`, `pnpm check`, `pnpm test`, `pnpm e2e` all pass on an empty app"
+  },
+  {
+   "id": "OB2",
+   "source": "bead:jade-h8i",
+   "section": "acceptance_criteria",
+   "text": "Module boundaries exist as folders with an index.ts each"
+  },
+  {
+   "id": "OB3",
+   "source": "bead:jade-h8i",
+   "section": "acceptance_criteria",
+   "text": "README has setup steps that work from a clean clone"
+  },
+  {
+   "id": "OB4",
+   "source": "bead:jade-urd",
+   "section": "acceptance_criteria",
+   "text": "`pnpm db:migrate` and `pnpm db:reset` work"
+  },
+  {
+   "id": "OB5",
+   "source": "bead:jade-urd",
+   "section": "acceptance_criteria",
+   "text": "A sample migration and a sample integration test pass in CI"
+  },
+  {
+   "id": "OB6",
+   "source": "bead:jade-urd",
+   "section": "acceptance_criteria",
+   "text": "Migrations are forward-only and run automatically on deploy"
+  },
+  {
+   "id": "OB7",
+   "source": "bead:jade-8v4",
+   "section": "acceptance_criteria",
+   "text": "App refuses to start with a clear message when a required variable is missing"
+  },
+  {
+   "id": "OB8",
+   "source": "bead:jade-8v4",
+   "section": "acceptance_criteria",
+   "text": ".env.example is complete; .env is gitignored"
+  },
+  {
+   "id": "OB9",
+   "source": "bead:jade-8v4",
+   "section": "acceptance_criteria",
+   "text": "No secret has a production default"
+  },
+  {
+   "id": "OB10",
+   "source": "bead:jade-xu0",
+   "section": "acceptance_criteria",
+   "text": "Workflow runs in under 10 minutes"
+  },
+  {
+   "id": "OB11",
+   "source": "bead:jade-xu0",
+   "section": "acceptance_criteria",
+   "text": "Main branch is protected and requires the workflow"
+  },
+  {
+   "id": "OB12",
+   "source": "bead:jade-xu0",
+   "section": "acceptance_criteria",
+   "text": "Playwright report is uploaded on failure"
+  },
+  {
+   "id": "OB13",
+   "source": "bead:jade-80h",
+   "section": "acceptance_criteria",
+   "text": "`docker compose -f compose.prod.yml up` serves the app locally over Caddy"
+  },
+  {
+   "id": "OB14",
+   "source": "bead:jade-80h",
+   "section": "acceptance_criteria",
+   "text": "Image runs as non-root and is under 300 MB"
+  },
+  {
+   "id": "OB15",
+   "source": "bead:jade-80h",
+   "section": "acceptance_criteria",
+   "text": "Only ports 80 and 443 are published"
+  },
+  {
+   "id": "OB16",
+   "source": "bead:jade-4zw",
+   "section": "acceptance_criteria",
+   "text": "Merge to main results in a new version live on staging without manual steps"
+  },
+  {
+   "id": "OB17",
+   "source": "bead:jade-4zw",
+   "section": "acceptance_criteria",
+   "text": "A failed health check leaves the previous version running"
+  },
+  {
+   "id": "OB18",
+   "source": "bead:jade-4zw",
+   "section": "acceptance_criteria",
+   "text": "Staging URL recorded in README"
+  },
+  {
+   "id": "OB19",
+   "source": "bead:jade-alt",
+   "section": "acceptance_criteria",
+   "text": "/readyz fails when the DB is down"
+  },
+  {
+   "id": "OB20",
+   "source": "bead:jade-alt",
+   "section": "acceptance_criteria",
+   "text": "A test asserts log lines contain no IP, cookie or code values"
+  },
+  {
+   "id": "OB21",
+   "source": "bead:jade-alt",
+   "section": "acceptance_criteria",
+   "text": "Error responses carry the request id"
+  },
+  {
+   "id": "OB22",
+   "source": "bead:jade-lhq",
+   "section": "acceptance_criteria",
+   "text": "No network request leaves the app origin on any page (Playwright asserts this)"
+  },
+  {
+   "id": "OB23",
+   "source": "bead:jade-lhq",
+   "section": "acceptance_criteria",
+   "text": "Student shell passes an automated axe check"
+  },
+  {
+   "id": "OB24",
+   "source": "bead:jade-lhq",
+   "section": "acceptance_criteria",
+   "text": "Layout holds at 360px wide and at 1366x768 (Chromebook)"
+  },
+  {
+   "id": "OB25",
+   "source": "bead:jade-h8i",
+   "section": "description",
+   "text": "SvelteKit with adapter-node, TypeScript strict, pnpm, ESLint + Prettier, Vitest, Playwright. Use the current Node LTS and pin it in .nvmrc and the Dockerfile. Folder layout per ARCHITECTURE.md section 4 (src/lib/server/{auth,codes,content,events,analytics}, src/routes/{(student),(adult),(staff),api})."
+  },
+  {
+   "id": "OB26",
+   "source": "bead:jade-urd",
+   "section": "description",
+   "text": "compose.dev.yml with Postgres 16. Drizzle ORM with SQL migrations checked in. Test harness that gives each test file an isolated schema or transaction rollback so tests run in parallel."
+  },
+  {
+   "id": "OB27",
+   "source": "bead:jade-8v4",
+   "section": "description",
+   "text": "Single config module that parses process.env with zod at boot and fails fast. .env.example documents every variable. Secrets (CODE_PEPPER, SESSION_SECRET, DATABASE_URL) never have defaults outside test."
+  },
+  {
+   "id": "OB28",
+   "source": "bead:jade-xu0",
+   "section": "description",
+   "text": "GitHub Actions workflow on pull request and main. Postgres service container for integration tests. Playwright with Chromium and WebKit (iPad Safari stand-in). Cache pnpm. Fail on lint warnings."
+  },
+  {
+   "id": "OB29",
+   "source": "bead:jade-80h",
+   "section": "description",
+   "text": "Multi-stage Dockerfile, non-root user, healthcheck. compose.prod.yml with app, postgres (named volume), and Caddy as the only public service (automatic TLS, compression, static /media with Range support, access log disabled or IP-stripped). App and DB are not exposed on the host."
+  },
+  {
+   "id": "OB30",
+   "source": "bead:jade-4zw",
+   "section": "description",
+   "text": "Staging VM in the chosen Canadian region. Firewall (22 from deploy source only, 80, 443), non-root deploy user, Docker. CI job: build image, push to registry, SSH deploy, run migrations, health-check gate. Staging shows a visible STAGING banner and uses its own secrets."
+  },
+  {
+   "id": "OB31",
+   "source": "bead:jade-alt",
+   "section": "description",
+   "text": "/healthz (process up) and /readyz (DB reachable, migrations current). JSON logs with request id, route, status, duration. Never log IP addresses, cookies, kit codes, join codes or request bodies."
+  },
+  {
+   "id": "OB32",
+   "source": "bead:jade-lhq",
+   "section": "description",
+   "text": "Shared layout and CSS tokens. Body text at least 18px on student pages, tap targets at least 48px, WCAG AA contrast, system font stack (no third-party font requests), reduced-motion respected. Three route groups with distinct shells: student, adult, staff."
+  },
+  {
+   "id": "OB33",
+   "source": "bead:jade-h8i",
+   "section": "notes",
+   "text": "2026-11-14 Mike: pin Node 24 (.nvmrc and Dockerfile)."
+  },
+  {
+   "id": "OB34",
+   "source": "bead:jade-vtk",
+   "section": "description",
+   "text": "A deployable empty app: repo, CI, database, container image, and a live staging URL. Everything after this ships to staging on every merge, so deploy problems surface in week one instead of the week before the pilot."
+  },
+  {
+   "id": "OB35",
+   "source": "docs/handoff/phases/phase-01-foundation.md",
+   "section": "Exit criteria",
+   "text": "- [ ] `pnpm dev`, `pnpm test`, `pnpm e2e` work from a clean clone"
+  },
+  {
+   "id": "OB36",
+   "source": "docs/handoff/phases/phase-01-foundation.md",
+   "section": "Exit criteria",
+   "text": "- [ ] CI is green and required on main"
+  },
+  {
+   "id": "OB37",
+   "source": "docs/handoff/phases/phase-01-foundation.md",
+   "section": "Exit criteria",
+   "text": "- [ ] Staging URL serves /healthz over HTTPS from a Canadian region"
+  },
+  {
+   "id": "OB38",
+   "source": "CLAUDE.md",
+   "section": "Rules that are not up for negotiation",
+   "text": "1. No accounts, names or free-text input for children. Ever."
+  },
+  {
+   "id": "OB39",
+   "source": "CLAUDE.md",
+   "section": "Rules that are not up for negotiation",
+   "text": "2. When a kit's `logging_enabled` is false, the server stores nothing about that kit's activity. The `p6-nolog-invariant` test must never be skipped, weakened or deleted."
+  },
+  {
+   "id": "OB40",
+   "source": "CLAUDE.md",
+   "section": "Rules that are not up for negotiation",
+   "text": "3. Class and kit identity come from the session, never from a request body."
+  },
+  {
+   "id": "OB41",
+   "source": "CLAUDE.md",
+   "section": "Rules that are not up for negotiation",
+   "text": "4. Plain kit codes, join codes and tokens are never stored or logged. IP addresses are never stored or logged."
+  },
+  {
+   "id": "OB42",
+   "source": "CLAUDE.md",
+   "section": "Rules that are not up for negotiation",
+   "text": "5. No request from the browser to any origin but our own. No third-party scripts, fonts, analytics or embeds."
+  },
+  {
+   "id": "OB43",
+   "source": "CLAUDE.md",
+   "section": "Rules that are not up for negotiation",
+   "text": "6. Step IDs are permanent. A changed step gets a version bump; CI enforces it."
+  },
+  {
+   "id": "OB44",
+   "source": "CLAUDE.md",
+   "section": "Rules that are not up for negotiation",
+   "text": "8. The decisions in `docs/adr/` stand. If one looks wrong, file a `decision` bead and stop."
+  },
+  {
+   "id": "OB45",
+   "source": "CLAUDE.md",
+   "section": "Work tracking: beads",
+   "text": "- **Never start a bead labelled `human`.** If one blocks you, say so and stop, or pick other ready work."
+  },
+  {
+   "id": "OB46",
+   "source": "CLAUDE.md",
+   "section": "Work tracking: beads",
+   "text": "- A bead is done when every acceptance criterion is met, tests pass locally and in CI, and the change is merged. Not before."
+  },
+  {
+   "id": "OB47",
+   "source": "CLAUDE.md",
+   "section": "How each bead is worked",
+   "text": "3. Implement with tests. Every new route goes into the authorization matrix test."
+  },
+  {
+   "id": "OB48",
+   "source": "CLAUDE.md",
+   "section": "How each bead is worked",
+   "text": "4. Run `pnpm lint && pnpm check && pnpm test && pnpm e2e`."
+  },
+  {
+   "id": "OB49",
+   "source": "CLAUDE.md",
+   "section": "How each bead is worked",
+   "text": "5. Commit with the bead ID in the message. Merge once CI is green; staging deploys itself."
+  },
+  {
+   "id": "OB50",
+   "source": "CLAUDE.md",
+   "section": "Stop and ask the human when",
+   "text": "- A secret, payment, DNS change or production deploy is needed."
+  },
+  {
+   "id": "OB51",
+   "source": "docs/adr/0002-modular-monolith-in-sveltekit.md",
+   "section": "Decision",
+   "text": "One SvelteKit app (adapter-node, TypeScript strict) serves pages and API routes. Server code is split into `auth`, `codes`, `content`, `events`, `analytics` modules that talk through their `index.ts`."
+  },
+  {
+   "id": "OB52",
+   "source": "docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md",
+   "section": "Decision",
+   "text": "PostgreSQL 16. Drizzle for typed queries. Migrations are SQL files, forward-only, run on deploy. Analytics is SQL views in the same database."
+  },
+  {
+   "id": "OB53",
+   "source": "docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md",
+   "section": "Consequences",
+   "text": "- Migrations stay compatible with the previous app version, so rollback to the previous image works"
+  },
+  {
+   "id": "OB54",
+   "source": "docs/adr/0004-one-canadian-vm-docker-compose.md",
+   "section": "Decision",
+   "text": "Production is a single Linux VM in a Canadian region running Compose: Caddy, app, Postgres. Staging is a second, smaller VM. Provider is a human decision (`p0-host`)."
+  },
+  {
+   "id": "OB55",
+   "source": "docs/adr/0007-self-hosted-same-origin-video.md",
+   "section": "Decision",
+   "text": "H.264/AAC MP4 at 720p with faststart, on a volume served by Caddy with Range support, behind short-lived signed URLs. No third-party video host."
+  },
+  {
+   "id": "OB56",
+   "source": "docs/adr/0009-consent-gated-logging.md",
+   "section": "Decision",
+   "text": "Off means zero activity stored server-side."
+  },
+  {
+   "id": "OB57",
+   "source": "docs/adr/0011-kit-code-format-and-storage.md",
+   "section": "Consequences",
+   "text": "- Pepper handling: p1-config (jade-8v4) reads `CODE_PEPPER` from config with no production default (jade-8v4 description)"
+  },
+  {
+   "id": "OB58",
+   "source": "docs/adr/0013-no-third-party-requests-from-the-browser.md",
+   "section": "Decision",
+   "text": "No analytics, fonts, CDNs, embeds or error trackers that load in the user's browser. CSP enforces it and an e2e test asserts it."
+  },
+  {
+   "id": "OB59",
+   "source": "docs/adr/0014-staging-from-phase-1.md",
+   "section": "Decision",
+   "text": "Staging exists before feature work and is deployed on every merge to main. Production receives the image that passed staging."
+  },
+  {
+   "id": "OB60",
+   "source": "docs/adr/0015-tooling.md",
+   "section": "Decision",
+   "text": "pnpm, current Node LTS (pinned), ESLint + Prettier, Vitest, Playwright (Chromium and WebKit), GitHub Actions, zod, k6 for load."
+  },
+  {
+   "id": "OB61",
+   "source": "docs/adr/README.md",
+   "section": "Assumptions (unconfirmed)",
+   "text": "A6: the repository has no git remote configured today (`git remote -v` is empty), so A6 is unconfirmed."
+  },
+  {
+   "id": "OB62",
+   "source": "docs/handoff/ARCHITECTURE.md",
+   "section": "4. Components",
+   "text": "| Caddy | TLS, HTTP/2, compression, serves `/media` with Range requests | Only public service. Access log off or IP-stripped |"
+  },
+  {
+   "id": "OB63",
+   "source": "docs/handoff/ARCHITECTURE.md",
+   "section": "4. Components",
+   "text": "src/lib/server/{auth,codes,content,events,analytics}/   one folder per module, index.ts is its public API"
+  },
+  {
+   "id": "OB64",
+   "source": "docs/handoff/ARCHITECTURE.md",
+   "section": "4. Components",
+   "text": "src/routes/(student)/  (adult)/  (staff)/  api/"
+  },
+  {
+   "id": "OB65",
+   "source": "docs/handoff/ARCHITECTURE.md",
+   "section": "4. Components",
+   "text": "Modules call each other only through their `index.ts`. That is the whole \"architecture enforcement\" for a monolith this size."
+  },
+  {
+   "id": "OB66",
+   "source": "docs/handoff/ARCHITECTURE.md",
+   "section": "9. Security and privacy",
+   "text": "| IP addresses as hidden identifiers | Not logged by Caddy or the app; used in memory for rate limiting only |"
+  },
+  {
+   "id": "OB67",
+   "source": "docs/handoff/ARCHITECTURE.md",
+   "section": "10. Deployment",
+   "text": "- **Environments:** local (Compose), staging (live from Phase 1, deployed on every merge to main), production (promoted by tag; same image that passed staging)."
+  },
+  {
+   "id": "OB68",
+   "source": "docs/handoff/ARCHITECTURE.md",
+   "section": "10. Deployment",
+   "text": "- **Releases:** build image, run forward-only migrations, start, health-check, switch. Rollback is the previous image. Migrations stay compatible with the previous app version."
+  },
+  {
+   "id": "OB69",
+   "source": "docs/handoff/DATA-MODEL.md",
+   "section": "Data model",
+   "text": "Phase 2 and Phase 6 implement it as Drizzle schema plus SQL migrations."
+  },
+  {
+   "id": "OB70",
+   "source": "docs/handoff/DATA-MODEL.md",
+   "section": "4. Content registry, events, progress",
+   "text": "The application's database role has `insert` and `select` on `events`, no `update`, and `delete` only through the `delete_kit_data(kit_id)` function added in Phase 9."
+  },
+  {
+   "id": "OB71",
+   "source": "docs/handoff/PRIVACY.md",
+   "section": "Data inventory",
+   "text": "| Server logs | VM disk, 14 days | Every request | Staff with server access. No IPs, emails, codes, tokens or bodies |"
+  },
+  {
+   "id": "OB72",
+   "source": "docs/handoff/PRIVACY.md",
+   "section": "Data inventory",
+   "text": "Not collected at all: child names, photos, audio, free text from students, IP addresses, location, device identifiers, advertising identifiers, third-party cookies."
+  },
+  {
+   "id": "OB73",
+   "source": "docs/handoff/PRIVACY.md",
+   "section": "Where it runs",
+   "text": "One VM and one object-storage bucket, both in Canada. No student traffic goes to any other company: no analytics service, no video platform, no font or script CDN, no error tracker in the browser."
+  },
+  {
+   "id": "OB74",
+   "source": "docs/threat-model.md",
+   "section": "3. Trust boundaries",
+   "text": "- **TB1 Browser to Caddy.** Over the internet or school Wi-Fi, with TLS; only 80 and 443 are published (ARCHITECTURE.md section 10; p1-docker jade-80h)."
+  },
+  {
+   "id": "OB75",
+   "source": "docs/threat-model.md",
+   "section": "3. Trust boundaries",
+   "text": "- **TB2 Caddy to app.** The internal Compose network (ARCHITECTURE.md section 10); the Caddy access log is off or IP-stripped (ARCHITECTURE.md section 4; jade-80h)."
+  },
+  {
+   "id": "OB76",
+   "source": "docs/threat-model.md",
+   "section": "3. Trust boundaries",
+   "text": "- **TB9 Object storage to the staging VM.** Staging \"uses its own secrets\" (p1-staging jade-4zw; ADR 0014)"
+  },
+  {
+   "id": "OB77",
+   "source": "docs/threat-model.md",
+   "section": "2. Assets",
+   "text": "read through typed config with no production default (p1-config jade-8v4). Never in the database (ARCHITECTURE.md section 6)"
+  },
+  {
+   "id": "OB78",
+   "source": "docs/threat-model.md",
+   "section": "5. Abuse cases",
+   "text": "| AB9 | IP addresses as hidden identifiers | Not logged by Caddy or the app (jade-80h, jade-alt, jade-ada); used in memory only, for rate limiting (jade-6cq; ADR 0020) |"
+  },
+  {
+   "id": "OB79",
+   "source": "docs/threat-model.md",
+   "section": "5. Abuse cases",
+   "text": "| AB16 | A plain kit code leaking from the QR redeem URL (`/redeem?code=...`) into server logs or a Referer header (beyond ARCHITECTURE.md section 9) | App log lines contain no code values (jade-alt);"
+  },
+  {
+   "id": "OB80",
+   "source": "docs/threat-model.md",
+   "section": "1. Actors",
+   "text": "- The repository and CI path: GitHub is assumed (assumption A6 of `docs/adr/README.md`); code and content arrive through it, and content changes go through the same CI (ARCHITECTURE.md section 4; ADR 0006; p1-ci jade-xu0)."
+  }
+ ],
+ "evidence": [],
+ "discovery": "plans/planloop/jade-vtk.pl1/discovery.json"
+}

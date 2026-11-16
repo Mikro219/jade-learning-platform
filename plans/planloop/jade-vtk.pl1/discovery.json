@@ -1,0 +1,902 @@
+{
+ "schema": "planloop-discovery/1",
+ "searches": [
+  {
+   "command": "command grep -rlnF -- 'jade-vtk' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "Phase 1 epic id; hits: docs/handoff/beads/id-map.json, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 2,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'jade-h8i' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "bead id (scaffold); hits: docs/adr/0002-modular-monolith-in-sveltekit.md, docs/adr/0015-tooling.md, docs/handoff/beads/id-map.json, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'p1-scaffold' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "plan key of jade-h8i; hits: .claude/skills/bugfix/SKILL.md, docs/adr/0002-modular-monolith-in-sveltekit.md, docs/adr/0015-tooling.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-04-content-pipeline.md, docs/handoff/phases/phase-06-event-pipeline.md, docs/handoff/tools/build_plan.py",
+   "hits": 9,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'jade-urd' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "bead id (db); hits: docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md, docs/handoff/beads/id-map.json, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'p1-db' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "plan key of jade-urd; hits: .claude/skills/bugfix/SKILL.md, docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py",
+   "hits": 7,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'jade-8v4' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "bead id (config); hits: docs/adr/0011-kit-code-format-and-storage.md, docs/handoff/beads/id-map.json, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'p1-config' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "plan key of jade-8v4; hits: docs/adr/0011-kit-code-format-and-storage.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, docs/threat-model.md",
+   "hits": 7,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'jade-xu0' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "bead id (CI); hits: docs/adr/0015-tooling.md, docs/handoff/beads/id-map.json, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'p1-ci' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "plan key of jade-xu0; hits: .claude/skills/bugfix/SKILL.md, docs/adr/0015-tooling.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, docs/threat-model.md",
+   "hits": 7,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'jade-80h' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "bead id (docker); hits: docs/adr/0004-one-canadian-vm-docker-compose.md, docs/handoff/beads/id-map.json, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'p1-docker' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "plan key of jade-80h; hits: docs/adr/0004-one-canadian-vm-docker-compose.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-04-content-pipeline.md, docs/handoff/phases/phase-09-privacy-security-hardening.md, docs/handoff/tools/build_plan.py, docs/threat-model.md",
+   "hits": 8,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'jade-4zw' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "bead id (staging); hits: docs/adr/0004-one-canadian-vm-docker-compose.md, docs/adr/0014-staging-from-phase-1.md, docs/handoff/beads/id-map.json, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 5,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'p1-staging' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "plan key of jade-4zw; hits: docs/adr/0004-one-canadian-vm-docker-compose.md, docs/adr/0014-staging-from-phase-1.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-09-privacy-security-hardening.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 10,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'jade-alt' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "bead id (observability); hits: docs/handoff/beads/id-map.json, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'p1-observability' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "plan key of jade-alt; hits: docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-09-privacy-security-hardening.md, docs/handoff/tools/build_plan.py, docs/threat-model.md",
+   "hits": 6,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'jade-lhq' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "bead id (ui shell); hits: docs/handoff/beads/id-map.json, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 2,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'p1-ui-shell' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "plan key of jade-lhq; hits: docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-03-accounts-classes-sessions.md, docs/handoff/tools/build_plan.py",
+   "hits": 5,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'jade-0za' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "human bead blocking jade-4zw; hits: docs/adr/0004-one-canadian-vm-docker-compose.md, docs/adr/0014-staging-from-phase-1.md, docs/adr/README.md, docs/handoff/beads/id-map.json, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 6,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'p0-host' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "plan key of jade-0za (host/region); hits: docs/adr/0004-one-canadian-vm-docker-compose.md, docs/adr/0014-staging-from-phase-1.md, docs/handoff/DECISIONS.md, docs/handoff/beads/expected.json, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-00-architecture-lock.md, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md",
+   "hits": 11,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'CODE_PEPPER' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/planloop/SKILL.md, docs/adr/0011-kit-code-format-and-storage.md, docs/adr/0021-split-human-and-agent-work.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md",
+   "hits": 9,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'SESSION_SECRET' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, docs/threat-model.md",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'DATABASE_URL' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/ARCHITECTURE.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'healthz' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'readyz' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/planloop/tests/__pycache__/test_planloop.cpython-312.pyc, docs/handoff/ARCHITECTURE.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py",
+   "hits": 6,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'request id' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'request ID' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'IP address' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/bugfix/SKILL.md, CLAUDE.md, docs/adr/0020-rate-limit-keys-for-redemption-and-signup.md, docs/handoff/ARCHITECTURE.md, docs/handoff/CLAUDE-SECTION.md, docs/handoff/EVENTS.md, docs/handoff/PRIVACY.md, docs/handoff/REVIEW.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, docs/threat-model.md",
+   "hits": 12,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'Caddy' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/bugfix/SKILL.md, .claude/skills/planloop/SKILL.md, docs/adr/0004-one-canadian-vm-docker-compose.md, docs/adr/0007-self-hosted-same-origin-video.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DECISIONS.md, docs/handoff/REVIEW.md, docs/handoff/architecture.svg, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-04-content-pipeline.md, docs/handoff/phases/phase-09-privacy-security-hardening.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 16,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'compose.prod' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'compose.dev' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/bugfix/SKILL.md, .claude/skills/planloop/SKILL.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 5,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'Drizzle' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md, docs/adr/README.md, docs/handoff/DATA-MODEL.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 9,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'migration' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/bugfix/SKILL.md, .claude/skills/planloop/SKILL.md, .claude/skills/planloop/references/formats.md, .claude/skills/planloop/scripts/__pycache__/planloop.cpython-312.pyc, .claude/skills/planloop/scripts/planloop.py, .claude/skills/planloop/tests/__pycache__/test_planloop.cpython-312.pyc, .claude/skills/planloop/tests/test_planloop.py, CLAUDE.md, docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md, docs/adr/0016-step-views-and-retention-post-launch-ok.md, docs/adr/0023-tiered-retention-for-kit-keyed-data.md, docs/adr/README.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DATA-MODEL.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 20,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- '.nvmrc' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/adr/0015-tooling.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'Node 24' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: none",
+   "hits": 0,
+   "match_proof": "same command with the known string 'Node LTS' (present in docs/adr/0015-tooling.md) returns 5 files: docs/adr/0015-tooling.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py"
+  },
+  {
+   "command": "command grep -rlnF -- 'Node LTS' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/adr/0015-tooling.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 5,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'Playwright' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/bugfix/SKILL.md, docs/adr/0015-tooling.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-04-content-pipeline.md, docs/handoff/phases/phase-05-student-experience.md, docs/handoff/phases/phase-07-facilitator-dashboard.md, docs/handoff/phases/phase-09-privacy-security-hardening.md, docs/handoff/tools/build_plan.py",
+   "hits": 10,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'axe' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-05-student-experience.md, docs/handoff/tools/build_plan.py, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 5,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'design token' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- '18px' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- '48px' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'reduced-motion' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'system font' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'zod' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/adr/0008-event-integrity.md, docs/adr/0015-tooling.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DECISIONS.md, docs/handoff/EVENTS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-04-content-pipeline.md, docs/handoff/phases/phase-06-event-pipeline.md, docs/handoff/tools/build_plan.py",
+   "hits": 10,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- '.env.example' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/planloop/SKILL.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'STAGING' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/planloop/tests/__pycache__/test_planloop.cpython-312.pyc, .claude/skills/planloop/tests/test_planloop.py, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, docs/threat-model.md",
+   "hits": 6,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'GitHub Actions' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/adr/0015-tooling.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 5,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'branch protection' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: none",
+   "hits": 0,
+   "match_proof": "same command with the known string 'Node LTS' (present in docs/adr/0015-tooling.md) returns 5 files: docs/adr/0015-tooling.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py"
+  },
+  {
+   "command": "command grep -rlnF -- '300 MB' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'non-root' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md",
+   "hits": 5,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'Postgres 16' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'forward-only' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/planloop/SKILL.md, .claude/skills/planloop/scripts/planloop.py, .claude/skills/planloop/tests/__pycache__/test_planloop.cpython-312.pyc, .claude/skills/planloop/tests/test_planloop.py, docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 10,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'Canadian region' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/adr/0004-one-canadian-vm-docker-compose.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-00-architecture-lock.md, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py",
+   "hits": 7,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'access log' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/bugfix/SKILL.md, docs/handoff/REVIEW.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, docs/threat-model.md",
+   "hits": 6,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'adapter-node' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/adr/0002-modular-monolith-in-sveltekit.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 6,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'phase-01-foundation' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/README.md",
+   "hits": 2,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'p6-nolog-invariant' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/bugfix/SKILL.md, .claude/skills/planloop/SKILL.md, CLAUDE.md, docs/adr/0009-consent-gated-logging.md, docs/adr/0017-live-stuck-alerts-for-no-log-kits.md, docs/adr/README.md, docs/handoff/ARCHITECTURE.md, docs/handoff/CLAUDE-SECTION.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-06-event-pipeline.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md",
+   "hits": 14,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'WCAG' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'Chromebook' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/bugfix/SKILL.md, docs/adr/README.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-00-architecture-lock.md, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-04-content-pipeline.md, docs/handoff/phases/phase-05-student-experience.md, docs/handoff/tools/build_plan.py",
+   "hits": 9,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'WebKit' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/bugfix/SKILL.md, .claude/skills/bugfix/references/walkthroughs.md, docs/adr/0015-tooling.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-05-student-experience.md, docs/handoff/tools/build_plan.py",
+   "hits": 8,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'A6' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/planloop/scripts/__pycache__/planloop.cpython-312.pyc, docs/adr/0015-tooling.md, docs/adr/README.md, docs/handoff/DECISIONS.md, docs/handoff/architecture.png, docs/threat-model.md",
+   "hits": 6,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'ca-central' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: none",
+   "hits": 0,
+   "match_proof": "same command with the known string 'Node LTS' (present in docs/adr/0015-tooling.md) returns 5 files: docs/adr/0015-tooling.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py"
+  },
+  {
+   "command": "command grep -rlnF -- 'Toronto' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/planloop/tests/fixtures/codex-0.156.1-rollout-shape.json, docs/adr/0004-one-canadian-vm-docker-compose.md, docs/handoff/DECISIONS.md",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "command grep -rlnF -- 'pino' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: none",
+   "hits": 0,
+   "match_proof": "same command with the known string 'Node LTS' (present in docs/adr/0015-tooling.md) returns 5 files: docs/adr/0015-tooling.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py"
+  },
+  {
+   "command": "command grep -rlnF -- 'x-request-id' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: none",
+   "hits": 0,
+   "match_proof": "same command with the known string 'Node LTS' (present in docs/adr/0015-tooling.md) returns 5 files: docs/adr/0015-tooling.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py"
+  },
+  {
+   "command": "command grep -rlnF -- 'secret' docs plans/handoffs CLAUDE.md AGENTS.md .claude/skills",
+   "purpose": "config variable / route / file / tool / rule term touched by Phase 1; hits: .claude/skills/bugfix/SKILL.md, .claude/skills/bugfix/tests/test_fixpatch.sh, .claude/skills/planloop/SKILL.md, .claude/skills/planloop/scripts/__pycache__/planloop.cpython-312.pyc, .claude/skills/planloop/scripts/planloop.py, .claude/skills/planloop/tests/__pycache__/test_planloop.cpython-312.pyc, .claude/skills/planloop/tests/test_planloop.py, CLAUDE.md, docs/adr/0011-kit-code-format-and-storage.md, docs/adr/0021-split-human-and-agent-work.md, docs/adr/README.md, docs/handoff/ARCHITECTURE.md, docs/handoff/CLAUDE-SECTION.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-00-architecture-lock.md, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "hits": 21,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-vtk --direction=up",
+   "purpose": "seed: beads that depend on this Phase 1 bead; hits: jade-80h, jade-h8i, jade-urd, jade-vtk.2, jade-vtk.1, jade-4zw, jade-xu0, jade-lhq, jade-alt, jade-8v4",
+   "hits": 10,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-vtk",
+   "purpose": "seed: beads this Phase 1 bead depends on; hits: none",
+   "hits": 0,
+   "match_proof": "bd dep list jade-h8i on the same database lists jade-hqq and jade-vtk, so the command returns rows when they exist"
+  },
+  {
+   "command": "bd dep list jade-h8i --direction=up",
+   "purpose": "seed: beads that depend on this Phase 1 bead; hits: jade-3ek, jade-8v4, jade-5kj, jade-urd, jade-lhq",
+   "hits": 5,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-h8i",
+   "purpose": "seed: beads this Phase 1 bead depends on; hits: jade-vtk, jade-hqq",
+   "hits": 2,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-urd --direction=up",
+   "purpose": "seed: beads that depend on this Phase 1 bead; hits: jade-80h, jade-o07, jade-xu0",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-urd",
+   "purpose": "seed: beads this Phase 1 bead depends on; hits: jade-h8i, jade-vtk",
+   "hits": 2,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-8v4 --direction=up",
+   "purpose": "seed: beads that depend on this Phase 1 bead; hits: jade-alt, jade-fd5, jade-lnn.1",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-8v4",
+   "purpose": "seed: beads this Phase 1 bead depends on; hits: jade-h8i, jade-vtk",
+   "hits": 2,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-xu0 --direction=up",
+   "purpose": "seed: beads that depend on this Phase 1 bead; hits: jade-4zw",
+   "hits": 1,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-xu0",
+   "purpose": "seed: beads this Phase 1 bead depends on; hits: jade-vtk, jade-urd",
+   "hits": 2,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-80h --direction=up",
+   "purpose": "seed: beads that depend on this Phase 1 bead; hits: jade-8ho, jade-u8z, jade-4zw, jade-ada",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-80h",
+   "purpose": "seed: beads this Phase 1 bead depends on; hits: jade-vtk, jade-urd, jade-alt",
+   "hits": 3,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-4zw --direction=up",
+   "purpose": "seed: beads that depend on this Phase 1 bead; hits: jade-0d8, jade-kn0",
+   "hits": 2,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-4zw",
+   "purpose": "seed: beads this Phase 1 bead depends on; hits: jade-0za, jade-80h, jade-vtk, jade-xu0",
+   "hits": 4,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-alt --direction=up",
+   "purpose": "seed: beads that depend on this Phase 1 bead; hits: jade-80h, jade-ada",
+   "hits": 2,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-alt",
+   "purpose": "seed: beads this Phase 1 bead depends on; hits: jade-8v4, jade-vtk",
+   "hits": 2,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-lhq --direction=up",
+   "purpose": "seed: beads that depend on this Phase 1 bead; hits: jade-5nj",
+   "hits": 1,
+   "match_proof": null
+  },
+  {
+   "command": "bd dep list jade-lhq",
+   "purpose": "seed: beads this Phase 1 bead depends on; hits: jade-vtk, jade-h8i",
+   "hits": 2,
+   "match_proof": null
+  },
+  {
+   "command": "git remote -v",
+   "purpose": "does a git remote exist (ADR assumption A6, GitHub Actions, branch protection); hits: none",
+   "hits": 0,
+   "match_proof": "git remote -v prints one line per configured remote; 'git log -1 --oneline' in the same repo prints d06791b, so the repository is readable and the empty output means no remote is configured"
+  }
+ ],
+ "sources": [
+  {
+   "path": "CLAUDE.md",
+   "class": "binding",
+   "reason": "rules 1-6 and 8, the bead workflow (gates, authorization matrix for every new route, merge once CI is green), stop-and-ask on secrets/DNS; OB38-OB50"
+  },
+  {
+   "path": "docs/handoff/phases/phase-01-foundation.md",
+   "class": "binding",
+   "reason": "Phase 1 phase file: exit criteria (OB35-OB37) and the eight task sections, which are byte-identical to the bead descriptions and acceptance criteria (OB1-OB32)"
+  },
+  {
+   "path": "bead:jade-vtk",
+   "class": "binding",
+   "reason": "Phase 1 epic: goal statement (OB34); its acceptance criteria equal the phase exit criteria (OB35-OB37)"
+  },
+  {
+   "path": "bead:jade-h8i",
+   "class": "binding",
+   "reason": "Phase 1 agent bead p1-scaffold: acceptance criteria and description are binding (notes carry Mike's Node 24 pin, OB33; bundle this bead with the notes field)"
+  },
+  {
+   "path": "bead:jade-urd",
+   "class": "binding",
+   "reason": "Phase 1 agent bead p1-db: acceptance criteria and description are binding"
+  },
+  {
+   "path": "bead:jade-8v4",
+   "class": "binding",
+   "reason": "Phase 1 agent bead p1-config: acceptance criteria and description are binding"
+  },
+  {
+   "path": "bead:jade-xu0",
+   "class": "binding",
+   "reason": "Phase 1 agent bead p1-ci: acceptance criteria and description are binding"
+  },
+  {
+   "path": "bead:jade-80h",
+   "class": "binding",
+   "reason": "Phase 1 agent bead p1-docker: acceptance criteria and description are binding"
+  },
+  {
+   "path": "bead:jade-4zw",
+   "class": "binding",
+   "reason": "Phase 1 agent bead p1-staging: acceptance criteria and description are binding ; blocked by human bead jade-0za"
+  },
+  {
+   "path": "bead:jade-alt",
+   "class": "binding",
+   "reason": "Phase 1 agent bead p1-observability: acceptance criteria and description are binding"
+  },
+  {
+   "path": "bead:jade-lhq",
+   "class": "binding",
+   "reason": "Phase 1 agent bead p1-ui-shell: acceptance criteria and description are binding"
+  },
+  {
+   "path": "docs/adr/0002-modular-monolith-in-sveltekit.md",
+   "class": "binding",
+   "reason": "SvelteKit adapter-node TS strict, module folders with index.ts (jade-h8i); OB51"
+  },
+  {
+   "path": "docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md",
+   "class": "binding",
+   "reason": "PostgreSQL 16, Drizzle, forward-only SQL migrations run on deploy, compatible with previous app version (jade-urd); OB52-OB53"
+  },
+  {
+   "path": "docs/adr/0004-one-canadian-vm-docker-compose.md",
+   "class": "binding",
+   "reason": "Compose stack Caddy/app/Postgres on a Canadian VM, staging a second VM, provider a human decision (jade-80h, jade-4zw); OB54"
+  },
+  {
+   "path": "docs/adr/0007-self-hosted-same-origin-video.md",
+   "class": "binding",
+   "reason": "Caddy serves /media with Range support behind signed URLs; jade-80h configures Caddy static /media; OB55"
+  },
+  {
+   "path": "docs/adr/0009-consent-gated-logging.md",
+   "class": "binding",
+   "reason": "zero activity stored server-side with logging off; constrains what jade-alt request logs may record; OB56"
+  },
+  {
+   "path": "docs/adr/0011-kit-code-format-and-storage.md",
+   "class": "binding",
+   "reason": "CODE_PEPPER read from config with no production default (jade-8v4); OB57"
+  },
+  {
+   "path": "docs/adr/0013-no-third-party-requests-from-the-browser.md",
+   "class": "binding",
+   "reason": "no third-party fonts/scripts, e2e asserts it (jade-lhq); OB58"
+  },
+  {
+   "path": "docs/adr/0014-staging-from-phase-1.md",
+   "class": "binding",
+   "reason": "staging before feature work, deployed on every merge to main (jade-4zw); OB59"
+  },
+  {
+   "path": "docs/adr/0015-tooling.md",
+   "class": "binding",
+   "reason": "toolchain: pnpm, Node LTS pinned, ESLint/Prettier, Vitest, Playwright Chromium+WebKit, GitHub Actions, zod (jade-h8i, jade-xu0, jade-8v4); OB60"
+  },
+  {
+   "path": "docs/adr/README.md",
+   "class": "binding",
+   "reason": "ADR index and assumption A6 (GitHub hosting) unconfirmed, no git remote (jade-xu0 branch protection, GitHub Actions); OB61"
+  },
+  {
+   "path": "docs/handoff/ARCHITECTURE.md",
+   "class": "binding",
+   "reason": "section 4 Caddy row and repo layout/module-boundary rule (jade-h8i, jade-80h), section 9 IP row (jade-alt, jade-80h), section 10 environments and releases (jade-4zw, jade-urd); OB62-OB68"
+  },
+  {
+   "path": "docs/handoff/DATA-MODEL.md",
+   "class": "binding",
+   "reason": "Phase 1 creates no domain tables (Phase 2/6 do); app DB role grants on events bear on the migration role vs app role split in jade-urd/jade-8v4; OB69-OB70"
+  },
+  {
+   "path": "docs/handoff/PRIVACY.md",
+   "class": "binding",
+   "reason": "server logs row (14 days, no IPs, emails, codes, tokens or bodies), not-collected list, Canada-only hosting and no third-party browser traffic (jade-alt, jade-80h, jade-lhq, jade-4zw); OB71-OB73"
+  },
+  {
+   "path": "docs/threat-model.md",
+   "class": "binding",
+   "reason": "TB1, TB2, TB9, the CODE_PEPPER asset row, AB9, AB16 and the repository/CI actor name Phase 1 beads (jade-80h, jade-alt, jade-8v4, jade-4zw, jade-xu0); OB74-OB80"
+  },
+  {
+   "path": "docs/handoff/EVENTS.md",
+   "class": "candidate",
+   "reason": "event catalog and ingest rules are Phase 6; Phase 1 only creates the empty events module folder and src/lib/shared/events placeholder; no EVENTS.md rule applies to Phase 1 code (its IP/user-agent exclusion is for event payloads)"
+  },
+  {
+   "path": "docs/handoff/DECISIONS.md",
+   "class": "candidate",
+   "reason": "source of ADR-01..15; docs/adr/0001-0015 are the current text and carry the obligations"
+  },
+  {
+   "path": "docs/handoff/phases/phase-09-privacy-security-hardening.md",
+   "class": "candidate",
+   "reason": "p9-logs (jade-ada) audits Caddy/app logs built in Phase 1; p9-headers CSP; p9-deps pinned images; downstream of jade-alt/jade-80h"
+  },
+  {
+   "path": "docs/handoff/phases/phase-10-production-deploy.md",
+   "class": "candidate",
+   "reason": "p10-cd health gate, rollback and backward-compatible migrations; p10-monitoring uptime on /readyz; p10-secrets; downstream of jade-4zw/jade-80h/jade-alt"
+  },
+  {
+   "path": "docs/handoff/phases/phase-06-event-pipeline.md",
+   "class": "candidate",
+   "reason": "p6-nolog-invariant asserts app logs contain no kit activity, which constrains jade-alt request logging; p6-catalog depends on p1-scaffold"
+  },
+  {
+   "path": "docs/handoff/phases/phase-04-content-pipeline.md",
+   "class": "candidate",
+   "reason": "p4-video (jade-u8z) serves /media through Caddy with signed URLs on top of jade-80h; p4-schema depends on p1-scaffold"
+  },
+  {
+   "path": "docs/handoff/phases/phase-02-data-model-and-kit-codes.md",
+   "class": "candidate",
+   "reason": "p2-schema-core uses the p1-db migration tooling (\"Migrations apply cleanly on an empty database and on staging\"); p2-code-lib uses CODE_PEPPER from p1-config"
+  },
+  {
+   "path": "docs/handoff/phases/phase-05-student-experience.md",
+   "class": "candidate",
+   "reason": "p5-a11y extends the axe and Chromebook checks begun in jade-lhq"
+  },
+  {
+   "path": "docs/handoff/phases/phase-03-accounts-classes-sessions.md",
+   "class": "candidate",
+   "reason": "p3-join depends on p1-ui-shell; p3-authz-tests builds the authorization matrix that new Phase 1 routes must eventually join"
+  },
+  {
+   "path": "docs/handoff/beads/id-map.json",
+   "class": "candidate",
+   "reason": "plan key to bead id map for the eight beads"
+  },
+  {
+   "path": "docs/handoff/START-HERE.md",
+   "class": "candidate",
+   "reason": "calendar row for Phase 1 and the note that the stack is expensive to change after Phase 1"
+  },
+  {
+   "path": "docs/handoff/REVIEW.md",
+   "class": "candidate",
+   "reason": "finding 18 (staging live in Phase 1) and findings 10/11 behind ADRs 0002/0007"
+  },
+  {
+   "path": "docs/handoff/CLAUDE-SECTION.md",
+   "class": "candidate",
+   "reason": "handoff copy of the CLAUDE.md section; CLAUDE.md is current"
+  },
+  {
+   "path": "docs/adr/0006-content-as-markdown-version-locked.md",
+   "class": "candidate",
+   "reason": "content.lock.json CI lint (p4-lock) is added to the Phase 1 CI later; rule 6 is carried by OB43"
+  },
+  {
+   "path": "docs/adr/0020-rate-limit-keys-for-redemption-and-signup.md",
+   "class": "candidate",
+   "reason": "per-IP signup limit is a config flag, off by default, added later to the config module of jade-8v4; IPs in memory only"
+  },
+  {
+   "path": "docs/adr/0021-split-human-and-agent-work.md",
+   "class": "candidate",
+   "reason": "production actions stay human; jade-lnn.1 secrets script builds on jade-8v4"
+  },
+  {
+   "path": "plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "class": "candidate",
+   "reason": "session handoff: Phase 1 order, risk domains, no git remote/CI, open question on merge flow"
+  },
+  {
+   "path": ".claude/skills/bugfix/SKILL.md",
+   "class": "candidate",
+   "reason": "gate commands (pnpm lint/check/test, pnpm e2e needs Postgres) that Phase 1 must make real"
+  },
+  {
+   "path": ".claude/skills/planloop/SKILL.md",
+   "class": "candidate",
+   "reason": "risk domains (privacy, secrets, schema-migration) that Phase 1 touches; Step 0 procedure"
+  },
+  {
+   "path": "bead:jade-0za",
+   "class": "candidate",
+   "reason": "human bead (host, region, domain) that blocks jade-4zw and the third exit criterion; never planned for implementation"
+  },
+  {
+   "path": "bead:jade-ada",
+   "class": "candidate",
+   "reason": "p9-logs audits the logs and Caddy config from jade-alt/jade-80h"
+  },
+  {
+   "path": "bead:jade-lnn.1",
+   "class": "candidate",
+   "reason": "secret generation script that writes CODE_PEPPER/SESSION_SECRET to the env file read by jade-8v4"
+  },
+  {
+   "path": "bead:jade-kn0",
+   "class": "candidate",
+   "reason": "p10-cd health gate/rollback built on jade-4zw; backward-compatible migrations"
+  },
+  {
+   "path": "bead:jade-u8z",
+   "class": "candidate",
+   "reason": "p4-video signed /media URLs on the Caddy config of jade-80h; unsigned URLs return 403"
+  },
+  {
+   "path": "docs/adr/0001-kit-agnostic-platform.md",
+   "class": "irrelevant",
+   "reason": "products/content model; Phase 1 creates no kit data"
+  },
+  {
+   "path": "docs/adr/0005-authentication-without-email.md",
+   "class": "irrelevant",
+   "reason": "auth is Phase 3"
+  },
+  {
+   "path": "docs/adr/0008-event-integrity.md",
+   "class": "irrelevant",
+   "reason": "events are Phase 6"
+  },
+  {
+   "path": "docs/adr/0010-kit-is-the-unit-of-analysis.md",
+   "class": "irrelevant",
+   "reason": "analysis unit; no Phase 1 code"
+  },
+  {
+   "path": "docs/adr/0012-device-telemetry-and-ai-assistant-out-of-scope.md",
+   "class": "irrelevant",
+   "reason": "out-of-scope features"
+  },
+  {
+   "path": "docs/adr/0016-step-views-and-retention-post-launch-ok.md",
+   "class": "irrelevant",
+   "reason": "Phase 8/9 labels"
+  },
+  {
+   "path": "docs/adr/0017-live-stuck-alerts-for-no-log-kits.md",
+   "class": "irrelevant",
+   "reason": "Phase 6/7 alert path"
+  },
+  {
+   "path": "docs/adr/0018-stale-timestamps-flagged-not-clamped.md",
+   "class": "irrelevant",
+   "reason": "Phase 6 ingest"
+  },
+  {
+   "path": "docs/adr/0019-participant-letters-a-to-d.md",
+   "class": "irrelevant",
+   "reason": "Phase 7 quiz entry"
+  },
+  {
+   "path": "docs/adr/0022-open-product-questions-scope.md",
+   "class": "irrelevant",
+   "reason": "scope of jade-6is"
+  },
+  {
+   "path": "docs/adr/0023-tiered-retention-for-kit-keyed-data.md",
+   "class": "irrelevant",
+   "reason": "Phase 9 retention"
+  },
+  {
+   "path": "docs/handoff/phases/phase-07-facilitator-dashboard.md",
+   "class": "irrelevant",
+   "reason": "hit only on \"Playwright\" (the Phase 7 two-context e2e task)"
+  },
+  {
+   "path": "docs/handoff/phases/phase-08-analytics.md",
+   "class": "irrelevant",
+   "reason": "no hit in any Phase 1 search; listed for completeness of the phase directory"
+  },
+  {
+   "path": "docs/handoff/phases/phase-00-architecture-lock.md",
+   "class": "irrelevant",
+   "reason": "Phase 0 (closed except human beads); p0-host text is carried by bead jade-0za"
+  },
+  {
+   "path": "docs/handoff/phases/README.md",
+   "class": "irrelevant",
+   "reason": "index of phase files"
+  },
+  {
+   "path": "docs/handoff/beads/plan.json",
+   "class": "irrelevant",
+   "reason": "generated seed data duplicating the phase files"
+  },
+  {
+   "path": "docs/handoff/beads/expected.json",
+   "class": "irrelevant",
+   "reason": "generated seed check data"
+  },
+  {
+   "path": "docs/handoff/tools/build_plan.py",
+   "class": "irrelevant",
+   "reason": "generator of the phase files and beads"
+  },
+  {
+   "path": "docs/handoff/architecture.svg",
+   "class": "irrelevant",
+   "reason": "image of ARCHITECTURE.md section 3"
+  },
+  {
+   "path": "docs/handoff/architecture.png",
+   "class": "irrelevant",
+   "reason": "image of ARCHITECTURE.md section 3"
+  },
+  {
+   "path": "AGENTS.md",
+   "class": "irrelevant",
+   "reason": "searched (no hit); bd usage and shell guidance only"
+  },
+  {
+   "path": ".claude/skills/planloop/scripts/planloop.py",
+   "class": "irrelevant",
+   "reason": "tool code; hits are generic words"
+  },
+  {
+   "path": ".claude/skills/planloop/tests/test_planloop.py",
+   "class": "irrelevant",
+   "reason": "tool tests"
+  },
+  {
+   "path": ".claude/skills/planloop/references/formats.md",
+   "class": "irrelevant",
+   "reason": "record formats; used for this file only"
+  },
+  {
+   "path": ".claude/skills/bugfix/tests/test_fixpatch.sh",
+   "class": "irrelevant",
+   "reason": "tool tests"
+  },
+  {
+   "path": ".claude/skills/bugfix/references/walkthroughs.md",
+   "class": "irrelevant",
+   "reason": "quartz-rs walkthroughs (hit on WebKit)"
+  },
+  {
+   "path": ".claude/skills/planloop/scripts/__pycache__/planloop.cpython-312.pyc",
+   "class": "irrelevant",
+   "reason": "compiled bytecode of planloop.py"
+  },
+  {
+   "path": ".claude/skills/planloop/tests/__pycache__/test_planloop.cpython-312.pyc",
+   "class": "irrelevant",
+   "reason": "compiled bytecode of test_planloop.py"
+  },
+  {
+   "path": ".claude/skills/planloop/tests/fixtures/codex-0.156.1-rollout-shape.json",
+   "class": "irrelevant",
+   "reason": "Codex transcript fixture; hit on \"Toronto\" is incidental"
+  }
+ ],
+ "known_omissions": []
+}

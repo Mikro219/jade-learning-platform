@@ -1,0 +1,1 @@
+{"name":"decide-D1","ops":[{"key":"finding:jade-vtk.pl1:R18","meta":{"planloop_resolution":"decisions/D1.json","planloop_state":"decided"},"reason":"decided by Mike, decisions/D1.json","status":"closed"},{"key":"run:jade-vtk.pl1","meta":{"planloop_redesign_required":""}}],"schema":"planloop-intent/1","state":"verified"}
