@@ -26,11 +26,18 @@ From a fresh clone:
 ```sh
 pnpm install --frozen-lockfile
 pnpm exec playwright install chromium webkit
+pnpm env:init
 ```
 
 <!-- setup:end -->
 
 Then `pnpm dev` serves the app on <http://localhost:5173>.
+
+`pnpm env:init` writes `.env` (mode 600, ignored by git) with freshly generated secrets and prints
+the variable names only. It never overwrites an existing `.env`. Every variable is documented in
+`.env.example`; nothing in the repository holds a secret value. The app refuses to start, naming
+the missing or invalid variables, when its configuration is incomplete. `.env` is read only
+outside production; the built server (`node build`) reads its settings from the environment.
 
 ## The gate
 

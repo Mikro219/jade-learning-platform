@@ -24,6 +24,7 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"start": "node build",
+		"env:init": "node tools/env-init.ts",
 		"prepare": "svelte-kit sync || echo ''",
 		"lint": "prettier --check . && eslint . --max-warnings 0",
 		"format": "prettier --write .",
@@ -51,5 +52,8 @@
 		"typescript-eslint": "8.72.2",
 		"vite": "8.3.8",
 		"vitest": "5.1.0"
+	},
+	"dependencies": {
+		"zod": "4.6.7"
 	}
 }

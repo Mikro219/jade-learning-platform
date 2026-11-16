@@ -18,3 +18,8 @@ blob-report/
 coverage/
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Env files hold secrets (plan V4, INV4); only the documented example is tracked (jade-8v4)
+.env
+.env.*
+!.env.example

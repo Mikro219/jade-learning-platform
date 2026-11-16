@@ -1,5 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 import { freePort } from './tools/free-port.ts';
+import { loadEnv } from './tools/load-env.ts';
+
+// `.env` outside production (plan V6). The server under test never sees it: the webServer command
+// starts `node build` through tests/support/server.ts, which gives it an explicit environment of
+// the harness's APP_ENV=test values (V8), whatever this process's environment holds.
+loadEnv();
 
 // The port is chosen once, by the process that loads this config first, and handed to the
 // workers (which load it again) through the environment (plan H6, PD11).
@@ -35,14 +41,9 @@ export default defineConfig({
 		}
 	],
 	webServer: {
-		command: `${node} node_modules/vite/bin/vite.js build && ${node} build`,
+		command: `${node} node_modules/vite/bin/vite.js build && ${node} tests/support/server.ts --port ${port} --origin ${origin}`,
 		url: `${origin}/`,
 		reuseExistingServer: false,
-		timeout: 180_000,
-		env: {
-			HOST: '127.0.0.1',
-			PORT: String(port),
-			ORIGIN: origin
-		}
+		timeout: 180_000
 	}
 });
