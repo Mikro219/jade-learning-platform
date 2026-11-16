@@ -42,6 +42,10 @@
 		"e2e": "playwright test",
 		"test:infra": "vitest run --project infra",
 		"ci:image": "node tools/compose.ts with-stack-env docker buildx bake --file compose.prod.yml --load app",
+		"ci:check": "pnpm lint && pnpm check && node tools/ci/base-ref.ts db-check && pnpm test",
+		"ci:e2e": "playwright test --project chromium --project webkit",
+		"ci:compat": "bash tools/ci/migration-compat.sh",
+		"ci:local": "bash tools/ci/local.sh",
 		"ci:clean-clone": "bash tools/ci/clean-clone.sh"
 	},
 	"devDependencies": {
@@ -64,7 +68,8 @@
 		"typescript": "6.0.3",
 		"typescript-eslint": "8.72.2",
 		"vite": "8.3.8",
-		"vitest": "5.1.0"
+		"vitest": "5.1.0",
+		"yaml": "2.9.1"
 	},
 	"dependencies": {
 		"drizzle-orm": "0.45.4",
