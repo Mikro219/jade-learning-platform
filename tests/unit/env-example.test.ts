@@ -5,7 +5,11 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseEnv } from 'node:util';
 import { describe, expect, it } from 'vitest';
-import { CONFIG_KEYS, SECRET_KEYS } from '../../src/lib/server/config/index.ts';
+import {
+	CONFIG_KEYS,
+	MIGRATION_SECRET_KEYS,
+	SECRET_KEYS
+} from '../../src/lib/server/config/index.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const text = readFileSync(join(root, '.env.example'), 'utf8');
@@ -36,8 +40,9 @@ export function composeVars(source: string): string[] {
 	return [...source.matchAll(/\$\{([A-Za-z_][A-Za-z0-9_]*)/g)].map((m) => m[1]!);
 }
 
+const ALL_SECRET_KEYS: readonly string[] = [...SECRET_KEYS, ...MIGRATION_SECRET_KEYS];
 const isSecret = (key: string) =>
-	(SECRET_KEYS as readonly string[]).includes(key) || /PASSWORD|SECRET|PEPPER|TOKEN/.test(key);
+	ALL_SECRET_KEYS.includes(key) || /PASSWORD|SECRET|PEPPER|TOKEN/.test(key);
 
 describe('.env.example', () => {
 	it('the scanners find what they look for', () => {
@@ -66,7 +71,7 @@ describe('.env.example', () => {
 
 	it('leaves every secret empty', () => {
 		const secrets = [...keys].filter(isSecret);
-		expect(secrets).toEqual(expect.arrayContaining([...SECRET_KEYS]));
+		expect(secrets).toEqual(expect.arrayContaining([...ALL_SECRET_KEYS]));
 		for (const key of secrets) expect({ key, value: example[key] }).toEqual({ key, value: '' });
 	});
 

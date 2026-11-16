@@ -1,0 +1,28 @@
+# The development database (plan U1). One service, `devdb`, published on 127.0.0.1 only, on the
+# port `pnpm env:init` chose (JADE_DEV_DB_PORT, PD11). No default and no literal for any secret:
+# both variables are required, and `pnpm env:init` writes them to `.env`.
+#
+# Run it through `pnpm db:up` and `pnpm db:down` (tools/compose.ts), which always pass a project
+# name with -p: the exported COMPOSE_PROJECT_NAME when there is one, else one derived from the
+# checkout's path, so two checkouts never share a database (PD13). No service, volume or network
+# name here is shared with compose.prod.yml.
+services:
+  devdb:
+    image: postgres:16.16-bookworm
+    environment:
+      POSTGRES_USER: jade_owner
+      POSTGRES_PASSWORD: ${JADE_OWNER_DB_PASSWORD:?}
+      POSTGRES_DB: jade
+    ports:
+      - '127.0.0.1:${JADE_DEV_DB_PORT:?}:5432'
+    volumes:
+      - devdb-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U jade_owner -d jade -h 127.0.0.1']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+
+volumes:
+  devdb-data:

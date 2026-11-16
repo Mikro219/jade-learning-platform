@@ -1,5 +1,6 @@
-// `pnpm env:init` (plan V5). Grows with the variables each bead adds: jade-urd the database
-// owner's variables and the `ci` profile, jade-80h the stack's variables and the `stack` profile.
+// `pnpm env:init` (plan V5). Grows with the variables each bead adds: jade-urd added the database
+// owner's variables and the `ci` profile; jade-80h adds the stack's variables and the `stack`
+// profile.
 import { execFile } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { createServer, type Server } from 'node:net';
@@ -8,7 +9,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseEnv, promisify } from 'node:util';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { loadAppConfig } from '../../src/lib/server/config/index.ts';
+import { loadAppConfig, loadMigrationConfig } from '../../src/lib/server/config/index.ts';
 
 const run = promisify(execFile);
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -16,14 +17,35 @@ const tool = join(root, 'tools/env-init.ts');
 
 const DEV_NAMES = [
 	'APP_ENV',
+	'JADE_OWNER_DB_PASSWORD',
 	'JADE_APP_DB_PASSWORD',
 	'JADE_DEV_DB_PORT',
+	'MIGRATION_DATABASE_URL',
 	'DATABASE_URL',
 	'CODE_PEPPER',
 	'SESSION_SECRET',
 	'LOG_LEVEL'
 ];
-const GENERATED = ['JADE_APP_DB_PASSWORD', 'DATABASE_URL', 'CODE_PEPPER', 'SESSION_SECRET'];
+const CI_NAMES = [
+	'APP_ENV',
+	'JADE_OWNER_DB_PASSWORD',
+	'JADE_APP_DB_PASSWORD',
+	'MIGRATION_DATABASE_URL',
+	'DATABASE_URL',
+	'CODE_PEPPER',
+	'SESSION_SECRET',
+	'LOG_LEVEL'
+];
+const GENERATED = [
+	'JADE_OWNER_DB_PASSWORD',
+	'JADE_APP_DB_PASSWORD',
+	'MIGRATION_DATABASE_URL',
+	'DATABASE_URL',
+	'CODE_PEPPER',
+	'SESSION_SECRET'
+];
+const CI_GENERATED = GENERATED.filter((name) => name !== 'JADE_OWNER_DB_PASSWORD');
+const CI_OWNER_PASSWORD = 'ci-test-only-owner-password';
 
 interface Result {
 	code: number;
@@ -31,16 +53,18 @@ interface Result {
 	stderr: string;
 }
 
-/** Run the tool with an explicit, empty environment: nothing comes from this process's env. */
-async function envInit(...args: string[]): Promise<Result> {
+/** Run the tool with an explicit environment, empty by default: nothing from this process's env. */
+async function envInitWith(env: Record<string, string>, ...args: string[]): Promise<Result> {
 	try {
-		const { stdout, stderr } = await run(process.execPath, [tool, ...args], { cwd: dir, env: {} });
+		const { stdout, stderr } = await run(process.execPath, [tool, ...args], { cwd: dir, env });
 		return { code: 0, stdout, stderr };
 	} catch (err) {
 		const e = err as { code: number; stdout: string; stderr: string };
 		return { code: e.code, stdout: e.stdout, stderr: e.stderr };
 	}
 }
+
+const envInit = (...args: string[]) => envInitWith({}, ...args);
 
 let dir: string;
 beforeEach(() => {
@@ -54,8 +78,12 @@ function readEnv(path: string): Record<string, string> {
 	return parseEnv(readFileSync(path, 'utf8')) as Record<string, string>;
 }
 
-function assertNoValuePrinted(result: Result, values: Record<string, string>) {
-	for (const name of GENERATED) {
+function assertNoValuePrinted(
+	result: Result,
+	values: Record<string, string>,
+	names: readonly string[] = GENERATED
+) {
+	for (const name of names) {
 		expect(result.stdout).not.toContain(values[name]);
 		expect(result.stderr).not.toContain(values[name]);
 	}
@@ -80,10 +108,20 @@ describe('dev profile', () => {
 		expect(url.host).toBe(`127.0.0.1:${env.JADE_DEV_DB_PORT}`);
 		expect(url.pathname).toBe('/jade');
 
+		const owner = new URL(env.MIGRATION_DATABASE_URL!);
+		expect(owner.protocol).toBe('postgres:');
+		expect(owner.username).toBe('jade_owner');
+		expect(owner.password).toBe(env.JADE_OWNER_DB_PASSWORD);
+		expect(owner.host).toBe(`127.0.0.1:${env.JADE_DEV_DB_PORT}`);
+		expect(owner.pathname).toBe('/jade');
+
 		expect(env.JADE_APP_DB_PASSWORD).toMatch(/^[A-Za-z0-9_-]{32,}$/);
+		expect(env.JADE_OWNER_DB_PASSWORD).toMatch(/^[A-Za-z0-9_-]{32,}$/);
+		expect(env.JADE_OWNER_DB_PASSWORD).not.toBe(env.JADE_APP_DB_PASSWORD);
 		expect(env.CODE_PEPPER).not.toBe(env.SESSION_SECRET);
-		// The file is a configuration the app accepts as it stands.
+		// The file is a configuration the app and the migration tool accept as it stands.
 		expect(loadAppConfig(env).appEnv).toBe('development');
+		expect(loadMigrationConfig(env).appEnv).toBe('development');
 
 		// Names only on the output, never a value.
 		expect(result.stdout).toContain(DEV_NAMES.join(', '));
@@ -96,6 +134,7 @@ describe('dev profile', () => {
 		const env = readEnv(out);
 		expect(env.JADE_DEV_DB_PORT).toBe('6543');
 		expect(new URL(env.DATABASE_URL!).port).toBe('6543');
+		expect(new URL(env.MIGRATION_DATABASE_URL!).port).toBe('6543');
 	});
 
 	it('chooses another port when 5432 is held', async () => {
@@ -127,6 +166,76 @@ describe('dev profile', () => {
 	});
 });
 
+describe('ci profile', () => {
+	it('APP_ENV=test, the owner password from the environment, generated app values', async () => {
+		const out = join(dir, '.env');
+		const result = await envInitWith(
+			{ JADE_OWNER_DB_PASSWORD: CI_OWNER_PASSWORD },
+			'--out',
+			out,
+			'--profile',
+			'ci',
+			'--db-port',
+			'54321'
+		);
+		expect(result.code).toBe(0);
+		expect(statSync(out).mode & 0o777).toBe(0o600);
+
+		const env = readEnv(out);
+		expect(Object.keys(env).sort()).toEqual([...CI_NAMES].sort());
+		expect(env.APP_ENV).toBe('test');
+		expect(env.JADE_OWNER_DB_PASSWORD).toBe(CI_OWNER_PASSWORD);
+		// No stack variable and no development port.
+		expect(Object.keys(env).filter((k) => /STACK|SITE|HTTP|ORIGIN|DEV_DB_PORT/.test(k))).toEqual(
+			[]
+		);
+
+		const owner = new URL(env.MIGRATION_DATABASE_URL!);
+		expect(owner.username).toBe('jade_owner');
+		expect(owner.password).toBe(CI_OWNER_PASSWORD);
+		expect(owner.host).toBe('127.0.0.1:54321');
+		const app = new URL(env.DATABASE_URL!);
+		expect(app.username).toBe('jade_app');
+		expect(app.password).toBe(env.JADE_APP_DB_PASSWORD);
+		expect(app.host).toBe('127.0.0.1:54321');
+
+		// Accepted under APP_ENV=test, as the CI job uses it.
+		expect(loadAppConfig(env).appEnv).toBe('test');
+		expect(loadMigrationConfig(env).appEnv).toBe('test');
+
+		expect(result.stdout).toContain(CI_NAMES.join(', '));
+		assertNoValuePrinted(result, env, CI_GENERATED);
+		expect(result.stdout).not.toContain(CI_OWNER_PASSWORD);
+	});
+
+	it('refuses an owner password without test-only, or none, and writes nothing', async () => {
+		const out = join(dir, '.env');
+		const envs: Record<string, string>[] = [{ JADE_OWNER_DB_PASSWORD: 'CanaryOwnerPassword' }, {}];
+		for (const env of envs) {
+			const result = await envInitWith(env, '--out', out, '--profile', 'ci', '--db-port', '5000');
+			expect(result.code).toBe(1);
+			expect(result.stderr).toContain('JADE_OWNER_DB_PASSWORD must be set');
+			expect(result.stderr).not.toContain('CanaryOwnerPassword');
+			expect(result.stdout).not.toContain('CanaryOwnerPassword');
+		}
+		expect(() => statSync(out)).toThrow();
+	});
+
+	it('needs --db-port', async () => {
+		const out = join(dir, '.env');
+		const result = await envInitWith(
+			{ JADE_OWNER_DB_PASSWORD: CI_OWNER_PASSWORD },
+			'--out',
+			out,
+			'--profile',
+			'ci'
+		);
+		expect(result.code).toBe(2);
+		expect(result.stderr).toContain('--profile ci needs --db-port');
+		expect(() => statSync(out)).toThrow();
+	});
+});
+
 describe('refusals', () => {
 	it('a second run onto the same path fails and leaves the file unchanged', async () => {
 		const out = join(dir, '.env');
@@ -141,10 +250,10 @@ describe('refusals', () => {
 
 	it('refuses a profile that does not exist yet, and writes nothing', async () => {
 		const out = join(dir, '.env');
-		for (const profile of ['ci', 'stack', 'nope']) {
+		for (const profile of ['stack', 'nope']) {
 			const result = await envInit('--out', out, '--profile', profile);
 			expect(result.code).toBe(2);
-			expect(result.stderr).toContain('--profile must be one of: dev');
+			expect(result.stderr).toContain('--profile must be one of: dev, ci');
 		}
 		expect(() => statSync(out)).toThrow();
 	});

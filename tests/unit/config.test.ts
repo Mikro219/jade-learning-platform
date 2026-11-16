@@ -5,10 +5,13 @@ import {
 	APP_ENVS,
 	CONFIG_KEYS,
 	ConfigError,
+	MIGRATION_SECRET_KEYS,
 	SECRET_KEYS,
 	configSchema,
 	formatConfigError,
 	loadAppConfig,
+	loadMigrationConfig,
+	migrationConfigSchema,
 	reportConfigError
 } from '../../src/lib/server/config/index.ts';
 
@@ -226,7 +229,108 @@ describe('reportConfigError', () => {
 		);
 	});
 
-	it('the key set is the schema shape', () => {
-		expect([...CONFIG_KEYS].sort()).toEqual(Object.keys(configSchema.shape).sort());
+	it("the key set is the union of the schemas' shapes", () => {
+		const shapes = new Set([
+			...Object.keys(configSchema.shape),
+			...Object.keys(migrationConfigSchema.shape)
+		]);
+		expect([...CONFIG_KEYS].sort()).toEqual([...shapes].sort());
+	});
+});
+
+// The migration tool's configuration (plan U2, jade-urd).
+const OWNER_PASSWORD = 'CanaryOwnerPassword4';
+
+function migrationEnv(appEnv: string = 'development'): Record<string, string> {
+	return {
+		APP_ENV: appEnv,
+		MIGRATION_DATABASE_URL: `postgres://jade_owner:${OWNER_PASSWORD}@127.0.0.1:5432/jade`,
+		DATABASE_URL: `postgres://jade_app:${DB_PASSWORD}@127.0.0.1:5432/jade`
+	};
+}
+
+function migrationError(env: Record<string, string | undefined>): ConfigError {
+	try {
+		loadMigrationConfig(env);
+	} catch (err) {
+		expect(err).toBeInstanceOf(ConfigError);
+		return err as ConfigError;
+	}
+	throw new Error('loadMigrationConfig accepted the environment');
+}
+
+describe('loadMigrationConfig', () => {
+	it.each(APP_ENVS)('accepts a complete environment under APP_ENV=%s', (appEnv) => {
+		const config = loadMigrationConfig(migrationEnv(appEnv));
+		expect(config).toEqual({
+			appEnv,
+			migrationDatabaseUrl: migrationEnv().MIGRATION_DATABASE_URL,
+			databaseUrl: migrationEnv().DATABASE_URL
+		});
+		expect(Object.isFrozen(config)).toBe(true);
+	});
+
+	it('needs neither CODE_PEPPER nor SESSION_SECRET, and the app never reads the owner URL', () => {
+		expect(() => loadMigrationConfig(migrationEnv())).not.toThrow();
+		const appConfig = loadAppConfig({ ...validEnv(), ...migrationEnv() });
+		expect(JSON.stringify(appConfig)).not.toContain(OWNER_PASSWORD);
+	});
+
+	it.each(['APP_ENV', ...MIGRATION_SECRET_KEYS])('names %s when it is missing', (key) => {
+		for (const appEnv of APP_ENVS) {
+			expect(migrationError(without(migrationEnv(appEnv), key)).missing).toEqual([key]);
+		}
+	});
+
+	it('refuses an owner URL for another role and an app URL for the owner', () => {
+		const err = migrationError({
+			...migrationEnv(),
+			MIGRATION_DATABASE_URL: migrationEnv().DATABASE_URL,
+			DATABASE_URL: migrationEnv().MIGRATION_DATABASE_URL
+		});
+		expect(err.invalid).toEqual(['MIGRATION_DATABASE_URL', 'DATABASE_URL']);
+		expect(err.message).toContain(
+			'MIGRATION_DATABASE_URL (must be a postgres URL for role jade_owner)'
+		);
+		expect(err.message).not.toContain(OWNER_PASSWORD);
+		expect(err.message).not.toContain(DB_PASSWORD);
+	});
+
+	it('refuses URLs that name different databases', () => {
+		for (const other of [
+			'postgres://jade_app:x@127.0.0.1:5432/other',
+			'postgres://jade_app:x@127.0.0.1:6543/jade',
+			'postgres://jade_app:x@db/jade'
+		]) {
+			const err = migrationError({ ...migrationEnv(), DATABASE_URL: other });
+			expect(err.invalid).toEqual(['DATABASE_URL']);
+			expect(err.message).toContain(
+				'DATABASE_URL (must name the same host, port and database as MIGRATION_DATABASE_URL)'
+			);
+		}
+	});
+
+	it('refuses a test-only value unless APP_ENV is test, and NODE_ENV=production development', () => {
+		const env = {
+			...migrationEnv('test'),
+			MIGRATION_DATABASE_URL: 'postgres://jade_owner:test-only-pw@127.0.0.1:5432/jade'
+		};
+		expect(() => loadMigrationConfig(env)).not.toThrow();
+		expect(migrationError({ ...env, APP_ENV: 'production' }).invalid).toEqual([
+			'MIGRATION_DATABASE_URL'
+		]);
+		expect(migrationError({ ...migrationEnv(), NODE_ENV: 'production' }).invalid).toEqual([
+			'APP_ENV'
+		]);
+	});
+
+	it('reportConfigError names MIGRATION_DATABASE_URL, not [invalid]', () => {
+		const lines: string[] = [];
+		reportConfigError(migrationError(without(migrationEnv(), 'MIGRATION_DATABASE_URL')), (l) =>
+			lines.push(l)
+		);
+		expect(lines).toEqual([
+			'Configuration error. Missing: MIGRATION_DATABASE_URL. See .env.example.\n'
+		]);
 	});
 });

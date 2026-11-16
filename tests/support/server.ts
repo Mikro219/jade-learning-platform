@@ -3,7 +3,8 @@
 // freePort() and an explicit environment object: never a copy of process.env.
 //
 // Run directly (`node tests/support/server.ts --port <p> --origin <url>`), it serves the build in
-// the foreground with the harness's `APP_ENV=test` values; Playwright's webServer uses this.
+// the foreground with the harness's `APP_ENV=test` values; Playwright's webServer uses this, and
+// passes the URL of the run's e2e database (plan U7) as JADE_E2E_DATABASE_URL.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { freePort } from '../../tools/free-port.ts';
@@ -150,9 +151,12 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 		process.stderr.write('usage: server.ts --port <port> --origin <url>\n');
 		process.exit(2);
 	}
+	const env = await testEnv();
+	const databaseUrl = process.env['JADE_E2E_DATABASE_URL'];
+	if (databaseUrl) env['DATABASE_URL'] = databaseUrl;
 	const child = spawn(process.execPath, [BUILD], {
 		cwd: root,
-		env: { ...(await testEnv()), HOST: '127.0.0.1', PORT: port, ORIGIN: origin },
+		env: { ...env, HOST: '127.0.0.1', PORT: port, ORIGIN: origin },
 		stdio: 'inherit'
 	});
 	for (const signal of ['SIGINT', 'SIGTERM'] as const) {
