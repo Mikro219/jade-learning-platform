@@ -56,9 +56,15 @@ describe('pnpm pin', () => {
 });
 
 describe('Postgres pin', () => {
+	// compose.dev.yml exists from jade-urd on; the other two join when jade-80h and jade-xu0 add them.
 	const files = ['compose.dev.yml', 'compose.prod.yml', '.github/workflows/ci.yml'].filter(exists);
 
-	it.runIf(files.length > 0)('every file that names Postgres names one Postgres 16 image', () => {
+	it('compose.dev.yml exists and names a Postgres image', () => {
+		expect(files).toContain('compose.dev.yml');
+		expect(read('compose.dev.yml')).toMatch(/^\s*image:\s*postgres:16\.\d+-bookworm\s*$/m);
+	});
+
+	it('every file that names Postgres names one Postgres 16 image', () => {
 		const images = new Set<string>();
 		for (const file of files) {
 			for (const m of read(file).matchAll(/\bpostgres:[\w.-]+/g)) images.add(m[0]);

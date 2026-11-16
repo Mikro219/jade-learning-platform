@@ -3,10 +3,15 @@
 // variable names only, never a value. Node built-ins and tools/free-port.ts only, so it also runs
 // in the image.
 //
-// Profiles: `dev` (the default, the README's). jade-urd adds the database owner's variables and
-// the `ci` profile; jade-80h adds the local stack's variables and the `stack` profile.
+// Profiles (jade-80h adds the local stack's variables and the `stack` profile):
+//   - `dev`, the default and the README's: APP_ENV=development, both database passwords and both
+//     URLs, written from the same generated values, the app's secrets.
+//   - `ci`, for a CI job (X2): APP_ENV=test; JADE_OWNER_DB_PASSWORD taken from the job's
+//     environment (the service container's literal password), refused unless it contains
+//     `test-only`; the app password and the app's secrets generated; both URLs at
+//     127.0.0.1:<--db-port>, which is required.
 //
-//   pnpm env:init [--out <path>] [--profile dev] [--db-port <port>]
+//   pnpm env:init [--out <path>] [--profile dev|ci] [--db-port <port>]
 import { randomBytes } from 'node:crypto';
 import { chmodSync, closeSync, openSync, writeSync } from 'node:fs';
 import { connect, createServer } from 'node:net';
@@ -14,7 +19,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { freePort } from './free-port.ts';
 
-export const PROFILES = ['dev'] as const;
+export const PROFILES = ['dev', 'ci'] as const;
 export type Profile = (typeof PROFILES)[number];
 
 /** A secret: 32 random bytes in base64url, 43 characters of `[A-Za-z0-9_-]`. */
@@ -30,6 +35,11 @@ export function generatePassword(): string {
 /** The development database URL for role `jade_app`. */
 export function appDatabaseUrl(password: string, port: number): string {
 	return `postgres://jade_app:${password}@127.0.0.1:${port}/jade`;
+}
+
+/** The development database URL for role `jade_owner`, which only the migration tool reads. */
+export function ownerDatabaseUrl(password: string, port: number): string {
+	return `postgres://jade_owner:${password}@127.0.0.1:${port}/jade`;
 }
 
 const DEFAULT_DB_PORT = 5432;
@@ -70,19 +80,49 @@ export async function chooseDbPort(given?: number): Promise<number> {
 	return freePort();
 }
 
+class UsageError extends Error {}
+
+/** A refusal of the input: a fixed message naming variables, never a value. */
+class RefusedError extends Error {}
+
 /** The variables of a profile, in file order. */
 export async function profileVariables(
 	profile: Profile,
-	options: { dbPort?: number } = {}
+	options: { dbPort?: number; env?: Readonly<Record<string, string | undefined>> } = {}
 ): Promise<[string, string][]> {
 	switch (profile) {
 		case 'dev': {
 			const port = await chooseDbPort(options.dbPort);
+			const ownerPassword = generatePassword();
 			const appPassword = generatePassword();
 			return [
 				['APP_ENV', 'development'],
+				['JADE_OWNER_DB_PASSWORD', ownerPassword],
 				['JADE_APP_DB_PASSWORD', appPassword],
 				['JADE_DEV_DB_PORT', String(port)],
+				['MIGRATION_DATABASE_URL', ownerDatabaseUrl(ownerPassword, port)],
+				['DATABASE_URL', appDatabaseUrl(appPassword, port)],
+				['CODE_PEPPER', generateSecret()],
+				['SESSION_SECRET', generateSecret()],
+				['LOG_LEVEL', 'info']
+			];
+		}
+		case 'ci': {
+			const port = options.dbPort;
+			if (port === undefined) throw new UsageError('--profile ci needs --db-port');
+			const ownerPassword = options.env?.['JADE_OWNER_DB_PASSWORD'] ?? '';
+			// It sits in a URL unescaped, and it is a CI-only literal (X2): test-only, or refused.
+			if (!/^[A-Za-z0-9_-]+$/.test(ownerPassword) || !ownerPassword.includes('test-only')) {
+				throw new RefusedError(
+					'JADE_OWNER_DB_PASSWORD must be set to a [A-Za-z0-9_-] value containing test-only'
+				);
+			}
+			const appPassword = generatePassword();
+			return [
+				['APP_ENV', 'test'],
+				['JADE_OWNER_DB_PASSWORD', ownerPassword],
+				['JADE_APP_DB_PASSWORD', appPassword],
+				['MIGRATION_DATABASE_URL', ownerDatabaseUrl(ownerPassword, port)],
 				['DATABASE_URL', appDatabaseUrl(appPassword, port)],
 				['CODE_PEPPER', generateSecret()],
 				['SESSION_SECRET', generateSecret()],
@@ -91,8 +131,6 @@ export async function profileVariables(
 		}
 	}
 }
-
-class UsageError extends Error {}
 
 interface Args {
 	out: string;
@@ -133,7 +171,7 @@ function parseArgs(argv: readonly string[]): Args {
 			default:
 				// The flag itself is not echoed: it might be a value pasted in the wrong place.
 				throw new UsageError(
-					'unknown argument; usage: env:init [--out <path>] [--profile dev] [--db-port <port>]'
+					'unknown argument; usage: env:init [--out <path>] [--profile dev|ci] [--db-port <port>]'
 				);
 		}
 	}
@@ -170,7 +208,20 @@ export async function main(argv: readonly string[]): Promise<number> {
 		throw err;
 	}
 	const path = resolve(args.out);
-	const variables = await profileVariables(args.profile, { dbPort: args.dbPort });
+	let variables: [string, string][];
+	try {
+		variables = await profileVariables(args.profile, { dbPort: args.dbPort, env: process.env });
+	} catch (err) {
+		if (err instanceof UsageError) {
+			process.stderr.write(`env:init: ${err.message}\n`);
+			return 2;
+		}
+		if (err instanceof RefusedError) {
+			process.stderr.write(`env:init: ${err.message}; nothing was written.\n`);
+			return 1;
+		}
+		throw err;
+	}
 	try {
 		writeEnvFile(path, variables);
 	} catch (err) {

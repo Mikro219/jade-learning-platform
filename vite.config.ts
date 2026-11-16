@@ -32,6 +32,19 @@ export default defineConfig({
 				}
 			},
 			{
+				// Database tests (plan U7): each file gets its own database on the one cluster that
+				// MIGRATION_DATABASE_URL names, cloned from a template global setup migrates once per run.
+				test: {
+					name: 'integration',
+					environment: 'node',
+					include: ['tests/integration/**/*.test.ts'],
+					globalSetup: ['tests/support/global-setup-db.ts'],
+					expect: { requireAssertions: true },
+					testTimeout: 60_000,
+					hookTimeout: 180_000
+				}
+			},
+			{
 				// Black-box checks of the built server (plan PD9). They build the app themselves.
 				test: {
 					name: 'blackbox',

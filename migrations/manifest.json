@@ -1,0 +1,8 @@
+{
+	"migrations": [
+		{
+			"name": "0000_baseline",
+			"sha256": "34d95aeca59b378e7fa95815cddb525fc55d9edcdb3a482a5675b241634d0617"
+		}
+	]
+}

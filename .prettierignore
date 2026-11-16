@@ -17,3 +17,6 @@ bun.lockb
 /.codex/
 /AGENTS.md
 /CLAUDE.md
+
+# Written by Drizzle Kit (`pnpm db:generate`) in its own format
+/migrations/meta/
