@@ -1,0 +1,62 @@
+/*
+ * Design tokens (plan section 13, L1). Every colour pair below meets WCAG AA for normal text
+ * (4.5:1) and every non-text pair meets 3:1; the ratio is noted beside each pair.
+ * The font stack is the system's own: no font-face rule and no font file (CLAUDE.md rule 5).
+ */
+:root {
+	/* Colour pairs */
+	--color-bg: #ffffff;
+	--color-text: #1b1f1d; /* on --color-bg: 16.66:1 */
+	--color-text-muted: #4a524e; /* on --color-bg: 8.05:1; on --color-surface: 7.40:1 */
+	--color-link: #0a5c47; /* on --color-bg: 7.97:1; on --color-surface: 7.33:1 */
+	--color-surface: #f3f6f4; /* --color-text on it: 15.31:1 */
+	--color-accent: #0a5c47;
+	--color-on-accent: #ffffff; /* on --color-accent: 7.97:1 */
+	--color-accent-strong: #074536; /* --color-on-accent on it: 10.97:1 (hover) */
+	--color-staff-band: #4b2a6e;
+	--color-on-staff-band: #ffffff; /* on --color-staff-band: 11.32:1 */
+	--color-border: #6b7470; /* on --color-bg: 4.82:1 (non-text, 3:1 needed) */
+	--color-focus: #0a5c47; /* on --color-bg: 7.97:1 (non-text, 3:1 needed) */
+	--color-focus-on-dark: #ffd166; /* on --color-staff-band: 7.85:1 */
+
+	/* Spacing */
+	--space-1: 0.25rem;
+	--space-2: 0.5rem;
+	--space-3: 0.75rem;
+	--space-4: 1rem;
+	--space-5: 1.5rem;
+	--space-6: 2rem;
+	--space-7: 3rem;
+
+	/* Radii */
+	--radius-sm: 4px;
+	--radius-md: 8px;
+	--radius-lg: 16px;
+	--radius-pill: 999px;
+
+	/* Type scale */
+	--font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+	--text-xs: 0.8125rem; /* 13px */
+	--text-sm: 0.875rem; /* 14px */
+	--text-md: 1rem; /* 16px */
+	--text-lg: 1.125rem; /* 18px: student body text */
+	--text-xl: 1.375rem; /* 22px */
+	--text-2xl: 1.75rem; /* 28px */
+	--text-3xl: 2.25rem; /* 36px */
+	--leading-tight: 1.2;
+	--leading-body: 1.5;
+
+	/* Targets */
+	--tap-min: 48px; /* student shell */
+	--target-min: 24px; /* everywhere else: WCAG 2.5.8 */
+
+	/* Motion */
+	--duration-short: 150ms;
+
+	/* Focus */
+	--focus-width: 3px;
+	--focus-offset: 2px;
+
+	/* Layout */
+	--measure: 40rem;
+}

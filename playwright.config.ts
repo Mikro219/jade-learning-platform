@@ -53,7 +53,18 @@ export default defineConfig({
 	projects: [
 		{
 			name: 'chromium',
-			use: { ...devices['Desktop Chrome'], viewport: { width: 1366, height: 768 } }
+			use: {
+				...devices['Desktop Chrome'],
+				viewport: { width: 1366, height: 768 },
+				// No GPU process at all. On a WSL2 host with GPU passthrough, a fresh Chromium's GPU
+				// process (hardware or SwiftShader) can take over a minute to serve its first frame or
+				// canvas read, which stalls Playwright's hover stability check and axe's color-contrast
+				// rule (jade-lhq). With both flags Chromium composites in the browser process. They apply
+				// everywhere on purpose, CI included, so every machine runs the same configuration.
+				// WebGL is unavailable in this project as a result: a future WebGL feature needs a
+				// Playwright project of its own without these flags.
+				launchOptions: { args: ['--disable-gpu', '--disable-software-rasterizer'] }
+			}
 		},
 		{
 			name: 'webkit',

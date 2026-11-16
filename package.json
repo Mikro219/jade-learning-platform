@@ -49,6 +49,7 @@
 		"ci:clean-clone": "bash tools/ci/clean-clone.sh"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "4.14.0",
 		"@eslint/js": "10.0.1",
 		"@playwright/test": "1.65.1",
 		"@sveltejs/adapter-node": "6.0.2",
