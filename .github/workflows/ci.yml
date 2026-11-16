@@ -1,0 +1,206 @@
+# CI (plan section 12, jade-xu0). Thin wiring around pnpm scripts, so another host reuses them
+# (X1): ci:check, ci:e2e, test:infra (which builds the image once, through ci:image) and
+# ci:compat; `pnpm ci:local` runs the same stages on a development machine.
+#
+# Secrets: none. The service container's password is a literal that lives as long as the job and
+# contains test-only, which the config module refuses outside APP_ENV=test. Every other value a
+# job needs comes from `pnpm env:init --profile ci`, which generates it in the job and prints
+# variable names only. tests/unit/ci-workflow.test.ts checks this file, and actionlint lints it.
+#
+# Every action is pinned to a full commit SHA, its release tag in the trailing comment.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A pull request's newer run cancels its older one. Every push to main has a group of its own, so
+# no push run is ever cancelled or left pending by a later push (a migration push always gets its
+# migration-compat run).
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('ci-pr-{0}', github.event.pull_request.number) || format('ci-push-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # The base commit (X1a), read by tools/ci/base-ref.ts: the pull request's base, or the commit the
+  # trunk pointed at before the push (forty zeros on the trunk's first push: no base).
+  JADE_CI_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    services:
+      postgres:
+        image: postgres:16.16-bookworm
+        env:
+          POSTGRES_USER: jade_owner
+          POSTGRES_PASSWORD: ci_test-only_owner
+          POSTGRES_DB: jade
+        ports:
+          - 5432
+        options: >-
+          --health-cmd "pg_isready -U jade_owner -d jade -h 127.0.0.1"
+          --health-interval 2s --health-timeout 5s --health-retries 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # No token is persisted in the checkout; the fetch alone gets the job's read-only token.
+      - name: Fetch the base commit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$JADE_CI_BASE" = 0000000000000000000000000000000000000000 ]; then
+            echo "No base: the first push of the trunk"
+          else
+            header="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+            echo "::add-mask::$header"
+            # The header reaches git through its environment, never its arguments.
+            GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0="http.$GITHUB_SERVER_URL/.extraheader" GIT_CONFIG_VALUE_0="$header" \
+              git fetch --no-tags --depth=1 origin "$JADE_CI_BASE"
+          fi
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --no-runtime
+      - name: Write .env (profile ci)
+        env:
+          JADE_OWNER_DB_PASSWORD: ci_test-only_owner
+        run: pnpm env:init --profile ci --db-port ${{ job.services.postgres.ports['5432'] }}
+      - run: pnpm ci:check
+
+  e2e:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    services:
+      postgres:
+        image: postgres:16.16-bookworm
+        env:
+          POSTGRES_USER: jade_owner
+          POSTGRES_PASSWORD: ci_test-only_owner
+          POSTGRES_DB: jade
+        ports:
+          - 5432
+        options: >-
+          --health-cmd "pg_isready -U jade_owner -d jade -h 127.0.0.1"
+          --health-interval 2s --health-timeout 5s --health-retries 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --no-runtime
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - name: Write .env (profile ci)
+        env:
+          JADE_OWNER_DB_PASSWORD: ci_test-only_owner
+        run: pnpm env:init --profile ci --db-port ${{ job.services.postgres.ports['5432'] }}
+      - run: pnpm ci:e2e
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --no-runtime
+      # The docker-container builder the gha cache backend needs, made the current builder.
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      # The Actions runtime variables, for the gha cache flags of `pnpm ci:image`, which runs
+      # inside the `run:` step below (GitHub gives them to JavaScript actions only).
+      - uses: crazy-max/ghaction-github-runtime@04d248b84655b509d8c44dc1d6f990c879747487 # v4.0.0
+      # Pulls the pinned postgres and caddy images and builds the run's image once, through
+      # `pnpm ci:image`, in its global setup (D7); keeps the tag for the push of jade-4zw.
+      - name: pnpm test:infra
+        env:
+          JADE_INFRA_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+          JADE_INFRA_KEEP_IMAGE: '1'
+          JADE_CI_IMAGE_CACHE: gha
+        run: pnpm test:infra
+
+  migration-compat:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    services:
+      postgres:
+        image: postgres:16.16-bookworm
+        env:
+          POSTGRES_USER: jade_owner
+          POSTGRES_PASSWORD: ci_test-only_owner
+          POSTGRES_DB: jade
+        ports:
+          - 5432
+        options: >-
+          --health-cmd "pg_isready -U jade_owner -d jade -h 127.0.0.1"
+          --health-interval 2s --health-timeout 5s --health-retries 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Always runs, so the job can be a required check; the rest only when migrations/ changed.
+      - name: Fetch the base commit and look for changed migrations
+        id: changes
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$JADE_CI_BASE" = 0000000000000000000000000000000000000000 ]; then
+            echo "No base: the first push of the trunk; nothing to compare"
+            echo "run=false" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+          header="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          echo "::add-mask::$header"
+          # The header reaches git through its environment, never its arguments.
+          GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0="http.$GITHUB_SERVER_URL/.extraheader" GIT_CONFIG_VALUE_0="$header" \
+            git fetch --no-tags --depth=1 origin "$JADE_CI_BASE"
+          changed=$(git diff --name-only "$JADE_CI_BASE" HEAD -- migrations/)
+          if [ -z "$changed" ]; then
+            echo "No file under migrations/ changed since the base; nothing to test"
+            echo "run=false" >>"$GITHUB_OUTPUT"
+          else
+            echo "$changed"
+            echo "run=true" >>"$GITHUB_OUTPUT"
+          fi
+      - if: steps.changes.outputs.run == 'true'
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - if: steps.changes.outputs.run == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - if: steps.changes.outputs.run == 'true'
+        run: pnpm install --frozen-lockfile --no-runtime
+      - name: Write .env (profile ci)
+        if: steps.changes.outputs.run == 'true'
+        env:
+          JADE_OWNER_DB_PASSWORD: ci_test-only_owner
+        run: pnpm env:init --profile ci --db-port ${{ job.services.postgres.ports['5432'] }}
+      - if: steps.changes.outputs.run == 'true'
+        run: pnpm ci:compat

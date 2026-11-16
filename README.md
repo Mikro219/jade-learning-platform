@@ -143,6 +143,49 @@ pnpm test:infra
   block above, `pnpm test`, `pnpm e2e` and a `pnpm dev` smoke check. It refuses to run while the
   working tree has uncommitted changes.
 
+## CI
+
+`.github/workflows/ci.yml` runs on every pull request and on every push to `main`, as four
+parallel jobs of at most 9 minutes each. Each job is thin wiring around one pnpm script, so the
+same stages run on a development machine:
+
+- `pnpm ci:check` (job `check`): `pnpm lint`, `pnpm check`, `pnpm db:check` against the base
+  commit, `pnpm test`.
+- `pnpm ci:e2e` (job `e2e`): Playwright on Chromium and WebKit; on failure the job uploads
+  `playwright-report/` and `test-results/`, kept 7 days.
+- `pnpm test:infra` (job `image`): the image, built once through `pnpm ci:image` with the GitHub
+  Actions cache, and the production stack.
+- `pnpm ci:compat` (job `migration-compat`): when a change adds migrations, the previous commit's
+  app is built and started on a database migrated to the new schema and must be ready, and its
+  integration tests run on a template migrated by the new runner. With no base, a base without
+  migrations, or no new migration, it says so and passes.
+
+`pnpm ci:local` runs the four stages in order and prints each one's exit status and time. It
+needs `.env`, `pnpm db:up` and Docker, like the gate.
+
+The base commit (`tools/ci/base-ref.ts`) is, in CI, the pull request's base or the commit `main`
+pointed at before the push (`JADE_CI_BASE`, which the jobs fetch first); locally, the merge base of
+`HEAD` and `main`, or `HEAD~1` when `HEAD` is on `main`. `pnpm ci:compat --base <ref>` names one
+explicitly; `pnpm ci:compat --self-test` proves the compatibility check itself: a harmless added
+migration passes, and one that revokes the app role's read of `schema_migrations` is caught.
+`ci:compat` uses temporary git worktrees and `jade_compat_*` databases, and removes both when it
+ends, also on Ctrl-C or SIGTERM; it warns about, and never removes, those of an earlier run.
+Interrupted in step 3, it may leave the base harness's `jade_t_*` clone databases. With no test run
+going on in this checkout, list and drop them with:
+
+```sh
+docker exec jade-dev-<hash>-devdb-1 psql -U jade_owner -d postgres -Atc \
+  "SELECT datname FROM pg_database WHERE datname LIKE 'jade\_t\_%'"
+docker exec jade-dev-<hash>-devdb-1 psql -U jade_owner -d postgres -c 'DROP DATABASE "<name>" WITH (FORCE)'
+```
+
+A shallow clone has no reliable local base: there `--base <ref>` (or `JADE_CI_BASE`) is required.
+
+The jobs hold no secret: the database service's password is a `test-only` literal, and
+`pnpm env:init --profile ci` generates everything else in the job. Every action is pinned to a
+commit SHA; `tests/unit/ci-workflow.test.ts` checks the file and lints it with actionlint
+(`rhysd/actionlint`, pinned by tag; that test is skipped, saying so, when Docker is missing).
+
 ## Documentation
 
 - `CLAUDE.md`: the rules every change keeps.
