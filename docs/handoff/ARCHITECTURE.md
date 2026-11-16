@@ -2,6 +2,8 @@
 
 Date: 2026-11-14. Supersedes the "Pickney Learning Platform: Hosting & Data Architecture" doc of 2026-10-25 (v1). What changed and why is in `REVIEW.md`.
 
+> Amended 2026-11-16 by [ADR 0025](../adr/0025-youtube-embedded-module-video.md): module videos play from YouTube in an embedded player (sections 2, 3, 4, 9, 10 and 14). The handoff text is in git commit 079e846 and jade-handoff.zip.
+
 ## 1. What this is
 
 One web app that hosts the learning modules for JADE STEM kits. A code printed in each kit unlocks the material. Every step a group views, replays, gets stuck on or answers is logged against the kit's anonymous ID, so the team can see which steps to rewrite between pilots.
@@ -14,7 +16,7 @@ The first kit it serves is the DIY mechanical arm (ages 8 to 10, January classro
 2. **The kit is the unit.** A group of two or three shares one tablet, so data is recorded per kit, not per child.
 3. **Nothing is recorded without consent.** Logging is off per kit until a facilitator confirms consent. With it off, the content still works and the server stores no activity.
 4. **Paper still works.** The printed guide is complete on its own. The platform adds video, checkpoints, help and data.
-5. **One deployable, one database, one origin.** One developer has to build and run this. No microservices, no third-party scripts, one domain for a school to allowlist.
+5. **One deployable, one database, one origin.** One developer has to build and run this. No microservices, no third-party scripts, one domain for a school to allowlist. The one exception is the embedded YouTube player on pages that show a module video, so a school must also allow YouTube ([ADR 0025](../adr/0025-youtube-embedded-module-video.md)).
 6. **Every data point names the content version it came from.** Otherwise Pilot 1 and Pilot 2 cannot be compared.
 7. **Boring and portable.** Docker Compose on a Canadian VM. Moving hosts is a restore, not a rewrite.
 
@@ -39,8 +41,10 @@ flowchart TB
       AN[analytics]
     end
     DB[(PostgreSQL)]
-    M[/media volume<br/>MP4 + images/]
+    M[/media volume<br/>images only, video on YouTube per ADR 0025/]
   end
+
+  Y[YouTube embedded player<br/>module videos, ADR 0025]
 
   R[Git repo<br/>content as Markdown]
   B[(Encrypted backups<br/>Canadian object storage)]
@@ -48,6 +52,7 @@ flowchart TB
   S -->|HTTPS| C
   A -->|HTTPS| C
   T -->|HTTPS| C
+  S -->|video pages only| Y
   P -.->|QR opens /s/step-id| C
   C --> APP
   C --> M
@@ -62,7 +67,7 @@ flowchart TB
 
 | Component | Responsibility | Notes |
 |---|---|---|
-| Caddy | TLS, HTTP/2, compression, serves `/media` with Range requests | Only public service. Access log off or IP-stripped |
+| Caddy | TLS, HTTP/2, compression, serves `/media` with Range requests | Only public service. Access log off or IP-stripped. Video is no longer served from `/media`; what the `/media` gate becomes is open ([ADR 0025](../adr/0025-youtube-embedded-module-video.md)) |
 | App (SvelteKit, adapter-node, TypeScript) | All pages and all API routes | Server-rendered; forms work without JavaScript where possible |
 | `auth` module | Adult accounts and sessions, staff role, invites, student device sessions, authorization | |
 | `codes` module | Generate, normalise, HMAC, redeem, revoke kit codes | |
@@ -70,7 +75,7 @@ flowchart TB
 | `events` module | Event catalog, ingest endpoint, consent gate, progress | |
 | `analytics` module | SQL views, data-quality report, exports, staff dashboards | Reads the same database |
 | PostgreSQL 16 | Everything persistent | Single instance, nightly encrypted backups |
-| Media volume | Transcoded MP4 and images | Served same-origin through short-lived signed URLs |
+| Media volume | Images. Module videos are on YouTube, unlisted and marked made for kids, not on this volume ([ADR 0025](../adr/0025-youtube-embedded-module-video.md)) | Served same-origin; whether through the signed-URL gate is open ([ADR 0025](../adr/0025-youtube-embedded-module-video.md)) |
 | Git repo | Code and content | Content changes go through the same CI |
 
 Repo layout the build should follow:
@@ -181,12 +186,12 @@ Abuse cases the build must cover (each gets a test in Phase 9):
 | Guessing a join code | Valid only while a session is open, rate limited per device, rotated on demand |
 | A group joins as another group's kit | Facilitator sees duplicate joins and can reset a kit's devices |
 | Spoofing events for another kit | Kit identity comes from the session, not the payload |
-| Sharing a video URL | Media URLs are signed and short-lived |
+| Sharing a video URL | Allowed by design: videos are unlisted on YouTube and anyone with the link may watch ([ADR 0025](../adr/0025-youtube-embedded-module-video.md); `docs/threat-model.md` AB6) |
 | Student reaching adult or staff pages | Route-group authorization matrix, 404 not 403 |
 | Free text capturing a child's name | Students have no free-text fields; adult note field carries a reminder |
 | IP addresses as hidden identifiers | Not logged by Caddy or the app; used in memory for rate limiting only |
 
-Other commitments: strict CSP with no third-party origins, no analytics or font CDNs, database and backups in Canada, deletion of all activity for a kit in one staff action, retention job that reduces raw events to aggregates after the agreed period. Details in `PRIVACY.md`. This is a privacy design, not legal advice; the consent form and research application need a human review against it (`p0-consent`).
+Other commitments: strict CSP with no third-party origins except the YouTube embed origin in `frame-src`, on pages that show a module video ([ADR 0025](../adr/0025-youtube-embedded-module-video.md)), no analytics or font CDNs, database and backups in Canada, deletion of all activity for a kit in one staff action, retention job that reduces raw events to aggregates after the agreed period. Details in `PRIVACY.md`. This is a privacy design, not legal advice; the consent form and research application need a human review against it (`p0-consent`).
 
 ## 10. Deployment
 
@@ -208,8 +213,8 @@ Other commitments: strict CSP with no third-party origins, no analytics or font 
 - **Releases:** build image, run forward-only migrations, start, health-check, switch. Rollback is the previous image. Migrations stay compatible with the previous app version.
 - **Backups:** nightly encrypted dump, 30-day retention, restore drill before launch.
 - **Monitoring:** external uptime check on `/readyz`, resource and 5xx alerts to a Discord webhook. Nothing runs in the user's browser.
-- **Sizing:** decided by the Phase 9 load test at twice pilot size (30 devices, each streaming 720p). Video bandwidth, not CPU, is the constraint.
-- **Offline fallback:** printed guides plus the videos on a USB stick or facilitator laptop. In the runbook.
+- **Sizing:** decided by the Phase 9 load test at twice pilot size (30 devices). Video streams from YouTube, not from our VM, so video bandwidth no longer sizes the VM ([ADR 0025](../adr/0025-youtube-embedded-module-video.md)); the school's own connection still carries it.
+- **Offline fallback:** printed guides plus the videos on a USB stick or facilitator laptop. In the runbook. With video on YouTube, this fallback and what a step shows when a video cannot load are open ([ADR 0025](../adr/0025-youtube-embedded-module-video.md)).
 
 ## 11. Analytics
 
@@ -252,7 +257,7 @@ The loop: pilot runs → Given opens the heatmap → picks the top steps → dia
 
 | Risk | Likelihood | Mitigation |
 |---|---|---|
-| School network blocks the domain or throttles video | Medium | Ask IT in week one (`p0-school-it`), single origin, test on site, USB fallback |
+| School network blocks the domain, blocks YouTube or throttles video | Medium | Ask IT in week one (`p0-school-it`), one origin plus YouTube for video pages (for the pilot school, Given's responsibility, [ADR 0025](../adr/0025-youtube-embedded-module-video.md)), test on site, USB fallback (open, [ADR 0025](../adr/0025-youtube-embedded-module-video.md)) |
 | School devices wipe cookies between sessions | Medium | Re-join is two steps; progress is server-side when logging is on |
 | Five weeks to a mid-December freeze | High | Staging from week one; dashboards deferred to January; scope cuts listed in `REVIEW.md` |
 | Consent or research approval does not cover the platform after the pivot | Medium | `p0-consent` starts on day one; no-log mode lets the pilot run regardless |
