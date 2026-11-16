@@ -3,15 +3,24 @@
 // variable names only, never a value. Node built-ins and tools/free-port.ts only, so it also runs
 // in the image.
 //
-// Profiles (jade-80h adds the local stack's variables and the `stack` profile):
+// Profiles:
 //   - `dev`, the default and the README's: APP_ENV=development, both database passwords and both
-//     URLs, written from the same generated values, the app's secrets.
+//     URLs, written from the same generated values, the app's secrets, and the local production
+//     stack's variables (JADE_STACK_APP_ENV=production, SITE_ADDRESS=localhost, the two host
+//     ports and JADE_ORIGIN), which compose.prod.yml reads.
+//   - `stack`, for a VM (plan Z2): the stack's variables only; `--app-env staging|production` and
+//     `--site <host>` are required. No development URL and no JADE_DEV_DB_PORT.
 //   - `ci`, for a CI job (X2): APP_ENV=test; JADE_OWNER_DB_PASSWORD taken from the job's
 //     environment (the service container's literal password), refused unless it contains
 //     `test-only`; the app password and the app's secrets generated; both URLs at
 //     127.0.0.1:<--db-port>, which is required.
 //
-//   pnpm env:init [--out <path>] [--profile dev|ci] [--db-port <port>]
+// Ports (PD11): JADE_HTTP_PORT and JADE_HTTPS_PORT are --http-port and --https-port when given,
+// else 80 and 443. JADE_ORIGIN is https://<site>, with :<https port> appended unless it is 443.
+//
+//   pnpm env:init [--out <path>] [--profile dev|stack|ci] [--db-port <port>]
+//                 [--http-port <port>] [--https-port <port>] [--app-env staging|production]
+//                 [--site <host>]
 import { randomBytes } from 'node:crypto';
 import {
 	closeSync,
@@ -27,7 +36,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { freePort } from './free-port.ts';
 
-export const PROFILES = ['dev', 'ci'] as const;
+export const PROFILES = ['dev', 'stack', 'ci'] as const;
 export type Profile = (typeof PROFILES)[number];
 
 /** A secret: 32 random bytes in base64url, 43 characters of `[A-Za-z0-9_-]`. */
@@ -51,6 +60,39 @@ export function ownerDatabaseUrl(password: string, port: number): string {
 }
 
 const DEFAULT_DB_PORT = 5432;
+const DEFAULT_HTTP_PORT = 80;
+const DEFAULT_HTTPS_PORT = 443;
+
+/** The APP_ENV values a stack may run as: the image refuses development and test (V2). */
+export const STACK_APP_ENVS = ['staging', 'production'] as const;
+export type StackAppEnv = (typeof STACK_APP_ENVS)[number];
+
+/** A host name for SITE_ADDRESS: DNS labels only, no scheme, port, path or space. */
+export function isSiteHost(text: string): boolean {
+	const label = '[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?';
+	return text.length <= 253 && new RegExp(`^${label}(?:\\.${label})*$`).test(text);
+}
+
+/** The public origin of a stack: https://<site>, with the port unless it is 443. */
+export function stackOrigin(site: string, httpsPort: number): string {
+	return httpsPort === DEFAULT_HTTPS_PORT ? `https://${site}` : `https://${site}:${httpsPort}`;
+}
+
+/** The variables compose.prod.yml interpolates besides the secrets, in file order. */
+function stackVariables(
+	appEnv: StackAppEnv,
+	site: string,
+	httpPort: number,
+	httpsPort: number
+): [string, string][] {
+	return [
+		['JADE_STACK_APP_ENV', appEnv],
+		['SITE_ADDRESS', site],
+		['JADE_HTTP_PORT', String(httpPort)],
+		['JADE_HTTPS_PORT', String(httpsPort)],
+		['JADE_ORIGIN', stackOrigin(site, httpsPort)]
+	];
+}
 
 /** Whether something accepts a TCP connection on 127.0.0.1:`port`. */
 function answers(port: number): Promise<boolean> {
@@ -94,10 +136,21 @@ class UsageError extends Error {}
 class RefusedError extends Error {}
 
 /** The variables of a profile, in file order. */
+export interface ProfileOptions {
+	dbPort?: number;
+	httpPort?: number;
+	httpsPort?: number;
+	appEnv?: StackAppEnv;
+	site?: string;
+	env?: Readonly<Record<string, string | undefined>>;
+}
+
 export async function profileVariables(
 	profile: Profile,
-	options: { dbPort?: number; env?: Readonly<Record<string, string | undefined>> } = {}
+	options: ProfileOptions = {}
 ): Promise<[string, string][]> {
+	const httpPort = options.httpPort ?? DEFAULT_HTTP_PORT;
+	const httpsPort = options.httpsPort ?? DEFAULT_HTTPS_PORT;
 	switch (profile) {
 		case 'dev': {
 			const port = await chooseDbPort(options.dbPort);
@@ -112,7 +165,23 @@ export async function profileVariables(
 				['DATABASE_URL', appDatabaseUrl(appPassword, port)],
 				['CODE_PEPPER', generateSecret()],
 				['SESSION_SECRET', generateSecret()],
-				['LOG_LEVEL', 'info']
+				['LOG_LEVEL', 'info'],
+				...stackVariables('production', 'localhost', httpPort, httpsPort)
+			];
+		}
+		case 'stack': {
+			if (options.appEnv === undefined || options.site === undefined) {
+				throw new UsageError(
+					'--profile stack needs --app-env staging|production and --site <host>'
+				);
+			}
+			return [
+				['JADE_OWNER_DB_PASSWORD', generatePassword()],
+				['JADE_APP_DB_PASSWORD', generatePassword()],
+				['CODE_PEPPER', generateSecret()],
+				['SESSION_SECRET', generateSecret()],
+				['LOG_LEVEL', 'info'],
+				...stackVariables(options.appEnv, options.site, httpPort, httpsPort)
 			];
 		}
 		case 'ci': {
@@ -144,7 +213,15 @@ interface Args {
 	out: string;
 	profile: Profile;
 	dbPort?: number;
+	httpPort?: number;
+	httpsPort?: number;
+	appEnv?: StackAppEnv;
+	site?: string;
 }
+
+const USAGE =
+	'usage: env:init [--out <path>] [--profile dev|stack|ci] [--db-port <port>] ' +
+	'[--http-port <port>] [--https-port <port>] [--app-env staging|production] [--site <host>]';
 
 function parsePort(text: string | undefined, flag: string): number {
 	const port = Number(text);
@@ -176,12 +253,45 @@ function parseArgs(argv: readonly string[]): Args {
 				args.dbPort = parsePort(value, '--db-port');
 				i++;
 				break;
+			case '--http-port':
+				args.httpPort = parsePort(value, '--http-port');
+				i++;
+				break;
+			case '--https-port':
+				args.httpsPort = parsePort(value, '--https-port');
+				i++;
+				break;
+			case '--app-env':
+				if (!(STACK_APP_ENVS as readonly string[]).includes(value ?? '')) {
+					throw new UsageError(`--app-env must be one of: ${STACK_APP_ENVS.join(', ')}`);
+				}
+				args.appEnv = value as StackAppEnv;
+				i++;
+				break;
+			case '--site':
+				// The value is not echoed when it is refused.
+				if (value === undefined || !isSiteHost(value)) {
+					throw new UsageError('--site needs a host name (letters, digits, dots and hyphens)');
+				}
+				args.site = value;
+				i++;
+				break;
 			default:
 				// The flag itself is not echoed: it might be a value pasted in the wrong place.
-				throw new UsageError(
-					'unknown argument; usage: env:init [--out <path>] [--profile dev|ci] [--db-port <port>]'
-				);
+				throw new UsageError(`unknown argument; ${USAGE}`);
 		}
+	}
+	// Each flag belongs to the profiles that use it.
+	if (args.profile !== 'stack' && (args.appEnv !== undefined || args.site !== undefined)) {
+		throw new UsageError('--app-env and --site belong to --profile stack');
+	}
+	if (args.profile === 'ci' && (args.httpPort !== undefined || args.httpsPort !== undefined)) {
+		throw new UsageError(
+			'--profile ci writes no stack variable; --http-port and --https-port do not apply'
+		);
+	}
+	if (args.profile === 'stack' && args.dbPort !== undefined) {
+		throw new UsageError('--profile stack has no development database; --db-port does not apply');
 	}
 	return args;
 }
@@ -287,7 +397,14 @@ export async function main(argv: readonly string[]): Promise<number> {
 	const path = resolve(args.out);
 	let variables: [string, string][];
 	try {
-		variables = await profileVariables(args.profile, { dbPort: args.dbPort, env: process.env });
+		variables = await profileVariables(args.profile, {
+			dbPort: args.dbPort,
+			httpPort: args.httpPort,
+			httpsPort: args.httpsPort,
+			appEnv: args.appEnv,
+			site: args.site,
+			env: process.env
+		});
 	} catch (err) {
 		if (err instanceof UsageError) {
 			process.stderr.write(`env:init: ${err.message}\n`);

@@ -1,0 +1,137 @@
+# The production stack (plan D2, D3, D7): db, migrate, app and caddy. Caddy is the only service
+# with published ports, and only to container ports 80 and 443 (INV7); the app and the database
+# sit on the internal `backend` network, with no route to the internet and no host port.
+#
+# Env contract. This file builds both database URLs itself, with host `db`, from
+# JADE_OWNER_DB_PASSWORD and JADE_APP_DB_PASSWORD, and reads none of APP_ENV, DATABASE_URL,
+# MIGRATION_DATABASE_URL or JADE_DEV_DB_PORT (in a checkout's .env those are the development
+# values). The stack's APP_ENV comes from JADE_STACK_APP_ENV, which `pnpm env:init` writes:
+# `production` in a checkout, `staging` on the VM (`--profile stack`). Each service receives only
+# the variables listed under it. Every secret is required (`:?`) and has no default.
+#
+# Projects (PD13). `name: jade-stack` is only Compose's last resort: `-p` or an exported
+# COMPOSE_PROJECT_NAME replaces it. Scripted use always passes `-p`: `pnpm stack:up` and
+# `pnpm stack:down` (tools/compose.ts) use jade-stack-<hash of this checkout's path>, the infra
+# tests jade-infra-<run id>-<test>, the VM's deploy script jade-stack. The bare
+# `docker compose -f compose.prod.yml up` is for one checkout, in a shell without
+# COMPOSE_PROJECT_NAME. No service, volume or network name here is shared with compose.dev.yml.
+#
+# Images (PD14, D7). `app` and `migrate` run ${JADE_IMAGE}; the `build:` stanza of `app` is the
+# app image's one build definition. The fallback jade-app:local serves only the bare command.
+name: jade-stack
+
+x-logging:
+  &logging # Size-capped container logs, so that a disk cannot fill (14-day retention is jade-ada).
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '5'
+
+services:
+  db:
+    image: postgres:16.16-bookworm
+    environment:
+      POSTGRES_USER: jade_owner
+      POSTGRES_PASSWORD: ${JADE_OWNER_DB_PASSWORD:?}
+      POSTGRES_DB: jade
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U jade_owner -d jade -h 127.0.0.1']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+    restart: unless-stopped
+    logging: *logging
+
+  migrate:
+    # Runs the pending migrations as the owner role, then exits (plan D3, C6).
+    image: ${JADE_IMAGE:-jade-app:local}
+    command: ['node', 'tools/db/migrate.ts']
+    environment:
+      APP_ENV: ${JADE_STACK_APP_ENV:?}
+      MIGRATION_DATABASE_URL: postgres://jade_owner:${JADE_OWNER_DB_PASSWORD:?}@db:5432/jade
+      DATABASE_URL: postgres://jade_app:${JADE_APP_DB_PASSWORD:?}@db:5432/jade
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: 'no'
+    logging: *logging
+
+  app:
+    image: ${JADE_IMAGE:-jade-app:local}
+    build:
+      context: .
+      args:
+        APP_VERSION: ${APP_VERSION:-dev}
+    environment:
+      APP_ENV: ${JADE_STACK_APP_ENV:?}
+      DATABASE_URL: postgres://jade_app:${JADE_APP_DB_PASSWORD:?}@db:5432/jade
+      CODE_PEPPER: ${CODE_PEPPER:?}
+      SESSION_SECRET: ${SESSION_SECRET:?}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ORIGIN: ${JADE_ORIGIN:?}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - backend
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    logging: *logging
+
+  caddy:
+    image: caddy:2.11.9-alpine
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?}
+    ports:
+      - '${JADE_HTTP_PORT:?}:80/tcp'
+      - '${JADE_HTTPS_PORT:?}:443/tcp'
+    volumes:
+      - ./deploy/caddy:/etc/caddy:ro
+      - caddy-data:/data
+      - caddy-config:/config
+      - media:/srv/media:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - edge
+      - backend
+    # Caddy runs as root in its image, so it keeps only the one capability it needs: binding the
+    # container's ports 80 and 443. It owns /data and /config, so it writes them without others.
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    logging: *logging
+
+networks:
+  edge:
+  backend:
+    internal: true
+
+volumes:
+  db-data:
+  caddy-data:
+  caddy-config:
+  media:

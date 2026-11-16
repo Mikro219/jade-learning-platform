@@ -1,0 +1,32 @@
+# Kept out of the image's build context (plan D1, INV4). Env files hold secrets and are never
+# baked into the image; the image is built from the sources alone.
+.git
+.env
+.env.*
+**/.env
+**/.env.*
+# Other local credentials and keys that may sit in a checkout.
+.mcp.json
+.npmrc
+**/.npmrc
+*.pem
+**/*.pem
+*.key
+**/*.key
+node_modules
+**/node_modules
+build
+.svelte-kit
+test-results
+playwright-report
+blob-report
+coverage
+docs
+plans
+.beads
+.claude
+.agents
+.codex
+tests
+jade-handoff.zip
+*.zip

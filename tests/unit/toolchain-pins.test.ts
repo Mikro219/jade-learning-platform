@@ -30,12 +30,17 @@ describe('Node pin', () => {
 		expect(process.version).toBe(`v${nvmrc}`);
 	});
 
-	it.runIf(exists('Dockerfile'))('the Dockerfile names the same Node and pnpm', () => {
+	it('the Dockerfile names the same Node and pnpm', () => {
 		const dockerfile = read('Dockerfile');
 		expect(dockerfile).toMatch(
 			new RegExp(`^ARG NODE_VERSION=${nvmrc.replaceAll('.', '\\.')}$`, 'm')
 		);
-		expect(dockerfile).toMatch(/^FROM node:\$\{NODE_VERSION\}-alpine\d+\.\d+/m);
+		// Both stages start from the pinned Node Alpine image of plan section 6.1.
+		const froms = dockerfile.split('\n').filter((line) => /^FROM\s/i.test(line));
+		expect(froms.length).toBe(2);
+		for (const line of froms) {
+			expect(line).toMatch(/^FROM node:\$\{NODE_VERSION\}-alpine3\.24(?: AS [a-z]+)?$/);
+		}
 		const pnpmVersion = pkg.packageManager?.replace(/^pnpm@/, '') ?? '';
 		expect(dockerfile).toMatch(
 			new RegExp(`^ARG PNPM_VERSION=${pnpmVersion.replaceAll('.', '\\.')}$`, 'm')
@@ -56,11 +61,12 @@ describe('pnpm pin', () => {
 });
 
 describe('Postgres pin', () => {
-	// compose.dev.yml exists from jade-urd on; the other two join when jade-80h and jade-xu0 add them.
+	// compose.dev.yml from jade-urd on, compose.prod.yml from jade-80h; the workflow joins with jade-xu0.
 	const files = ['compose.dev.yml', 'compose.prod.yml', '.github/workflows/ci.yml'].filter(exists);
 
 	it('compose.dev.yml exists and names a Postgres image', () => {
 		expect(files).toContain('compose.dev.yml');
+		expect(files).toContain('compose.prod.yml');
 		expect(read('compose.dev.yml')).toMatch(/^\s*image:\s*postgres:16\.\d+-bookworm\s*$/m);
 	});
 
@@ -71,6 +77,23 @@ describe('Postgres pin', () => {
 		}
 		expect(images.size).toBe(1);
 		expect([...images][0]).toMatch(/^postgres:16\.\d+-/);
+	});
+});
+
+describe('Caddy pin', () => {
+	it('compose.prod.yml names one exact Caddy 2 image', () => {
+		const images = [...read('compose.prod.yml').matchAll(/^\s*image:\s*(caddy:\S+)\s*$/gm)].map(
+			(m) => m[1]
+		);
+		expect(new Set(images)).toEqual(new Set(['caddy:2.11.9-alpine']));
+	});
+
+	it('compose.prod.yml names the Postgres image of compose.dev.yml', () => {
+		const dev = /^\s*image:\s*(postgres:\S+)\s*$/m.exec(read('compose.dev.yml'))?.[1];
+		const prod = [...read('compose.prod.yml').matchAll(/^\s*image:\s*(postgres:\S+)\s*$/gm)].map(
+			(m) => m[1]
+		);
+		expect(prod).toEqual([dev]);
 	});
 });
 

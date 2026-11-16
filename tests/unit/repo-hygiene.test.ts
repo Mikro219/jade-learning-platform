@@ -66,6 +66,38 @@ describe('env files', () => {
 	});
 });
 
+// INV4, plan D1: the image's build context holds no env file or other local credential or key,
+// no repository metadata, no dependencies installed on the host, and none of the documents, plans
+// or tests.
+describe('.dockerignore', () => {
+	const entries = readFileSync(`${root}.dockerignore`, 'utf8')
+		.split('\n')
+		.map((line) => line.trim())
+		.filter((line) => line !== '' && !line.startsWith('#'));
+
+	it.each([
+		'.env',
+		'.env.*',
+		'.git',
+		'node_modules',
+		'docs',
+		'plans',
+		'.beads',
+		'.claude',
+		'tests',
+		'.mcp.json',
+		'.npmrc',
+		'*.pem',
+		'*.key'
+	])('excludes %s', (entry) => {
+		expect(entries).toContain(entry);
+	});
+
+	it('re-includes nothing', () => {
+		expect(entries.filter((line) => line.startsWith('!'))).toEqual([]);
+	});
+});
+
 // B3: tools/ci/clean-clone.sh curls `pnpm dev` only once its log shows Vite's ready line naming
 // the chosen port, so a 200 from another process that took the port cannot pass.
 describe('clean-clone waits for the dev server it started', () => {
