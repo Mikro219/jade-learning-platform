@@ -7,7 +7,16 @@ import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type pg from 'pg';
-import { DbError, ensureAppRole, newClient, sqlstateOf, type AppRoleOutcome } from './roles.ts';
+import {
+	DbError,
+	LOCK_TIMEOUT_MS,
+	acquireAdvisoryLock,
+	ensureAppRole,
+	hasUrlParameters,
+	newClient,
+	sqlstateOf,
+	type AppRoleOutcome
+} from './roles.ts';
 
 /** One shipped migration: its name (the file name without `.sql`) and the SHA-256 of its bytes. */
 export interface ManifestEntry {
@@ -134,6 +143,11 @@ export interface MigrateOptions {
 	readonly appUrl: string;
 	/** The directory holding the `*.sql` files and `manifest.json`. */
 	readonly dir: string;
+	/**
+	 * How long to wait for each advisory lock (the runner's, then the role bootstrap's) before
+	 * failing with MIGRATION_LOCK_TIMEOUT or ROLE_LOCK_TIMEOUT. Default LOCK_TIMEOUT_MS (B4).
+	 */
+	readonly lockTimeoutMs?: number;
 }
 
 export interface MigrateResult {
@@ -150,7 +164,7 @@ export interface MigrateResult {
 
 /**
  * Apply the pending migrations of `dir` to the owner URL's database (plan U3):
- * 1. take the database's runner lock; 2. `ensureAppRole()` (the cluster lock: database lock
+ * 1. take the database's runner lock (bounded wait, MIGRATION_LOCK_TIMEOUT); 2. `ensureAppRole()` (the cluster lock: database lock
  * first, cluster lock second, so they cannot deadlock); 3. create the ledger if absent;
  * 4. check the files against the manifest; 5. compare with the ledger row by row, stopping with
  * MIGRATION_HISTORY_MISMATCH before applying anything if a name or hash differs, and returning
@@ -158,6 +172,9 @@ export interface MigrateResult {
  * row. Throws `DbError`.
  */
 export async function migrate(options: MigrateOptions): Promise<MigrateResult> {
+	if (hasUrlParameters(options.ownerUrl) || hasUrlParameters(options.appUrl)) {
+		throw new DbError('MIGRATION_FAILED');
+	}
 	const files = readMigrations(options.dir);
 	const client = newClient(options.ownerUrl);
 	try {
@@ -167,8 +184,9 @@ export async function migrate(options: MigrateOptions): Promise<MigrateResult> {
 		throw new DbError('MIGRATION_FAILED', { sqlstate: sqlstateOf(err) });
 	}
 	try {
-		await client.query('SELECT pg_advisory_lock($1::bigint)', [MIGRATE_LOCK_KEY]);
-		const role = await ensureAppRole(options.ownerUrl, options.appUrl);
+		const lockTimeoutMs = options.lockTimeoutMs ?? LOCK_TIMEOUT_MS;
+		await acquireAdvisoryLock(client, MIGRATE_LOCK_KEY, lockTimeoutMs, 'MIGRATION_LOCK_TIMEOUT');
+		const role = await ensureAppRole(options.ownerUrl, options.appUrl, { lockTimeoutMs });
 		await client.query(
 			`CREATE TABLE IF NOT EXISTS ${LEDGER_TABLE} (` +
 				'name text PRIMARY KEY, sha256 text NOT NULL, applied_at timestamptz NOT NULL DEFAULT now())'

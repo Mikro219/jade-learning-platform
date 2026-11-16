@@ -131,6 +131,26 @@ describe('bad values are refused by name', () => {
 	});
 });
 
+describe('a database URL with a query string or fragment is refused (jade-f1w)', () => {
+	// pg's connection-string parser copies query parameters into the connection config, and
+	// host, port, user and password there override the URL's own parts. Each URL below passes the
+	// role check (its own user part is the right role), so only the query check can refuse it.
+	const phrase = 'must not have a query string or fragment';
+	it.each([
+		`postgres://jade_app:${DB_PASSWORD}@127.0.0.1:5432/jade?user=jade_owner`,
+		`postgres://jade_app:${DB_PASSWORD}@127.0.0.1:5432/jade?host=remote`,
+		`postgres://jade_app:${DB_PASSWORD}@127.0.0.1:5432/jade?`,
+		`postgres://jade_app:${DB_PASSWORD}@127.0.0.1:5432/jade#frag`
+	])('DATABASE_URL %s', (value) => {
+		const err = configError({ ...validEnv(), DATABASE_URL: value });
+		expect(err.missing).toEqual([]);
+		expect(err.invalid).toEqual(['DATABASE_URL']);
+		expect(err.reasons).toEqual({ DATABASE_URL: 'database_url_query' });
+		expect(err.message).toContain(`Invalid: DATABASE_URL (${phrase})`);
+		expect(err.message).not.toContain('Canary');
+	});
+});
+
 describe('test-only values', () => {
 	const testOnly = {
 		DATABASE_URL: 'postgres://jade_app:test-only-pw@127.0.0.1:5432/jade',
@@ -318,6 +338,32 @@ describe('loadMigrationConfig', () => {
 				'DATABASE_URL (must name the same host, port and database as MIGRATION_DATABASE_URL)'
 			);
 		}
+	});
+
+	it('refuses either URL with a query string or fragment, even when both carry the same one (jade-f1w)', () => {
+		const q = (url: string, suffix: string) => `${url}${suffix}`;
+		for (const suffix of ['?host=remote', '?port=6543', '#x']) {
+			// Same host, port and database in both, so the same_database check accepts it.
+			const err = migrationError({
+				...migrationEnv(),
+				MIGRATION_DATABASE_URL: q(migrationEnv().MIGRATION_DATABASE_URL!, suffix),
+				DATABASE_URL: q(migrationEnv().DATABASE_URL!, suffix)
+			});
+			expect(err.invalid).toEqual(['MIGRATION_DATABASE_URL', 'DATABASE_URL']);
+			expect(err.reasons).toEqual({
+				MIGRATION_DATABASE_URL: 'database_url_query',
+				DATABASE_URL: 'database_url_query'
+			});
+			expect(err.message).toContain(
+				'MIGRATION_DATABASE_URL (must not have a query string or fragment)'
+			);
+			expect(err.message).not.toContain(OWNER_PASSWORD);
+		}
+		const owner = migrationError({
+			...migrationEnv(),
+			MIGRATION_DATABASE_URL: `${migrationEnv().MIGRATION_DATABASE_URL}?user=jade_app`
+		});
+		expect(owner.invalid).toEqual(['MIGRATION_DATABASE_URL']);
 	});
 
 	it('refuses a test-only value unless APP_ENV is test, and NODE_ENV=production development', () => {

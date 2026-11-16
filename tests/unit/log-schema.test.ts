@@ -12,7 +12,9 @@ import {
 	buildAllowlist,
 	createLogger,
 	isForbiddenKeyName,
+	NODE_ERRNO_NAMES,
 	registerConfigKeyNames,
+	registerErrorTags,
 	registerRouteIds,
 	stackFramesOf,
 	type LogLevel,
@@ -196,10 +198,77 @@ describe('error lines', () => {
 	});
 
 	it('an app error tag is written; a tag that fails its validator is [invalid]', () => {
+		registerErrorTags(['MIGRATION_FAILED']);
 		const tagged = Object.assign(new Error('x'), { tag: 'MIGRATION_FAILED' });
 		expect(errorLine(tagged).line.err_tag).toBe('MIGRATION_FAILED');
 		const bad = Object.assign(new Error('x'), { code: 'canary code' });
 		expect(errorLine(bad).line.err_tag).toBe(INVALID);
+	});
+
+	describe('err_tag is a SQLSTATE, a Node error code or a registered app tag only (jade-zwq)', () => {
+		// Shaped like a six-character Crockford join code, and like a kit code without its dashes.
+		const JOIN = '7KQ4XM';
+		const tagOf = (props: Record<string, unknown>) =>
+			errorLine(Object.assign(new Error('x'), props));
+
+		it('a join-code-shaped .code or .tag is [invalid], and the value is not written', () => {
+			for (const props of [{ code: JOIN }, { tag: JOIN }, { code: 'ARM7KQ4XM2H9' }]) {
+				const { text, line } = tagOf(props);
+				expect(line.err_tag).toBe(INVALID);
+				expect(text).not.toContain(Object.values(props)[0] as string);
+			}
+		});
+
+		it('an unregistered app tag is [invalid], a registered one is written', () => {
+			expect(tagOf({ tag: 'NOT_A_REGISTERED_TAG' }).line.err_tag).toBe(INVALID);
+			registerErrorTags(['SOME_REGISTERED_TAG', 'not upper case']);
+			expect(tagOf({ tag: 'SOME_REGISTERED_TAG' }).line.err_tag).toBe('SOME_REGISTERED_TAG');
+			expect(tagOf({ tag: 'not upper case' }).line.err_tag).toBe(INVALID);
+		});
+
+		it('the app registers its own fixed tags (DbError, db:reset)', async () => {
+			await import('../../src/lib/server/db/index.ts');
+			await import('../../tools/db/reset.ts');
+			for (const tag of [
+				'MIGRATION_HISTORY_MISMATCH',
+				'MIGRATION_MANIFEST_MISMATCH',
+				'MIGRATION_FAILED',
+				'MIGRATION_LOCK_TIMEOUT',
+				'ROLE_BOOTSTRAP_FAILED',
+				'ROLE_LOCK_TIMEOUT',
+				'DB_RESET_REFUSED',
+				'DB_RESET_FAILED'
+			]) {
+				expect(tagOf({ tag }).line.err_tag).toBe(tag);
+			}
+		});
+
+		it('a SQLSTATE, an ERR_ code and a listed errno name in .code are written', () => {
+			for (const code of ['23505', '42P01', '57P01', 'ERR_INVALID_ARG_TYPE', 'ERR_SOCKET_CLOSED']) {
+				expect(tagOf({ code }).line.err_tag).toBe(code);
+			}
+			for (const code of NODE_ERRNO_NAMES) expect(tagOf({ code }).line.err_tag).toBe(code);
+			expect(NODE_ERRNO_NAMES).toContain('EADDRINUSE');
+		});
+
+		it('no listed errno name could be a join code: none is six Crockford characters (A4)', () => {
+			const joinCodeShaped = /^[0-9A-HJKMNP-TV-Z]{6}$/;
+			expect(NODE_ERRNO_NAMES.filter((name) => joinCodeShaped.test(name))).toEqual([]);
+			expect(joinCodeShaped.test('EACCES')).toBe(true);
+			expect(tagOf({ code: 'EACCES' }).line.err_tag).toBe(INVALID);
+		});
+
+		it('a code that is none of those is [invalid]: not ERR_-prefixed, not listed, too long', () => {
+			for (const code of ['EFOOBAR', 'ERR_', 'ERR_lower', 'SQLSTATE', 'A'.repeat(64), '2350']) {
+				expect(tagOf({ code }).line.err_tag).toBe(INVALID);
+			}
+		});
+
+		it('an ERR_ code or errno name in .tag is [invalid] unless registered', () => {
+			expect(tagOf({ tag: 'ERR_INVALID_ARG_TYPE' }).line.err_tag).toBe(INVALID);
+			expect(tagOf({ tag: 'ECONNRESET' }).line.err_tag).toBe(INVALID);
+			expect(tagOf({ tag: '23505' }).line.err_tag).toBe(INVALID);
+		});
 	});
 
 	it('a tag that fails its validator is [invalid] even when the code is valid (no fallback)', () => {

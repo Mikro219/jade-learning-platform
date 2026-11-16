@@ -1,9 +1,18 @@
 // The built server stops before it listens when its configuration is unusable, naming the
 // variables and never a value (plan V3, V3a, INV1, INV4). From jade-alt on, the names are carried
 // by one `config_error` lifecycle line on stdout, written through the logger, and no generic
-// error line is written instead. The blackbox project's global setup builds the app with an empty
-// environment (jade-b1f), which is also the check that the build needs no secret.
+// error line is written instead. The blackbox project's global setup builds the app with no
+// configuration (jade-b1f, jade-7yz), which is also the check that the build needs no secret.
 import { describe, expect, it } from 'vitest';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import {
+	BUILD_ENV,
+	buildEnv,
+	kitEnvUnder,
+	loadEnvUnder
+} from '../support/global-setup-blackbox.ts';
 import { loadAppConfig } from '../../src/lib/server/config/index.ts';
 import { generatedEnv, testEnv, type ServerEnv } from '../support/env.ts';
 import { runServer, startServer, type ServerRun } from '../support/server.ts';
@@ -105,5 +114,40 @@ describe('node build with every variable set', () => {
 		} finally {
 			await server.stop();
 		}
+	});
+});
+
+describe('the blackbox build reads no env file (V3, jade-7yz)', () => {
+	it('BUILD_ENV is NODE_ENV=production only, under which loadEnv() reads nothing', async () => {
+		expect(BUILD_ENV).toEqual({ NODE_ENV: 'production' });
+		expect(await loadEnvUnder(BUILD_ENV)).toEqual({ read: false, leaked: false });
+	});
+
+	it('the probe is live: with an empty environment loadEnv() reads the file', async () => {
+		expect(await loadEnvUnder({})).toEqual({ read: true, leaked: true });
+	});
+
+	it("under the build's environment SvelteKit's and Vite's loaders read no env file", async () => {
+		const envDir = mkdtempSync(join(tmpdir(), 'jade-build-envdir-'));
+		try {
+			expect(buildEnv(envDir)).toEqual({ NODE_ENV: 'production', JADE_BUILD_ENV_DIR: envDir });
+			expect(await kitEnvUnder(buildEnv(envDir))).toEqual({
+				kitLeaked: false,
+				viteLeaked: false,
+				kitDefault: false,
+				viteDefault: false
+			});
+		} finally {
+			rmSync(envDir, { recursive: true, force: true });
+		}
+	});
+
+	it('that probe is live: without JADE_BUILD_ENV_DIR both read the root `.env`, NODE_ENV or not', async () => {
+		expect(await kitEnvUnder(BUILD_ENV)).toEqual({
+			kitLeaked: true,
+			viteLeaked: true,
+			kitDefault: true,
+			viteDefault: true
+		});
 	});
 });

@@ -23,7 +23,9 @@ export {
 } from './migrate.ts';
 export {
 	APP_ROLE,
+	DB_ERROR_TAGS,
 	DbError,
+	LOCK_TIMEOUT_MS,
 	ensureAppRole,
 	newClient,
 	scramVerifier,

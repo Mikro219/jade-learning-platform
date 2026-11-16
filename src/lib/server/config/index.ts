@@ -80,6 +80,16 @@ function isDatabaseUrlFor(value: string, role: string): boolean {
 const isAppDatabaseUrl = (value: string) => isDatabaseUrlFor(value, APP_DB_ROLE);
 const isOwnerDatabaseUrl = (value: string) => isDatabaseUrlFor(value, OWNER_DB_ROLE);
 
+/**
+ * Whether a database URL has a query string or a fragment, even an empty one (jade-f1w). pg's
+ * connection-string parser copies every query parameter into the connection config, and `host`,
+ * `port`, `user` and `password` there override the URL's own parts, so a URL whose own parts pass
+ * every check here could still connect elsewhere or as another role. No such URL is accepted.
+ */
+export function hasQueryOrFragment(value: string): boolean {
+	return value.includes('?') || value.includes('#');
+}
+
 /** Host, port and database of a URL both schemas have accepted. */
 function databaseTarget(value: string): string {
 	const url = new URL(value);
@@ -113,6 +123,7 @@ export type InvalidReason =
 	| 'app_env_node_production'
 	| 'database_url'
 	| 'migration_database_url'
+	| 'database_url_query'
 	| 'same_database'
 	| 'secret_format'
 	| 'log_level'
@@ -123,6 +134,7 @@ const REASON_PHRASES: Record<InvalidReason, string> = {
 	app_env_node_production: 'must be staging or production when NODE_ENV is production',
 	database_url: 'must be a postgres URL for role jade_app',
 	migration_database_url: 'must be a postgres URL for role jade_owner',
+	database_url_query: 'must not have a query string or fragment',
 	same_database: 'must name the same host, port and database as MIGRATION_DATABASE_URL',
 	secret_format: 'must be at least 43 characters of A-Z a-z 0-9 _ + / = -',
 	log_level: 'must be one of debug, info, warn, error',
@@ -243,6 +255,17 @@ function validate(
 		const result = schemaFields[key]!.safeParse(raw[key]);
 		if (result.success) parsed[key] = result.data;
 		else refuse(key, FORMAT_REASON[key]);
+	}
+
+	// A database URL that passed its role check must still carry no query string or fragment
+	// (jade-f1w): pg would let either override the host, port, user or password checked above.
+	for (const key of keys) {
+		if (key !== 'DATABASE_URL' && key !== 'MIGRATION_DATABASE_URL') continue;
+		const value = parsed[key];
+		if (typeof value === 'string' && hasQueryOrFragment(value)) {
+			refuse(key, 'database_url_query');
+			delete parsed[key];
+		}
 	}
 
 	const appEnv = parsed.APP_ENV as AppEnv | undefined;

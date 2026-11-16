@@ -8,6 +8,8 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { request as httpRequest } from 'node:http';
 import { describe, expect, it } from 'vitest';
 import { routes } from '../authz/route-registry.ts';
+import '../../src/lib/server/db/index.ts';
+import { INVALID, isErrTag } from '../../src/lib/server/log/index.ts';
 import { generatedEnv, testEnv, type ServerEnv } from '../support/env.ts';
 import { startServer } from '../support/server.ts';
 
@@ -107,7 +109,6 @@ const REQUEST = [...COMMON, 'request_id', 'method', 'route', 'status', 'duration
 const ERROR = [...COMMON, 'request_id', 'route', 'kind', 'err_type', 'err_tag', 'stack_frames'];
 const LIFECYCLE_MSGS = ['boot', 'shutdown', 'migrate', 'config_error'];
 const LIFECYCLE_KEYS = [...COMMON, 'migration', 'count', 'missing', 'invalid'];
-const INVALID = '[invalid]';
 
 const isRoute = (v: unknown) => v === null || (typeof v === 'string' && ROUTE_IDS.has(v));
 const isId = (v: unknown) => v === null || (typeof v === 'string' && UUID.test(v));
@@ -130,7 +131,10 @@ function checkLine(line: Record<string, unknown>): void {
 		expect(line.err_type === null || /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(String(line.err_type))).toBe(
 			true
 		);
-		expect(line.err_tag === null || /^[A-Z0-9_]+$/.test(String(line.err_tag))).toBe(true);
+		// The logger's own rule (A3): a registered tag, a SQLSTATE, an ERR_ code, a listed errno
+		// name, `[invalid]` or null. Importing the db module registers the database tools' tags here,
+		// as the server registers them.
+		expect(line.err_tag === null || line.err_tag === INVALID || isErrTag(line.err_tag)).toBe(true);
 		const frames = line.stack_frames;
 		if (frames !== INVALID) {
 			expect(Array.isArray(frames)).toBe(true);
@@ -224,6 +228,39 @@ describe.each(runs)('APP_ENV=%s', (appEnv, makeEnv) => {
 		} else {
 			expect(errorLines.length).toBeGreaterThan(0);
 			for (const line of errorLines) expect(Array.isArray(line.stack_frames)).toBe(true);
+		}
+	});
+});
+
+describe('the line check itself (A3)', () => {
+	const errorLine = (err_tag: unknown) => ({
+		ts: new Date().toISOString(),
+		level: 'error',
+		msg: 'error',
+		request_id: null,
+		route: null,
+		kind: 'unknown',
+		err_type: 'Error',
+		err_tag,
+		stack_frames: []
+	});
+
+	it('accepts the err_tag values the logger writes', () => {
+		for (const tag of [
+			null,
+			INVALID,
+			'23505',
+			'ERR_SOCKET_CLOSED',
+			'EADDRINUSE',
+			'MIGRATION_FAILED'
+		]) {
+			checkLine(errorLine(tag));
+		}
+	});
+
+	it('refuses an err_tag the logger would never write, a join-code-shaped one included', () => {
+		for (const tag of [crockford(6), 'EACCES', 'NOT_REGISTERED_TAG', 'EFOOBAR']) {
+			expect(() => checkLine(errorLine(tag))).toThrow();
 		}
 	});
 });

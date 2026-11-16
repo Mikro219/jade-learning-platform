@@ -4,6 +4,9 @@
 //   - Drizzle Kit's journal (meta/_journal.json) lists the same names in the same order;
 //   - a destructive statement (DROP, TRUNCATE, RENAME, REVOKE, DELETE, a column type change,
 //     SET NOT NULL) needs a `-- jade:contract <bead>` marker line in its file;
+//   - no file has a transaction-control statement (BEGIN, COMMIT, ROLLBACK, END, ABORT,
+//     START TRANSACTION, SAVEPOINT, RELEASE): the runner applies each file in one transaction with
+//     its ledger row, and a COMMIT inside the file would commit the file without its row (B7);
 //   - with --base, the base commit's manifest is an unchanged prefix of this one: no merged file
 //     was edited, renamed, reordered or removed. A base without a manifest has an empty one.
 // tests/unit/migrations-static.test.ts runs the same checks.
@@ -29,19 +32,61 @@ const DESTRUCTIVE = [
 	/\brename\b/i,
 	/\brevoke\b/i,
 	/\bdelete\s+from\b/i,
-	/\balter\s+column\s+\S+\s+(?:set\s+data\s+)?type\b/i,
+	// ALTER [COLUMN] <name> [SET DATA] TYPE, with a plain or a double-quoted name, whose quotes
+	// may be doubled inside it (A4, A6).
+	/\balter\s+(?:column\s+)?(?:"(?:[^"]|"")+"|\S+)\s+(?:set\s+data\s+)?type\b/i,
 	/\bset\s+not\s+null\b/i
 ];
 
-/** The SQL of a file with its `--` line comments removed. */
+// One SQL token that is not a statement keyword (A5, A6), in the order the lexer tries them:
+//   1. a `--` comment, 2. a `/* */` comment (Postgres nests these; no migration does),
+//   3. an escape string `E'...'`, where a backslash escapes the next character, so `E'\''` is
+//      one string; the E must not end an identifier,
+//   4. a plain string `'...'` (standard_conforming_strings: a backslash is literal),
+//   5. a double-quoted identifier, 6. a dollar-quoted body `$$ ... $$` or `$tag$ ... $tag$`,
+//      where the tag is a letter or `_` and then letters, digits or `_`.
+const NON_CODE =
+	/(--[^\n]*|\/\*[\s\S]*?\*\/)|(?<![A-Za-z0-9_$])[Ee]'(?:[^'\\]|\\[\s\S]|'')*'|'(?:[^']|'')*'|"(?:[^"]|"")*"|(\$(?:[A-Za-z_][A-Za-z0-9_]*)?\$)[\s\S]*?\2/g;
+
+/**
+ * The SQL of a file with its `--` and `/* *\/` comments replaced by a space. Strings, quoted
+ * identifiers and dollar-quoted bodies are kept as they are, and a comment marker inside one of
+ * them is not a comment.
+ */
 export function stripComments(sql: string): string {
-	return sql.replace(/--[^\n]*/g, '');
+	return sql.replace(NON_CODE, (match, comment: string | undefined) =>
+		comment === undefined ? match : ' '
+	);
 }
 
 /** Whether a file's SQL has a destructive statement. */
 export function isDestructive(sql: string): boolean {
 	const code = stripComments(sql);
 	return DESTRUCTIVE.some((pattern) => pattern.test(code));
+}
+
+/**
+ * The SQL with everything that is not a statement keyword blanked out: `--` and `/* *\/`
+ * comments, escape and plain strings, double-quoted identifiers and dollar-quoted bodies
+ * (`$$ ... $$`, `$tag$ ... $tag$`, where PL/pgSQL's own BEGIN and END live). Each is replaced by a
+ * space, so the statements around it stay apart.
+ */
+export function stripNonCode(sql: string): string {
+	return sql.replace(NON_CODE, ' ');
+}
+
+const TRANSACTION_CONTROL =
+	/^(?:begin|commit|rollback|end|abort|start\s+transaction|savepoint|release|prepare\s+transaction)\b/i;
+
+/**
+ * Whether a file's SQL has a transaction-control statement (B7): a statement, after comments,
+ * strings and dollar-quoted bodies are removed, that starts with one of the keywords above. A
+ * SQL-standard function body (`BEGIN ATOMIC ... END`) would be refused too; none is needed yet.
+ */
+export function hasTransactionControl(sql: string): boolean {
+	return stripNonCode(sql)
+		.split(';')
+		.some((statement) => TRANSACTION_CONTROL.test(statement.trim()));
 }
 
 /** Every problem with the migrations of `dir`, as fixed phrases and file names. */
@@ -55,6 +100,11 @@ export function checkMigrationsDir(dir: string): string[] {
 			problems.push(`${file.name}: number is not ${String(i).padStart(4, '0')}`);
 		if (isDestructive(file.sql) && !CONTRACT_MARKER.test(file.sql)) {
 			problems.push(`${file.name}: destructive statement without a -- jade:contract <bead> marker`);
+		}
+		if (hasTransactionControl(file.sql)) {
+			problems.push(
+				`${file.name}: transaction-control statement (the runner wraps each file in one transaction)`
+			);
 		}
 	});
 

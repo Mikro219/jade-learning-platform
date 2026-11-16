@@ -3,9 +3,16 @@ import adapter from '@sveltejs/adapter-node';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { loadEnv } from './tools/load-env.ts';
 
-// `.env` outside production (plan V6), so `pnpm dev` has the app's configuration. The build itself
-// reads no secret: the init hook checks nothing while building (V3).
+// `.env` outside production (plan V6), so `pnpm dev` has the app's configuration.
 loadEnv();
+
+// loadEnv() is not the only reader of `.env`: SvelteKit itself calls Vite's loadEnv() on `env.dir`
+// (default: the project root) for `$env/*`, and Vite core reads `envDir` (default: the root) for
+// `import.meta.env`, both whatever NODE_ENV is. JADE_BUILD_ENV_DIR, set only by the blackbox build
+// (tests/support/global-setup-blackbox.ts) to an empty directory, points both there, so that build
+// sees no env file at all (V3, jade-7yz). Unset (`pnpm dev`, `pnpm build`), both keep their
+// defaults.
+const buildEnvDir = process.env['JADE_BUILD_ENV_DIR'] || undefined;
 
 export default defineConfig({
 	plugins: [
@@ -16,9 +23,11 @@ export default defineConfig({
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
 			adapter: adapter(),
-			version: { name: process.env.APP_VERSION ?? 'dev' }
+			version: { name: process.env.APP_VERSION ?? 'dev' },
+			...(buildEnvDir === undefined ? {} : { env: { dir: buildEnvDir } })
 		})
 	],
+	...(buildEnvDir === undefined ? {} : { envDir: buildEnvDir }),
 	test: {
 		expect: { requireAssertions: true },
 		projects: [
@@ -46,8 +55,9 @@ export default defineConfig({
 			},
 			{
 				// Black-box checks of the built server (plan PD9). Global setup builds the app once per
-				// run with an empty environment (jade-b1f), and gives health.test.ts the database
-				// harness of U7.
+				// run with NODE_ENV=production and JADE_BUILD_ENV_DIR at an empty directory, so no env
+				// file is read, neither by loadEnv() nor by SvelteKit or Vite (jade-b1f, jade-7yz),
+				// and gives health.test.ts the database harness of U7.
 				test: {
 					name: 'blackbox',
 					environment: 'node',

@@ -13,6 +13,7 @@
 // a password or a server message: only a fixed tag and, where useful, a SQLSTATE.
 import { createHash, createHmac, pbkdf2Sync, randomBytes } from 'node:crypto';
 import pg from 'pg';
+import { registerErrorTags } from '../log/index.ts';
 
 /** The role the app connects as. Fixed, because migration files grant to it by name (U2). */
 export const APP_ROLE = 'jade_app';
@@ -22,7 +23,22 @@ export type DbErrorTag =
 	| 'MIGRATION_HISTORY_MISMATCH'
 	| 'MIGRATION_MANIFEST_MISMATCH'
 	| 'MIGRATION_FAILED'
-	| 'ROLE_BOOTSTRAP_FAILED';
+	| 'MIGRATION_LOCK_TIMEOUT'
+	| 'ROLE_BOOTSTRAP_FAILED'
+	| 'ROLE_LOCK_TIMEOUT';
+
+/** Every DbErrorTag, for the logger's registry of app error tags (jade-zwq). */
+export const DB_ERROR_TAGS: readonly DbErrorTag[] = [
+	'MIGRATION_HISTORY_MISMATCH',
+	'MIGRATION_MANIFEST_MISMATCH',
+	'MIGRATION_FAILED',
+	'MIGRATION_LOCK_TIMEOUT',
+	'ROLE_BOOTSTRAP_FAILED',
+	'ROLE_LOCK_TIMEOUT'
+];
+
+// A DbError reaching the logger is written with its tag only when the tag is registered.
+registerErrorTags(DB_ERROR_TAGS);
 
 /** A database tool's failure: a fixed tag, the migration it concerns, the SQLSTATE if any. */
 export class DbError extends Error {
@@ -49,6 +65,33 @@ export function sqlstateOf(err: unknown): string | undefined {
 // `postgres` maintenance database, so every runner on the cluster shares it.
 const ROLE_LOCK_KEY = '7665518427635674213';
 
+/** How long a runner waits for an advisory lock before it fails with a fixed tag (B4). */
+export const LOCK_TIMEOUT_MS = 60_000;
+
+/** How often a waiting runner tries the lock again. */
+const LOCK_POLL_MS = 250;
+
+/**
+ * Take the session advisory lock `key` on `client`, trying every LOCK_POLL_MS until `timeoutMs`
+ * has passed, then throw `DbError(tag)`. A plain `pg_advisory_lock` would wait silently forever
+ * behind a stuck session (B4).
+ */
+export async function acquireAdvisoryLock(
+	client: pg.Client,
+	key: string,
+	timeoutMs: number,
+	tag: DbErrorTag
+): Promise<void> {
+	const deadline = Date.now() + timeoutMs;
+	for (;;) {
+		const { rows } = await client.query('SELECT pg_try_advisory_lock($1::bigint) AS locked', [key]);
+		if ((rows[0] as { locked?: unknown } | undefined)?.locked === true) return;
+		const remaining = deadline - Date.now();
+		if (remaining <= 0) throw new DbError(tag);
+		await new Promise((done) => setTimeout(done, Math.min(LOCK_POLL_MS, remaining)));
+	}
+}
+
 const SCRAM_ITERATIONS = 4096;
 
 /**
@@ -68,16 +111,38 @@ export function scramVerifier(password: string, salt: Buffer = randomBytes(16)):
 	);
 }
 
-/** `url` with its database replaced by `database`. */
+/**
+ * Whether a database URL carries a query string or fragment (jade-f1w). pg copies query parameters
+ * into the connection config, where `host`, `port`, `user` and `password` override the URL's own
+ * parts. The config schemas refuse such a URL; the runner and the bootstrap refuse it again, for
+ * callers that pass URLs directly.
+ */
+export function hasUrlParameters(url: string): boolean {
+	return url.includes('?') || url.includes('#');
+}
+
+/** `url` with its database replaced by `database`, and with no query string or fragment. */
 export function withDatabase(url: string, database: string): string {
 	const u = new URL(url);
 	u.pathname = `/${encodeURIComponent(database)}`;
+	u.search = '';
+	u.hash = '';
 	return u.toString();
 }
 
 /** A client that never throws an unhandled 'error' event; connect errors still reject. */
 export function newClient(url: string): pg.Client {
-	const client = new pg.Client({ connectionString: url, connectionTimeoutMillis: 10_000 });
+	// keepAlive (B4, B6): a runner may hold or wait for a lock for a while, with nothing sent on
+	// the socket. TCP keepalive probes, from 10 s of idleness on, let this side's operating system
+	// notice a peer or path that went away, so a query waiting on it fails instead of hanging.
+	// They act on this end of the connection only; what the server does with a session whose
+	// client vanished is the server's own matter.
+	const client = new pg.Client({
+		connectionString: url,
+		connectionTimeoutMillis: 10_000,
+		keepAlive: true,
+		keepAliveInitialDelayMillis: 10_000
+	});
 	client.on('error', () => {
 		// A connection lost while idle; the next query on it fails and is reported there.
 	});
@@ -102,9 +167,18 @@ export type AppRoleOutcome = 'created' | 'password_set' | 'unchanged';
 /**
  * Make sure `jade_app` exists, can log in, and has the password `appUrl` carries (plan U2).
  * Runs as the owner (`ownerUrl`, role jade_owner) under the cluster-wide lock. A cluster whose
- * role is already right sees no write. Throws `DbError('ROLE_BOOTSTRAP_FAILED')` otherwise.
+ * role is already right sees no write. Throws `DbError('ROLE_BOOTSTRAP_FAILED')` otherwise, or
+ * `DbError('ROLE_LOCK_TIMEOUT')` when the lock is not free within `lockTimeoutMs` (default
+ * LOCK_TIMEOUT_MS).
  */
-export async function ensureAppRole(ownerUrl: string, appUrl: string): Promise<AppRoleOutcome> {
+export async function ensureAppRole(
+	ownerUrl: string,
+	appUrl: string,
+	options: { readonly lockTimeoutMs?: number } = {}
+): Promise<AppRoleOutcome> {
+	if (hasUrlParameters(ownerUrl) || hasUrlParameters(appUrl)) {
+		throw new DbError('ROLE_BOOTSTRAP_FAILED');
+	}
 	const password = decodeURIComponent(new URL(appUrl).password);
 	if (password === '') throw new DbError('ROLE_BOOTSTRAP_FAILED');
 
@@ -116,7 +190,12 @@ export async function ensureAppRole(ownerUrl: string, appUrl: string): Promise<A
 		throw new DbError('ROLE_BOOTSTRAP_FAILED', { sqlstate: sqlstateOf(err) });
 	}
 	try {
-		await admin.query('SELECT pg_advisory_lock($1::bigint)', [ROLE_LOCK_KEY]);
+		await acquireAdvisoryLock(
+			admin,
+			ROLE_LOCK_KEY,
+			options.lockTimeoutMs ?? LOCK_TIMEOUT_MS,
+			'ROLE_LOCK_TIMEOUT'
+		);
 		const found = await admin.query('SELECT 1 FROM pg_roles WHERE rolname = $1', [APP_ROLE]);
 		let outcome: AppRoleOutcome = 'unchanged';
 		if (found.rowCount === 0) {

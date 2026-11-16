@@ -3,29 +3,39 @@
 // Its guard runs first, before loadMigrationConfig and before any connection, on the raw APP_ENV
 // and on the host of each of MIGRATION_DATABASE_URL and DATABASE_URL: unless APP_ENV is
 // development or test and every host is a loopback address, it writes the fixed tag
-// DB_RESET_REFUSED with the half that failed (`app_env` or `host`), never a value or a URL, and
-// exits 1. A URL that does not parse, or is missing, is refused as `host`.
+// DB_RESET_REFUSED with the half that failed (`app_env`, `host` or `query`), never a value or a
+// URL, and exits 1. A URL that does not parse, or is missing, is refused as `host`. A URL with a
+// query string or fragment is refused as `query` (jade-f1w): pg would let a `host` or `port`
+// parameter override the loopback host checked here.
 import { fileURLToPath } from 'node:url';
 import { newClient, sqlstateOf, withDatabase } from '../../src/lib/server/db/index.ts';
+import { hasQueryOrFragment } from '../../src/lib/server/config/index.ts';
+import { registerErrorTags } from '../../src/lib/server/log/index.ts';
 import { loadEnv } from '../load-env.ts';
 import { migrationConfigOrReport, runMigrate } from './migrate.ts';
 
 type Env = Readonly<Record<string, string | undefined>>;
 
+/** The fixed tags db:reset writes (on stderr), registered with the logger too (jade-zwq). */
+export const RESET_TAGS = ['DB_RESET_REFUSED', 'DB_RESET_FAILED'] as const;
+registerErrorTags(RESET_TAGS);
+
 const LOOPBACK = new Set(['127.0.0.1', '[::1]', '::1', 'localhost']);
 
 /** The half of the guard that refuses `env`, or null when it may be reset (U6). */
-export function resetGuard(env: Env): 'app_env' | 'host' | null {
+export function resetGuard(env: Env): 'app_env' | 'host' | 'query' | null {
 	const appEnv = env['APP_ENV'];
 	if (appEnv !== 'development' && appEnv !== 'test') return 'app_env';
 	for (const key of ['MIGRATION_DATABASE_URL', 'DATABASE_URL']) {
+		const value = env[key] ?? '';
 		let host: string;
 		try {
-			host = new URL(env[key] ?? '').hostname;
+			host = new URL(value).hostname;
 		} catch {
 			return 'host';
 		}
 		if (!LOOPBACK.has(host)) return 'host';
+		if (hasQueryOrFragment(value)) return 'query';
 	}
 	return null;
 }

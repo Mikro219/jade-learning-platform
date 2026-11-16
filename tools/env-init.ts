@@ -13,9 +13,17 @@
 //
 //   pnpm env:init [--out <path>] [--profile dev|ci] [--db-port <port>]
 import { randomBytes } from 'node:crypto';
-import { chmodSync, closeSync, openSync, writeSync } from 'node:fs';
+import {
+	closeSync,
+	fchmodSync,
+	fsyncSync,
+	linkSync,
+	openSync,
+	unlinkSync,
+	writeFileSync
+} from 'node:fs';
 import { connect, createServer } from 'node:net';
-import { resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { freePort } from './free-port.ts';
 
@@ -183,17 +191,86 @@ const HEADER = [
 	'# Every variable is documented in .env.example.'
 ];
 
-/** Write the env file. Fails, leaving any existing file untouched, if `path` exists. */
-export function writeEnvFile(path: string, variables: readonly [string, string][]): void {
-	const text = [...HEADER, ...variables.map(([name, value]) => `${name}=${value}`), ''].join('\n');
-	// 'wx' fails if the file exists, so an existing file is never truncated or overwritten.
-	const fd = openSync(path, 'wx', 0o600);
+/**
+ * The temporary file's name for `target`: `<basename>.tmp-<pid>-<hex>`, in the target's directory.
+ * For `.env` that is `.env.tmp-…`, which `.gitignore`'s `.env.*` covers, so a write killed
+ * part-way leaves no untracked file of secrets that git would offer to add (B1).
+ */
+export function tempEnvFileName(
+	target: string,
+	pid: number = process.pid,
+	hex: string = randomBytes(6).toString('hex')
+): string {
+	return join(dirname(target), `${basename(target)}.tmp-${pid}-${hex}`);
+}
+
+/** Link errors after which writeEnvFile writes the file in place instead (B8). */
+const NO_LINK = new Set(['EPERM', 'ENOTSUP', 'EOPNOTSUPP', 'EXDEV']);
+
+function writeFd(fd: number, text: string, write: (fd: number, text: string) => void): void {
 	try {
-		writeSync(fd, text);
+		fchmodSync(fd, 0o600);
+		write(fd, text);
+		fsyncSync(fd);
 	} finally {
 		closeSync(fd);
 	}
-	chmodSync(path, 0o600);
+}
+
+/**
+ * Write the env file atomically (B8). Fails, leaving any existing file untouched, if `path`
+ * exists. The text goes to a temporary file in the same directory (opened `wx`, mode 600), is
+ * flushed to disk, and is then hard-linked to `path`: the link fails if `path` exists, so an
+ * existing file is never truncated or overwritten, and `path` appears only complete. Where the
+ * file system has no hard links (the link fails with EPERM, ENOTSUP, EOPNOTSUPP or EXDEV), `path`
+ * itself is opened `wx` (mode 600), written and flushed, and removed again if that fails. The
+ * temporary file is removed on every outcome, so a failure leaves no file at all.
+ * `options.write` and `options.link` replace the write and the link themselves (tests).
+ */
+export function writeEnvFile(
+	path: string,
+	variables: readonly [string, string][],
+	options: {
+		readonly write?: (fd: number, text: string) => void;
+		readonly link?: (existing: string, target: string) => void;
+	} = {}
+): void {
+	const text = [...HEADER, ...variables.map(([name, value]) => `${name}=${value}`), ''].join('\n');
+	const write = options.write ?? ((fd: number, data: string) => writeFileSync(fd, data));
+	const link = options.link ?? linkSync;
+	const tmp = tempEnvFileName(path);
+	const fd = openSync(tmp, 'wx', 0o600);
+	try {
+		writeFd(fd, text, write);
+		try {
+			link(tmp, path);
+		} catch (err) {
+			if (!NO_LINK.has(String((err as NodeJS.ErrnoException).code))) throw err;
+			const direct = openSync(path, 'wx', 0o600);
+			try {
+				writeFd(direct, text, write);
+			} catch (writeErr) {
+				try {
+					unlinkSync(path);
+				} catch {
+					// Nothing more to do; the original error is what matters.
+				}
+				throw writeErr;
+			}
+		}
+	} finally {
+		try {
+			unlinkSync(tmp);
+		} catch {
+			// Already gone; nothing to clean up.
+		}
+	}
+}
+
+/** An error's code as fixed text: an `E…` code, or `unknown`, never a message or a value. */
+export function errorCodeOf(err: unknown): string {
+	const code = (err as NodeJS.ErrnoException | null)?.code;
+	return typeof code === 'string' && /^E[A-Z0-9_]{1,30}$/.test(code) ? code : 'unknown';
 }
 
 export async function main(argv: readonly string[]): Promise<number> {
@@ -229,7 +306,7 @@ export async function main(argv: readonly string[]): Promise<number> {
 			process.stderr.write(`env:init: ${args.out} already exists; it was not changed.\n`);
 			return 1;
 		}
-		process.stderr.write(`env:init: could not write ${args.out}.\n`);
+		process.stderr.write(`env:init: could not write ${args.out} (${errorCodeOf(err)}).\n`);
 		return 1;
 	}
 	process.stdout.write(

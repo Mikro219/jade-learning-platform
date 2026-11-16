@@ -2,7 +2,7 @@
 // owner's variables and the `ci` profile; jade-80h adds the stack's variables and the `stack`
 // profile.
 import { execFile } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { parseEnv, promisify } from 'node:util';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { loadAppConfig, loadMigrationConfig } from '../../src/lib/server/config/index.ts';
+import { errorCodeOf, tempEnvFileName, writeEnvFile } from '../../tools/env-init.ts';
 
 const run = promisify(execFile);
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -114,6 +115,10 @@ describe('dev profile', () => {
 		expect(owner.password).toBe(env.JADE_OWNER_DB_PASSWORD);
 		expect(owner.host).toBe(`127.0.0.1:${env.JADE_DEV_DB_PORT}`);
 		expect(owner.pathname).toBe('/jade');
+		// No query string or fragment, which the config schemas refuse (jade-f1w).
+		for (const value of [env.DATABASE_URL!, env.MIGRATION_DATABASE_URL!]) {
+			expect(value).not.toMatch(/[?#]/);
+		}
 
 		expect(env.JADE_APP_DB_PASSWORD).toMatch(/^[A-Za-z0-9_-]{32,}$/);
 		expect(env.JADE_OWNER_DB_PASSWORD).toMatch(/^[A-Za-z0-9_-]{32,}$/);
@@ -246,6 +251,97 @@ describe('refusals', () => {
 		expect(second.stderr).toContain('already exists; it was not changed.');
 		expect(readFileSync(out, 'utf8')).toBe(before);
 		assertNoValuePrinted(second, readEnv(out));
+	});
+
+	it('a second run leaves no temporary file behind (B8)', async () => {
+		const out = join(dir, '.env');
+		expect((await envInit('--out', out)).code).toBe(0);
+		expect((await envInit('--out', out)).code).toBe(1);
+		expect(readdirSync(dir)).toEqual(['.env']);
+	});
+
+	it('a write that fails leaves no file at all, and a rerun succeeds (B8)', () => {
+		const out = join(dir, '.env');
+		const variables: [string, string][] = [['APP_ENV', 'development']];
+		expect(() =>
+			writeEnvFile(out, variables, {
+				write: () => {
+					throw new Error('simulated write failure');
+				}
+			})
+		).toThrow('simulated write failure');
+		expect(readdirSync(dir)).toEqual([]);
+
+		writeEnvFile(out, variables);
+		expect(readdirSync(dir)).toEqual(['.env']);
+		expect(statSync(out).mode & 0o777).toBe(0o600);
+		expect(readEnv(out)).toEqual({ APP_ENV: 'development' });
+	});
+
+	it('the temporary file is `<name>.tmp-<pid>-<hex>` beside the target (B1)', () => {
+		expect(tempEnvFileName(join(dir, '.env'), 123, 'ab12')).toBe(join(dir, '.env.tmp-123-ab12'));
+		expect(tempEnvFileName(join(dir, '.env'))).toMatch(/\/\.env\.tmp-\d+-[0-9a-f]{12}$/);
+	});
+
+	it.each(['EPERM', 'ENOTSUP', 'EXDEV'])(
+		'where the link fails with %s, the file is written in place, mode 600 (B8)',
+		(code) => {
+			const out = join(dir, '.env');
+			const link = () => {
+				throw Object.assign(new Error('simulated link failure'), { code });
+			};
+			writeEnvFile(out, [['APP_ENV', 'development']], { link });
+			expect(readdirSync(dir)).toEqual(['.env']);
+			expect(statSync(out).mode & 0o777).toBe(0o600);
+			expect(readEnv(out)).toEqual({ APP_ENV: 'development' });
+
+			// The fallback still never overwrites.
+			const before = readFileSync(out, 'utf8');
+			expect(() => writeEnvFile(out, [['APP_ENV', 'test']], { link })).toThrow(
+				expect.objectContaining({ code: 'EEXIST' })
+			);
+			expect(readFileSync(out, 'utf8')).toBe(before);
+			expect(readdirSync(dir)).toEqual(['.env']);
+		}
+	);
+
+	it('a fallback write that fails leaves no file at all (B8)', () => {
+		const out = join(dir, '.env');
+		let writes = 0;
+		expect(() =>
+			writeEnvFile(out, [['APP_ENV', 'development']], {
+				link: () => {
+					throw Object.assign(new Error('no links here'), { code: 'EPERM' });
+				},
+				write: (fd, text) => {
+					writes += 1;
+					if (writes === 2) throw new Error('simulated write failure');
+					writeFileSync(fd, text);
+				}
+			})
+		).toThrow('simulated write failure');
+		expect(readdirSync(dir)).toEqual([]);
+	});
+
+	it('another link error is not hidden by the fallback, and leaves no file', () => {
+		const out = join(dir, '.env');
+		expect(() =>
+			writeEnvFile(out, [['APP_ENV', 'development']], {
+				link: () => {
+					throw Object.assign(new Error('simulated'), { code: 'EACCES' });
+				}
+			})
+		).toThrow(expect.objectContaining({ code: 'EACCES' }));
+		expect(readdirSync(dir)).toEqual([]);
+	});
+
+	it('a failed write names the error code, never its message (B8)', async () => {
+		const result = await envInit('--out', join(dir, 'missing', '.env'));
+		expect(result.code).toBe(1);
+		expect(result.stderr).toMatch(/could not write .*\(ENOENT\)\.\n$/);
+		expect(result.stderr).not.toContain('no such file');
+		expect(errorCodeOf(new Error('x'))).toBe('unknown');
+		expect(errorCodeOf(Object.assign(new Error('x'), { code: 'secret value' }))).toBe('unknown');
 	});
 
 	it('refuses a profile that does not exist yet, and writes nothing', async () => {
