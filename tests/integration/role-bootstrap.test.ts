@@ -55,7 +55,6 @@ describe('in a throwaway cluster', () => {
 	const appPassword = generatePassword();
 	let ownerUrl = '';
 	let appUrl = '';
-	let started = false;
 
 	beforeAll(async () => {
 		// The password reaches the container through the docker CLI's environment (`-e NAME`
@@ -70,6 +69,9 @@ describe('in a throwaway cluster', () => {
 						'-d',
 						'--name',
 						name,
+						// Marks the container as this file's, for a person cleaning up by hand.
+						'--label',
+						'jade-test=role-bootstrap',
 						'-e',
 						'POSTGRES_USER=jade_owner',
 						'-e',
@@ -82,7 +84,6 @@ describe('in a throwaway cluster', () => {
 					],
 					{ env: { ...process.env, POSTGRES_PASSWORD: ownerPassword } }
 				);
-				started = true;
 				ownerUrl = `postgres://jade_owner:${ownerPassword}@127.0.0.1:${port}/jade`;
 				appUrl = `postgres://jade_app:${appPassword}@127.0.0.1:${port}/jade`;
 				break;
@@ -114,8 +115,10 @@ describe('in a throwaway cluster', () => {
 		}
 	}, 150_000);
 
+	// Always, whether or not beforeAll got as far as noting the start (a timeout during `docker run`
+	// can leave a container behind): remove this file's container by its own name (B6).
 	afterAll(async () => {
-		if (started) await docker('docker', ['rm', '-f', '-v', name]);
+		await docker('docker', ['rm', '-f', '-v', name]).catch(() => {});
 	});
 
 	/** Two fresh databases, migrated at once, then dropped so the role can be dropped too. */

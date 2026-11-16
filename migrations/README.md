@@ -33,7 +33,9 @@ SQL migrations for PostgreSQL 16 (ADR 0003). Drizzle Kit writes them; the projec
   refuses the file without it.
 - **One transaction per file.** The runner applies each file in its own transaction together
   with its ledger row; a failure rolls the file back. A statement that cannot run inside a
-  transaction is out of scope until one is needed.
+  transaction is out of scope until one is needed. A file holds no transaction-control
+  statement (`BEGIN`, `COMMIT`, `ROLLBACK`, `END`, `ABORT`, `START TRANSACTION`, `SAVEPOINT`,
+  `RELEASE`): one would commit the file apart from its ledger row. `pnpm db:check` refuses it.
 - **Grants to `jade_app` by name.** The app connects as `jade_app` and owns nothing; the owner,
   `jade_owner`, runs migrations. Every new table needs its grants to `jade_app` in the same file.
 
@@ -43,3 +45,11 @@ SQL migrations for PostgreSQL 16 (ADR 0003). Drizzle Kit writes them; the projec
 - `pnpm db:reset`: drop, recreate and migrate it; development and test on a loopback host only.
 - `pnpm db:check [--base <ref>]`: the static rules above, and with `--base`, that the base
   commit's manifest is an unchanged prefix of this one.
+
+## Notes
+
+- `0000_baseline` revokes `CREATE` on schema `public` from `PUBLIC`. On PostgreSQL 15 and later
+  (the project runs 16) `PUBLIC` has no such privilege by default, so the statement is defensive:
+  it keeps the app role unable to create objects on a cluster made by an older `initdb` or changed
+  by hand. `tests/integration/baseline-migration.test.ts` checks the privilege itself
+  (`has_schema_privilege`), not only that a `CREATE TABLE` by the app role fails.

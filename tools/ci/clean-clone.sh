@@ -55,16 +55,34 @@ bash -euo pipefail -c "$setup"
 pnpm test
 pnpm e2e
 
-# pnpm dev on a port from freePort(), so no other server on the machine can answer in its place.
-# A start that fails because the port was taken in between is retried, at most three times.
+# Whether the pnpm dev log `$1` holds Vite's ready line naming port `$2` on the loopback address
+# the server was started on (`Local:   http://127.0.0.1:<port>/`, after Vite's "ready in" line). Only then is a 200 on that port this server's: another process
+# that took the port first would answer too (B3, PD11).
+vite_ready() {
+	sed 's/\x1b\[[0-9;]*m//g' "$1" |
+		awk -v port="$2" '
+			/VITE v[0-9.]+ +ready in / { ready = 1 }
+			ready && $0 ~ ("Local: +http://127[.]0[.]0[.]1:" port "/") { found = 1 }
+			END { exit found ? 0 : 1 }
+		'
+}
+
+# pnpm dev on 127.0.0.1 and a port from freePort(), so no other server on the machine can answer in
+# its place; the address curl asks is the one Vite listens on (A8, B5).
+# A start that fails because the port was taken in between is retried, at most three times. The
+# port is curled only after the log shows Vite's ready line naming it.
 for attempt in 1 2 3; do
 	port=$(pnpm --silent exec node tools/free-port.ts)
 	log="$work/dev-$attempt.log"
-	pnpm dev --port "$port" --strictPort >"$log" 2>&1 &
+	pnpm dev --host 127.0.0.1 --port "$port" --strictPort >"$log" 2>&1 &
 	dev_pid=$!
 	for _ in $(seq 1 120); do
 		if ! kill -0 "$dev_pid" 2>/dev/null; then break; fi
-		code=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/" || true)
+		if ! vite_ready "$log" "$port"; then
+			sleep 0.5
+			continue
+		fi
+		code=$(curl -s --max-time 10 -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/" || true)
 		if [ "$code" = "200" ]; then
 			echo "clean-clone: pnpm dev answered 200 on port $port"
 			kill "$dev_pid" 2>/dev/null || true

@@ -23,7 +23,12 @@ import {
 	readManifest,
 	sha256
 } from '../../src/lib/server/db/index.ts';
-import { checkMigrationsDir, checkPrefix, isDestructive } from '../../tools/db/check-migrations.ts';
+import {
+	checkMigrationsDir,
+	checkPrefix,
+	hasTransactionControl,
+	isDestructive
+} from '../../tools/db/check-migrations.ts';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const dir = join(root, 'migrations');
@@ -143,6 +148,77 @@ describe('the checks catch what they are for', () => {
 			expect({ sql, destructive: isDestructive(sql) }).toEqual({ sql, destructive: true });
 		}
 		expect(isDestructive('CREATE INDEX i ON t (c); GRANT SELECT ON t TO jade_app;')).toBe(false);
+	});
+
+	it('a column type change without COLUMN, or on quoted identifiers with spaces (A4)', () => {
+		for (const sql of [
+			'ALTER TABLE t ALTER c TYPE text',
+			'alter table t alter c set data type bigint',
+			'ALTER TABLE "my table" ALTER COLUMN "my col" TYPE text',
+			'ALTER TABLE "my table" ALTER "my col" SET DATA TYPE text',
+			'ALTER TABLE t\n  ALTER\n  c\n  TYPE integer USING c::integer',
+			// A6: a block comment between the name and TYPE, and a quoted name with doubled quotes.
+			'ALTER TABLE t ALTER COLUMN c /* widen */ TYPE bigint',
+			'ALTER TABLE t ALTER COLUMN "my ""x"" col" TYPE text',
+			// A6: a comment marker inside a string does not hide what follows it.
+			"COMMENT ON TABLE t IS '-- note'; DROP TABLE u;"
+		]) {
+			expect({ sql, destructive: isDestructive(sql) }).toEqual({ sql, destructive: true });
+		}
+		for (const sql of [
+			"ALTER TYPE mood ADD VALUE 'meh'",
+			'ALTER TABLE t ADD COLUMN c text',
+			'ALTER TABLE t ALTER COLUMN c SET DEFAULT 1'
+		]) {
+			expect({ sql, destructive: isDestructive(sql) }).toEqual({ sql, destructive: false });
+		}
+	});
+
+	it('a transaction-control statement (B7)', () => {
+		const c = copy();
+		writeFileSync(
+			join(c, '0001_tx.sql'),
+			'BEGIN;\nGRANT USAGE ON SCHEMA public TO jade_app;\nCOMMIT;\n'
+		);
+		writeFileSync(join(c, 'manifest.json'), formatManifest(buildManifest(c)));
+		expect(checkMigrationsDir(c)).toContain(
+			'0001_tx: transaction-control statement (the runner wraps each file in one transaction)'
+		);
+		for (const sql of [
+			'BEGIN;',
+			'begin transaction isolation level serializable;',
+			'SELECT 1; COMMIT;',
+			'SELECT 1;\n--> statement-breakpoint\nROLLBACK;',
+			'END;',
+			'START TRANSACTION;',
+			'SAVEPOINT s1;',
+			'RELEASE SAVEPOINT s1;',
+			'release s1',
+			'ROLLBACK TO SAVEPOINT s1;',
+			'ABORT;',
+			'COMMIT AND CHAIN;',
+			'/* a block comment */ COMMIT;',
+			// A5: an escape string whose backslash escapes a quote ends where Postgres ends it.
+			"SELECT E'\\''; COMMIT;",
+			"SELECT E'\\''; COMMIT; SELECT 'x';",
+			"SELECT e'a\\\\'; COMMIT; SELECT 'x';"
+		]) {
+			expect({ sql, tx: hasTransactionControl(sql) }).toEqual({ sql, tx: true });
+		}
+		for (const sql of [
+			'-- BEGIN; in a comment\nSELECT 1;',
+			'/* COMMIT; */ SELECT 1;',
+			"SELECT 'BEGIN; COMMIT;';",
+			'DO $$ BEGIN PERFORM 1; END $$;',
+			'CREATE FUNCTION f() RETURNS void LANGUAGE plpgsql AS $body$\nBEGIN\n  IF true THEN RETURN; END IF;\nEND;\n$body$;',
+			'GRANT SELECT ON t TO jade_app;',
+			'CREATE TABLE begin_log (ended boolean);',
+			// A5: a dollar tag with digits; an escape string holding a quote and a keyword.
+			'CREATE FUNCTION f() RETURNS void LANGUAGE plpgsql AS $f1$\nBEGIN\n  RETURN;\nEND;\n$f1$;',
+			"SELECT E'BEGIN; \\' COMMIT;';"
+		]) {
+			expect({ sql, tx: hasTransactionControl(sql) }).toEqual({ sql, tx: false });
+		}
 	});
 
 	it('--base: a base manifest that is not an unchanged prefix', () => {

@@ -152,6 +152,29 @@ describe('the db:reset guard (PD15)', () => {
 		}
 	);
 
+	it.each([
+		['MIGRATION_DATABASE_URL', '?host=192.0.2.1'],
+		['DATABASE_URL', '?host=192.0.2.1'],
+		['MIGRATION_DATABASE_URL', '#x']
+	])(
+		'%s with %s: refused as query, before any connection, with the scratch table left in place (jade-f1w)',
+		async (key, suffix) => {
+			await createScratchTable();
+			// APP_ENV and the URL's own host (loopback) pass the earlier halves of the guard.
+			const input = { ...env, [key]: `${env[key]}${suffix}` };
+			expect(resetGuard({ ...input, [key]: env[key] })).toBeNull();
+			expect(resetGuard(input)).toBe('query');
+
+			const run = await tool('tools/db/reset.ts', input);
+			expect(run.code).toBe(1);
+			expect(run.elapsedMs).toBeLessThan(5000);
+			expect(run.stderr).toBe('db:reset: DB_RESET_REFUSED query\n');
+			expect(run.stdout).toBe('');
+			for (const value of Object.values(input)) expect(run.stderr).not.toContain(value);
+			expect(await scratchTableExists()).toBe(true);
+		}
+	);
+
 	it('refuses a URL that does not parse, and accepts development and test on loopback', () => {
 		expect(resetGuard({ ...env, DATABASE_URL: 'not a url' })).toBe('host');
 		expect(resetGuard({ ...env, MIGRATION_DATABASE_URL: undefined as unknown as string })).toBe(

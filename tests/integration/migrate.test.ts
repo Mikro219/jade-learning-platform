@@ -7,14 +7,22 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
 	DbError,
 	buildManifest,
+	ensureAppRole,
 	formatManifest,
 	migrate,
 	migrationStatus,
+	newClient,
 	readManifest,
+	withDatabase,
 	type Manifest
 } from '../../src/lib/server/db/index.ts';
 import { createEmptyDatabase, type TestDatabase } from '../support/db.ts';
-import { MIGRATIONS_DIR } from '../support/global-setup-db.ts';
+import {
+	MIGRATIONS_DIR,
+	clusterConfig,
+	createTemplateDatabase,
+	newRunId
+} from '../support/global-setup-db.ts';
 
 const shipped: Manifest = readManifest(MIGRATIONS_DIR);
 const created: TestDatabase[] = [];
@@ -148,5 +156,111 @@ describe('readiness (migrationStatus over the app pool)', () => {
 		};
 		expect(await migrationStatus(db.app, other)).toBe('mismatch');
 		expect(await migrationStatus(db.app, shipped)).toBe('ok');
+	});
+});
+
+describe('database URLs with a query string or fragment (jade-f1w)', () => {
+	// 192.0.2.1 is reserved for documentation and nothing answers it: a runner that let the query
+	// override the host would wait for its 10-second connect timeout instead of refusing at once.
+	it('migrate() and ensureAppRole() refuse them before any connection', async () => {
+		const db = await emptyDatabase();
+		const remote = (url: string) => `${url}?host=192.0.2.1`;
+		const started = Date.now();
+		await expect(
+			migrate({ ownerUrl: remote(db.ownerUrl), appUrl: db.appUrl, dir: MIGRATIONS_DIR })
+		).rejects.toMatchObject({ tag: 'MIGRATION_FAILED' });
+		await expect(
+			migrate({
+				ownerUrl: db.ownerUrl,
+				appUrl: `${db.appUrl}?user=jade_owner`,
+				dir: MIGRATIONS_DIR
+			})
+		).rejects.toMatchObject({ tag: 'MIGRATION_FAILED' });
+		await expect(ensureAppRole(remote(db.ownerUrl), db.appUrl)).rejects.toMatchObject({
+			tag: 'ROLE_BOOTSTRAP_FAILED'
+		});
+		await expect(ensureAppRole(db.ownerUrl, `${db.appUrl}#x`)).rejects.toMatchObject({
+			tag: 'ROLE_BOOTSTRAP_FAILED'
+		});
+		expect(Date.now() - started).toBeLessThan(2000);
+		expect(await migrationStatus(db.owner, shipped)).toBe('behind');
+	}, 15_000);
+
+	it('withDatabase() drops a query string and fragment', () => {
+		const out = withDatabase('postgres://jade_owner:pw@127.0.0.1:5432/jade?host=remote#x', 'other');
+		expect(out).toBe('postgres://jade_owner:pw@127.0.0.1:5432/other');
+	});
+});
+
+describe('advisory lock waits are bounded (B4)', () => {
+	// The keys are the ASCII of "jademigr" (per database) and "jaderole" (cluster-wide, held in
+	// the postgres database), as src/lib/server/db documents them.
+	const key = (ascii: string) => Buffer.from(ascii).readBigInt64BE().toString();
+
+	async function holding<T>(url: string, ascii: string, body: () => Promise<T>): Promise<T> {
+		const holder = newClient(url);
+		await holder.connect();
+		try {
+			await holder.query('SELECT pg_advisory_lock($1::bigint)', [key(ascii)]);
+			return await body();
+		} finally {
+			await holder.end();
+		}
+	}
+
+	it('migrate() fails with MIGRATION_LOCK_TIMEOUT while another session holds the runner lock', async () => {
+		const db = await emptyDatabase();
+		const started = Date.now();
+		await holding(db.ownerUrl, 'jademigr', async () => {
+			await expect(
+				migrate({
+					ownerUrl: db.ownerUrl,
+					appUrl: db.appUrl,
+					dir: MIGRATIONS_DIR,
+					lockTimeoutMs: 600
+				})
+			).rejects.toMatchObject({ name: 'DbError', tag: 'MIGRATION_LOCK_TIMEOUT' });
+		});
+		expect(Date.now() - started).toBeLessThan(5000);
+		expect(await migrationStatus(db.owner, shipped)).toBe('behind');
+	}, 15_000);
+
+	it('ensureAppRole() fails with ROLE_LOCK_TIMEOUT while another session holds the role lock', async () => {
+		const db = await emptyDatabase();
+		const started = Date.now();
+		await holding(withDatabase(db.ownerUrl, 'postgres'), 'jaderole', async () => {
+			await expect(
+				ensureAppRole(db.ownerUrl, db.appUrl, { lockTimeoutMs: 600 })
+			).rejects.toMatchObject({ name: 'DbError', tag: 'ROLE_LOCK_TIMEOUT' });
+		});
+		expect(Date.now() - started).toBeLessThan(5000);
+	}, 15_000);
+});
+
+describe("the harness's template database (B5)", () => {
+	it('a template whose migration fails is dropped, and the error is its tag only', async () => {
+		const config = clusterConfig();
+		const name = `jade_tmpl_${newRunId()}`;
+		const exists = async () => {
+			const client = newClient(withDatabase(config.migrationDatabaseUrl, 'postgres'));
+			await client.connect();
+			try {
+				const { rowCount } = await client.query('SELECT 1 FROM pg_database WHERE datname = $1', [
+					name
+				]);
+				return rowCount === 1;
+			} finally {
+				await client.end();
+			}
+		};
+		let created = false;
+		await expect(
+			createTemplateDatabase(config, name, async () => {
+				created = await exists();
+				throw new DbError('MIGRATION_FAILED', { migration: '0000_baseline' });
+			})
+		).rejects.toThrow(/^template database: MIGRATION_FAILED$/);
+		expect(created).toBe(true);
+		expect(await exists()).toBe(false);
 	});
 });

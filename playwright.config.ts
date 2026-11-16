@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import { withDatabase } from './src/lib/server/db/index.ts';
 import { newRunId } from './tests/support/global-setup-db.ts';
+import { CLI_READY } from './tests/support/server.ts';
 import { freePort } from './tools/free-port.ts';
 import { loadEnv } from './tools/load-env.ts';
 
@@ -11,7 +12,10 @@ import { loadEnv } from './tools/load-env.ts';
 loadEnv();
 
 // The port is chosen once, by the process that loads this config first, and handed to the
-// workers (which load it again) through the environment (plan H6, PD11).
+// workers (which load it again) through the environment (plan H6, PD11). It is the server's first
+// attempt only: if another process takes it before the server listens, tests/support/server.ts
+// retries on a new port, and the webServer's `wait.stdout` (CLI_READY) writes the port the server
+// actually listens on back into JADE_E2E_PORT before any worker starts (jade-r7c).
 const PORT_VAR = 'JADE_E2E_PORT';
 if (!process.env[PORT_VAR]) {
 	process.env[PORT_VAR] = String(await freePort());
@@ -58,9 +62,12 @@ export default defineConfig({
 	],
 	globalSetup: './tests/support/global-setup-e2e.ts',
 	webServer: {
-		command: `${node} node_modules/vite/bin/vite.js build && ${node} tests/support/server.ts --port ${port} --origin ${origin}`,
+		command: `${node} node_modules/vite/bin/vite.js build && ${node} tests/support/server.ts --port ${port}`,
 		env: serverEnv,
-		url: `${origin}/`,
+		// Ready when the server under test says so on its own stdout, never when something answers
+		// on the port: a process that bound the port during the build is not this server (PD11).
+		// No `url` or `port` here: Playwright would race it against `wait` and take the first.
+		wait: { stdout: CLI_READY },
 		reuseExistingServer: false,
 		timeout: 180_000
 	}

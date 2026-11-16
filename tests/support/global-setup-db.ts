@@ -64,17 +64,41 @@ export function clusterConfig(): MigrationConfig {
 	}
 }
 
-/** Create `name` from template0 and migrate it with this checkout's runner. */
-export async function createMigratedDatabase(config: MigrationConfig, name: string) {
+/** Create `name` from template0 and migrate it with this checkout's runner (`run`: tests). */
+export async function createMigratedDatabase(
+	config: MigrationConfig,
+	name: string,
+	run: typeof migrate = migrate
+) {
 	await adminQuery(
 		config.migrationDatabaseUrl,
 		`CREATE DATABASE ${quoteIdentifier(name)} TEMPLATE template0`
 	);
-	return migrate({
+	return run({
 		ownerUrl: withDatabase(config.migrationDatabaseUrl, name),
 		appUrl: withDatabase(config.databaseUrl, name),
 		dir: MIGRATIONS_DIR
 	});
+}
+
+/**
+ * Create and migrate the run's template `name`. If migrating it fails, the half-made template is
+ * dropped before the error is rethrown (B5), so a failed run leaves no database behind; a DbError
+ * is rethrown as its tag only (INV4).
+ */
+export async function createTemplateDatabase(
+	config: MigrationConfig,
+	name: string,
+	run: typeof migrate = migrate
+): Promise<void> {
+	try {
+		await createMigratedDatabase(config, name, run);
+	} catch (err) {
+		await dropDatabase(config.migrationDatabaseUrl, name).catch(() => {});
+		// eslint-disable-next-line preserve-caught-error -- the cause can carry a URL or a server message (INV4)
+		if (err instanceof DbError) throw new Error(`template database: ${err.tag}`);
+		throw err;
+	}
 }
 
 /** Names of this run's databases still in the cluster. */
@@ -115,13 +139,7 @@ export default async function setup(project: TestProject): Promise<() => Promise
 		}
 	} else {
 		template = `jade_tmpl_${runId}`;
-		try {
-			await createMigratedDatabase(config, template);
-		} catch (err) {
-			// eslint-disable-next-line preserve-caught-error -- the cause can carry a URL or a server message (INV4)
-			if (err instanceof DbError) throw new Error(`template database: ${err.tag}`);
-			throw err;
-		}
+		await createTemplateDatabase(config, template);
 	}
 	// migrate() has ended its sessions; nothing else of this run is connected to the template.
 

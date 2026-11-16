@@ -43,6 +43,31 @@ describe('0000_baseline', () => {
 		).toBe('42501');
 	});
 
+	// On Postgres 15 and later PUBLIC has no CREATE on schema public by default, so the 42501
+	// above would hold without the baseline's REVOKE; the REVOKE is defensive there, for a cluster
+	// created by an older initdb or changed by hand. This checks its effect directly (A5).
+	it('leaves PUBLIC and the app role without CREATE on schema public', async () => {
+		const { rows } = await db.owner.query(
+			"SELECT has_schema_privilege('public', 'public', 'CREATE') AS pub," +
+				" has_schema_privilege('jade_app', 'public', 'CREATE') AS app"
+		);
+		expect(rows[0]).toEqual({ pub: false, app: false });
+	});
+
+	it('the privilege check is live: a CREATE granted to PUBLIC shows, and the REVOKE removes it', async () => {
+		const check = async () =>
+			(await db.owner.query("SELECT has_schema_privilege('public', 'public', 'CREATE') AS p"))
+				.rows[0].p;
+		await db.owner.query('GRANT CREATE ON SCHEMA public TO PUBLIC');
+		try {
+			expect(await check()).toBe(true);
+		} finally {
+			// The baseline's own statement.
+			await db.owner.query('REVOKE CREATE ON SCHEMA public FROM PUBLIC');
+		}
+		expect(await check()).toBe(false);
+	});
+
 	it("accepts the app URL's password and refuses a wrong one", async () => {
 		const good = newClient(db.appUrl);
 		await good.connect();

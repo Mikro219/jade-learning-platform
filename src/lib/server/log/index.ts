@@ -107,7 +107,55 @@ export type LifecycleMessage = (typeof LIFECYCLE_MESSAGES)[number];
 const MAX_FRAMES = 20;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]{0,63}$/;
-const TAG = /^[A-Z0-9_]{1,64}$/;
+// err_tag (jade-zwq): written only when it is one of three kinds, each from its own property.
+//   - a SQLSTATE from `.code`: five characters of 0-9 A-Z. A five-character string that is not a
+//     SQLSTATE would also pass; that residual is accepted, because join codes are six characters
+//     and kit codes longer, so neither can match.
+//   - a Node error code from `.code`: `ERR_` and upper-case letters, digits and underscores, or a
+//     name on NODE_ERRNO_NAMES. Those names are fixed strings, and none is six characters of the
+//     Crockford alphabet (0-9 A-H J K M N P-T V-Z), so none can equal a join code: EACCES, the one
+//     such name, is left off (tests/unit/log-schema.test.ts checks the list). The only residual
+//     is the five-character SQLSTATE shape above.
+//   - an app tag from `.tag`, registered with registerErrorTags().
+// Anything else, a six-character join-code-shaped value included, is `[invalid]`.
+const SQLSTATE = /^[0-9A-Z]{5}$/;
+const NODE_ERR_CODE = /^ERR_[A-Z0-9_]{1,60}$/;
+const APP_TAG = /^[A-Z][A-Z0-9_]{0,63}$/;
+
+/** The errno names a Node error's `.code` may carry into `err_tag`. */
+export const NODE_ERRNO_NAMES = [
+	'EADDRINUSE',
+	'EADDRNOTAVAIL',
+	'EAGAIN',
+	'EAI_AGAIN',
+	'EBADF',
+	'EBUSY',
+	'ECANCELED',
+	'ECONNABORTED',
+	'ECONNREFUSED',
+	'ECONNRESET',
+	'EEXIST',
+	'EHOSTUNREACH',
+	'EINTR',
+	'EINVAL',
+	'EIO',
+	'EISDIR',
+	'EMFILE',
+	'ENETDOWN',
+	'ENETUNREACH',
+	'ENFILE',
+	'ENOENT',
+	'ENOMEM',
+	'ENOSPC',
+	'ENOTDIR',
+	'ENOTEMPTY',
+	'ENOTFOUND',
+	'EPERM',
+	'EPIPE',
+	'EROFS',
+	'ETIMEDOUT'
+] as const;
+const ERRNO_SET: ReadonlySet<string> = new Set(NODE_ERRNO_NAMES);
 const MIGRATION_NAME = /^[0-9]{4}_[a-z0-9_]{1,59}$/;
 
 // The route ids SvelteKit can match, registered once by the app (src/lib/server/http). Until then
@@ -135,6 +183,29 @@ export function registerConfigKeyNames(keys: Iterable<string>): void {
 	);
 }
 
+// The app's own error tags (`.tag`), registered by the modules that define them. Additive: each
+// module registers its own set; a name that is not upper-case letters, digits and underscores is
+// ignored.
+const errorTags = new Set<string>();
+
+/** Register app error tags that an error line may write as `err_tag` (jade-zwq). */
+export function registerErrorTags(tags: Iterable<string>): void {
+	for (const tag of tags) if (typeof tag === 'string' && APP_TAG.test(tag)) errorTags.add(tag);
+}
+
+const isSqlstate = (v: string) => SQLSTATE.test(v);
+const isNodeCode = (v: string) => NODE_ERR_CODE.test(v) || ERRNO_SET.has(v);
+
+/**
+ * Whether `value` is an `err_tag` the logger writes as itself: a registered app tag, a SQLSTATE,
+ * an `ERR_` code or a listed errno name. Any other `err_tag` on a line is `[invalid]` or null.
+ */
+export function isErrTag(value: unknown): boolean {
+	return (
+		typeof value === 'string' && (errorTags.has(value) || isSqlstate(value) || isNodeCode(value))
+	);
+}
+
 const configKeyList: Validator = (value) => {
 	if (!Array.isArray(value) || value.length > 32) return INVALID;
 	return value.map((name) => (typeof name === 'string' && configKeys.has(name) ? name : INVALID));
@@ -148,7 +219,7 @@ const V = {
 	duration_ms: ok((v) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v < 1e9),
 	kind: oneOf(ERROR_KINDS),
 	err_type: nullable(ok((v) => typeof v === 'string' && IDENTIFIER.test(v))),
-	err_tag: nullable(ok((v) => typeof v === 'string' && TAG.test(v))),
+	err_tag: nullable(ok(isErrTag)),
 	stack_frames: ok(
 		(v) => Array.isArray(v) && v.length <= MAX_FRAMES && v.every((f) => typeof f === 'string')
 	),
@@ -299,13 +370,18 @@ function errorType(err: unknown): unknown {
 	}
 }
 
-/** The error's tag: the app's own `tag`, else a driver's `code` (a SQLSTATE), else null. */
+/**
+ * The error's tag: a string `tag` (the app's own) when it is registered, else a string `code`
+ * when it is a SQLSTATE or a Node error code, else null when the error has neither. A string `tag`
+ * or `code` of any other value is `[invalid]`, with no fallback from a refused `tag` to `code`
+ * (jade-zwq).
+ */
 function errorTag(err: unknown): unknown {
 	if (err === null || (typeof err !== 'object' && typeof err !== 'function')) return null;
 	try {
 		const { tag, code } = err as { tag?: unknown; code?: unknown };
-		if (typeof tag === 'string') return tag;
-		if (typeof code === 'string') return code;
+		if (typeof tag === 'string') return errorTags.has(tag) ? tag : INVALID;
+		if (typeof code === 'string') return isSqlstate(code) || isNodeCode(code) ? code : INVALID;
 		return null;
 	} catch {
 		return null;
