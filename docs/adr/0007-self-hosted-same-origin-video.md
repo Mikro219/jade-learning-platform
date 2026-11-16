@@ -1,9 +1,11 @@
 # 0007. Self-hosted, same-origin video
 
-- Status: accepted
+- Status: superseded by [0025](0025-youtube-embedded-module-video.md)
 - Date: 2026-11-14
 - Source: `docs/handoff/DECISIONS.md` ADR-07
-- Related: [0013](0013-no-third-party-requests-from-the-browser.md)
+- Related: [0013](0013-no-third-party-requests-from-the-browser.md), [0025](0025-youtube-embedded-module-video.md)
+
+Superseded 2026-11-16: module videos play from YouTube in an embedded player ([0025](0025-youtube-embedded-module-video.md)). The text below is the decision as accepted on 2026-11-14.
 
 ## Context
 

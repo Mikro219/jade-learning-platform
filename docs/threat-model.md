@@ -2,6 +2,8 @@
 
 Status: 2026-11-14. Scope: v1 as designed in the handoff docs (`docs/handoff/`) and the accepted decisions ADR 0001 to ADR 0023 (`docs/adr/`), not as built. p9-authz-sweep (jade-sio) walks every abuse case in section 5 and links each to a passing test or a signed-off manual check (jade-sio acceptance). Every statement below cites a handoff doc section, an ADR or a bead; where the sources are silent it says "not decided" or "open" and points at section 7. Plan keys and their bead ids are from `docs/handoff/beads/id-map.json`; beads created after seeding (jade-lnn.1, jade-7s7.1, jade-7s7.2) and every bead's description and acceptance are from Beads (`bd show <id>`).
 
+Amended 2026-11-16 for [ADR 0025](adr/0025-youtube-embedded-module-video.md) (module videos play from YouTube in an embedded player; it supersedes ADR 0007 and amends ADR 0013): the YouTube party in section 1, the Media row in section 2, TB10, the YOUTUBE node in section 4, AB6 and AB17 in section 5, and TM-9 and TM-10 in section 7. The mitigations ADR 0007 gave for video are kept in AB6 as history.
+
 ## 1. Actors
 
 | Actor | How it gets in | What it can reach | What it must not reach |
@@ -12,9 +14,10 @@ Status: 2026-11-14. Scope: v1 as designed in the handoff docs (`docs/handoff/`) 
 | Outsider on school Wi-Fi | Same network and same public IP as the class (REVIEW.md finding 20; p9-ratelimit jade-6cq description); can see the join code shown in class (ARCHITECTURE.md section 5, "Classroom flow" step 3); the school's web filter or proxy is in the path, and whether it intercepts TLS is open until jade-tw4 (section 7) | What any browser can reach through Caddy on 80/443 (TB1); a join attempt while a session is open (AB3, AB4) | Anything behind a device session or adult session it does not hold (TB3, jade-aq5) |
 | Outsider on the internet | Reaches Caddy on ports 80 and 443 only; app and database are not exposed on the host (ARCHITECTURE.md section 10; p1-docker jade-80h) | Public pages, the redeem, signup, login and join forms, and the media URLs it can obtain (AB1, AB3, AB6) | Everything behind authentication (TB3) |
 
-Two non-human parties are named but not modelled in depth:
+Three non-human parties are named but not modelled in depth:
 
 - The hosting and object-storage provider: who it is, its region and how it handles disks are open until p0-host (jade-0za) closes (ADR 0004; section 7).
+- YouTube (Google): on pages that show a module video, the embedded player connects the student device to YouTube, which receives the device's network address, user agent and, as far as the referrer policy sends one, the referrer (ADR 0025; TB10). Its handling of that data is set by YouTube's and Google's own terms, not by any JADE source.
 - The repository and CI path: GitHub is assumed (assumption A6 of `docs/adr/README.md`); code and content arrive through it, and content changes go through the same CI (ARCHITECTURE.md section 4; ADR 0006; p1-ci jade-xu0).
 
 ## 2. Assets
@@ -29,7 +32,7 @@ Two non-human parties are named but not modelled in depth:
 | Device-session tokens | Cookie on the student device; `device_sessions.token_hash` (DATA-MODEL.md section 3; jade-5nj) | Class and kit identity come from the device session (ADR 0008; CLAUDE.md rule 3) | ADR 0008 |
 | Kit-level data, including event data | `events`, `kit_progress`, `facilitator_notes`, `quiz_responses`, `exit_cards`, `class_kits` (DATA-MODEL.md sections 3 to 5); `device_sessions`, written at join, with `last_seen_at`, even for a kit with logging off (DATA-MODEL.md section 3; whether that is stored activity under CLAUDE.md rule 2 is open, TM-5); live stuck alerts for kits with logging off, in app memory per class (ADR 0017; whether kits with logging on use the same store is open, TM-1); the student device's IndexedDB event queue (p6-client jade-4a7) and local progress (p5-progress jade-7cf); retention aggregates with no kit id (ADR 0023); staff exports (p8-export jade-1cc) | The data the team collects, with consent, to redesign modules (ARCHITECTURE.md section 1); kit ids are persistent identifiers (PRIVACY.md "Laws the team should check") | ADR 0009; ADR 0010; ADR 0017; ADR 0023; CLAUDE.md rule 2 |
 | Backups | Nightly encrypted `pg_dump` to Canadian object storage, 30-day retention (ARCHITECTURE.md section 10; jade-6o3). Restored in full onto the staging VM for the restore drill (jade-6o3: "Perform a full restore onto staging"), so after the drill staging holds a copy of production adult PII and kit-level data, decrypted with the production backup key; when that copy is wiped is not decided (TM-3) | Everything in the database, for 30 days, including data already deleted from production (TM-7) | ADR 0004; ADR 0014 |
-| Media | MP4 and images on a volume served by Caddy behind signed, short-lived URLs (ARCHITECTURE.md section 4; p4-video jade-u8z) | No personal data; content is entitled per kit (jade-u8z) | ADR 0007 |
+| Media | Images on a volume served by Caddy (ARCHITECTURE.md section 4); what the `/media` gate becomes now that video is not self-hosted is open (ADR 0025; p4-video jade-u8z). Module videos are unlisted on YouTube, marked made for kids, and playable by anyone with the link (ADR 0025); until ADR 0025 they were MP4 on the same volume behind signed, short-lived URLs (ADR 0007) | No personal data; video is not entitled per kit (ADR 0025) | ADR 0025 (supersedes ADR 0007) |
 
 ## 3. Trust boundaries
 
@@ -42,10 +45,11 @@ Two non-human parties are named but not modelled in depth:
 - **TB7 Physical and offline.** Printed code cards, the packing CSV (jade-99j; p10-codes jade-t17: "store the CSV offline"), and the offline store of the pepper and the backup key (jade-fgs).
 - **TB8 The shared student device.** Its cookie and IndexedDB queue are readable by the next user of the device (ARCHITECTURE.md section 2, principle 2; jade-4a7); school-managed devices may wipe cookies, which is open until jade-tw4 (ARCHITECTURE.md section 5, "Classroom flow" step 5).
 - **TB9 Object storage to the staging VM.** Staging "uses its own secrets" (p1-staging jade-4zw; ADR 0014), but the p10-backups restore drill brings a decrypted copy of production data onto it and needs the production backup key there (jade-6o3); whether and when that copy is wiped is not decided (TM-3).
+- **TB10 Student device to YouTube.** On pages that show a module video, the embedded player connects the device directly to YouTube (Google), outside the VM and whatever the kit's `logging_enabled` state (ADR 0025). The CSP `frame-src` allows the embed origin only (ADR 0025; p9-headers jade-c42). Which further origins the player loads inside its frame is open (TM-10).
 
 ## 4. Data-flow diagram
 
-Every store of adult PII and kit-level data, and every secret that protects them. Each node says what it holds and whether that is adult PII, kit-level data, a secret, or neither. All browser traffic crosses TB1 to Caddy and then the app; the edges from the devices to the stores show where data ends up, not a direct connection. Rows in `events`, `kit_progress`, `facilitator_notes`, `quiz_responses` and `exit_cards` are written for a kit only when that kit's `logging_enabled` is true (ADR 0009; EVENTS.md server rule 2; DATA-MODEL.md sections 4 and 5). A `device_sessions` row is written at join whatever the logging state (DATA-MODEL.md section 3; p3-join jade-5nj); whether that counts as stored activity is open (TM-5).
+Every store of adult PII and kit-level data, and every secret that protects them. Each node says what it holds and whether that is adult PII, kit-level data, a secret, or neither. All browser traffic crosses TB1 to Caddy and then the app, except the YouTube player's on pages that show a module video (TB10, ADR 0025); the edges from the devices to the stores show where data ends up, not a direct connection. Rows in `events`, `kit_progress`, `facilitator_notes`, `quiz_responses` and `exit_cards` are written for a kit only when that kit's `logging_enabled` is true (ADR 0009; EVENTS.md server rule 2; DATA-MODEL.md sections 4 and 5). A `device_sessions` row is written at join whatever the logging state (DATA-MODEL.md section 3; p3-join jade-5nj); whether that counts as stored activity is open (TM-5).
 
 ```mermaid
 flowchart LR
@@ -57,7 +61,7 @@ flowchart LR
   subgraph VM["Production VM (Canada, Docker Compose, ADR 0004)"]
     CADDY["CADDY<br/>TLS, /media, access log off or IP-stripped<br/>neither"]
     APP["APP SvelteKit modular monolith<br/>neither (processes all)"]
-    MEDIA["MEDIA media volume<br/>MP4 and images, signed URLs (ADR 0007)<br/>neither"]
+    MEDIA["MEDIA media volume<br/>images; video moved to YouTube (ADR 0025), /media gate open<br/>neither"]
     subgraph MEM["Process memory"]
       ALERTS["ALERTS live stuck alerts for kits with logging off<br/>memory only, per class, until resolved or session closes (ADR 0017)<br/>whether logging-on kits use it is open, TM-1<br/>kit-level"]
       RL_MEM["RL_MEM rate-limit counters in memory<br/>IP only when the per-IP signup flag is on (ADR 0020)<br/>where per-account lockout and global throttle counters live: storage not decided<br/>neither, IP transiently"]
@@ -80,6 +84,10 @@ flowchart LR
     CODEGEN["CODEGEN code generator CLI (p2-code-cli jade-99j)<br/>run against production by p10-codes jade-t17<br/>plain codes shown once, never stored"]
   end
 
+  subgraph TB10["TB10 third party (ADR 0025)"]
+    YOUTUBE["YOUTUBE YouTube (Google), embedded player<br/>unlisted, made-for-kids module videos<br/>receives network address, user agent, referrer<br/>not a JADE store"]
+  end
+
   subgraph TB5["TB5 object storage (Canada, provider open until jade-0za)"]
     BACKUP[("BACKUP encrypted nightly dump, 30 days<br/>adult PII, kit-level, encrypted")]
   end
@@ -99,6 +107,7 @@ flowchart LR
   end
 
   STU_DEV -->|"HTTPS"| CADDY
+  STU_DEV -->|"video pages only: player load, whatever the logging state (ADR 0025)"| YOUTUBE
   ADULT_DEV -->|"redeem request: plain code in the request line (AB16)"| CADDY
   CADDY --> APP
   CADDY --> MEDIA
@@ -160,7 +169,7 @@ Notes on the diagram:
 
 ## 5. Abuse cases
 
-AB1 to AB9 are the rows of ARCHITECTURE.md section 9, first column verbatim. AB10 to AB16 are beyond ARCHITECTURE.md section 9. Each mitigation names the bead that implements it, and that bead appears with its phase in the next column.
+AB1 to AB9 are the rows of ARCHITECTURE.md section 9, first column verbatim. AB10 to AB17 are beyond ARCHITECTURE.md section 9. Each mitigation names the bead that implements it, and that bead appears with its phase in the next column.
 
 | ID | Abuse case | Mitigation (named) | Phase, plan key, bead | Verified by |
 |---|---|---|---|---|
@@ -169,7 +178,7 @@ AB1 to AB9 are the rows of ARCHITECTURE.md section 9, first column verbatim. AB1
 | AB3 | Guessing a join code | Valid only while a session is open, stored hashed (jade-5nj); rotated on demand (jade-axr); join attempts rate limited per device, not per IP (jade-6cq) | Phase 3 p3-join jade-5nj, p3-session-controls jade-axr; Phase 9 p9-ratelimit jade-6cq | jade-5nj "Join code stops working when the facilitator closes the session"; jade-6cq join brute-force and "30 devices joining within one minute from one IP" tests; jade-sio |
 | AB4 | A group joins as another group's kit | Facilitator resets a kit's devices (jade-axr); facilitator sees duplicate device joins per kit on the class dashboard (jade-7s7.1, phase to be confirmed, TM-2) | Phase 3 p3-session-controls jade-axr; Phase 7 jade-7s7.1 (TM-2) | jade-axr "Reset forces the kit's devices back to the join screen"; the test jade-7s7.1 will define (no acceptance yet, TM-2); jade-sio |
 | AB5 | Spoofing events for another kit | Class and kit from the device session, never the payload (jade-5nj, jade-zg3; ADR 0008, CLAUDE.md rule 3); the same rule on the live alert endpoint for kits with logging off (jade-p99; ADR 0017, TM-1) | Phase 3 p3-join jade-5nj; Phase 6 p6-ingest jade-zg3; Phase 7 p7-live-stuck jade-p99 | jade-zg3 "Payload cannot write events for another kit (tested)"; jade-5nj own-kit test; jade-sio |
-| AB6 | Sharing a video URL | Signed, short-lived media URLs (jade-u8z); unsigned or expired returns 403 (jade-u8z) | Phase 4 p4-video jade-u8z | jade-u8z 403 test; jade-sio |
+| AB6 | Sharing a video URL | Allowed by design since ADR 0025: videos are unlisted on YouTube and anyone with the link may watch; a video link identifies no kit or child (ADR 0025). History: under ADR 0007 the mitigation was signed, short-lived media URLs, with unsigned or expired returning 403 (jade-u8z) | Phase 4 p4-video jade-u8z (rescoped by ADR 0025) | No test needed for video (ADR 0025); whether the jade-u8z 403 test stays for images depends on the `/media` gate (open, ADR 0025); jade-sio |
 | AB7 | Student reaching adult or staff pages | Route-group authorization matrix, 404 not 403 (jade-aq5); every new route enters the matrix test (jade-aq5) | Phase 3 p3-authz-tests jade-aq5 | jade-aq5 matrix test; jade-sio |
 | AB8 | Free text capturing a child's name | No student free-text fields: preset stuck reasons (jade-fy1); the catalog rejects extra fields (jade-3ek); the adult note field (500 chars) carries a reminder (jade-p4p) | Phase 5 p5-stuck jade-fy1; Phase 6 p6-catalog jade-3ek; Phase 7 p7-notes jade-p4p | jade-3ek extra-field rejection; jade-sio |
 | AB9 | IP addresses as hidden identifiers | Not logged by Caddy or the app (jade-80h, jade-alt, jade-ada); used in memory only, for rate limiting (jade-6cq; ADR 0020) | Phase 1 p1-docker jade-80h, p1-observability jade-alt; Phase 9 p9-logs jade-ada, p9-ratelimit jade-6cq | jade-alt log-line test; jade-ada log grep; jade-sio |
@@ -181,6 +190,7 @@ AB1 to AB9 are the rows of ARCHITECTURE.md section 9, first column verbatim. AB1
 | AB14b | Theft of the VM disk or compromise of the host, which exposes the database, `CODE_PEPPER` (so offline guessing of the printed codes from `code_hmac`) and the backup key (so the 30 days of backups, if the key on the VM can decrypt them) together (TM-8) (beyond ARCHITECTURE.md section 9) | Only 80/443 public and SSH restricted, a firewall, automatic security updates and a non-root deploy user (jade-dvm) | Phase 10 p10-prod-infra jade-dvm; provider and disk handling open until jade-0za (TM-8) | jade-dvm "Only 80/443 public; SSH restricted"; jade-sio |
 | AB15 | A staff export leaking kit-level data (beyond ARCHITECTURE.md section 9) | Staff-only, audited, kit ids only, never adult emails (jade-1cc) | Phase 8 p8-export jade-1cc | jade-1cc "Export is staff-only and audited" test; jade-sio |
 | AB16 | A plain kit code leaking from the QR redeem URL (`/redeem?code=...`) into server logs or a Referer header (beyond ARCHITECTURE.md section 9) | App log lines contain no code values (jade-alt); a grep of staging logs after a full e2e run finds no codes (jade-ada); `Referrer-Policy: no-referrer` (jade-c42, p9-headers description) | Phase 1 p1-observability jade-alt; Phase 9 p9-logs jade-ada, p9-headers jade-c42 | jade-alt "no IP, cookie or code values" test; jade-ada grep; jade-c42 header assertions; jade-sio |
+| AB17 | The student device sending data to YouTube (Google) when a video page loads, whatever the kit's logging state (beyond ARCHITECTURE.md section 9) | Accepted by ADR 0025 (TM-9). Limits: the embed only on pages that show a module video, with no other third-party script, font, analytics or embed (ADR 0013, amended by ADR 0025); privacy-enhanced embed origin `www.youtube-nocookie.com` (ADR 0025); videos marked made for kids (ADR 0025); CSP `frame-src` allows the embed origin only (jade-c42); `Referrer-Policy: no-referrer` (jade-c42), unless the player needs a referrer (open, ADR 0025) | Phase 9 p9-headers jade-c42; the INV3 allowlist has no bead yet (ADR 0025) | jade-c42 header assertions; `tests/e2e/no-offorigin.spec.ts` with an allowlist limited to the embed origins on video pages (future work, ADR 0025); jade-sio |
 
 What AB16 does not cover. The Caddy access log is "off or IP-stripped" (ARCHITECTURE.md section 4), so whether it records the query string depends on which of the two is chosen, and jade-ada's grep covers it only if the Caddy log is among the staging logs searched. The code also stays in the adult device's browser history, which no bead addresses; single-use redemption (jade-7if) limits a code seen there to whoever redeems it first (TM-4).
 
@@ -212,7 +222,7 @@ How each store in section 4 is emptied, as the sources state it. Where a source 
 What this model cannot settle yet, per human bead:
 
 - **jade-0za (host):** provider, region, object-storage provider, who holds VM and SSH access, DNS registrar, and disk handling. TB5, TB6, AB14a and AB14b stay provisional until it closes (TM-8).
-- **jade-tw4 (school IT):** device type and whether devices are shared across classes, cookie wiping (TB8), whether the school filter intercepts TLS (TB1, for the outsider on school Wi-Fi), and allowlisting; assumptions A2 and A4 of `docs/adr/README.md`.
+- **jade-tw4 (school IT):** device type and whether devices are shared across classes, cookie wiping (TB8), whether the school filter intercepts TLS (TB1, for the outsider on school Wi-Fi), and allowlisting, which now includes YouTube for video pages (TB10; for the pilot school, Given's responsibility, ADR 0025); assumptions A2 and A4 of `docs/adr/README.md`.
 - **jade-6is (product questions):** networked electronics or an AI assistant (assumption A1; a yes would add a device-key actor through extension E1 or a new server module through extension E2, ARCHITECTURE.md section 12), `RETENTION_MONTHS`, who enters quiz results (which decides which adults hold `entered_by`), and the kit prefix.
 - **jade-bi5 (consent):** whether the research approval covers the retention tiers of ADR 0023, the memory-only alerts for kits with logging off of ADR 0017, and backups that outlive a deletion by up to 30 days (TM-7).
 
@@ -226,10 +236,12 @@ Open items not tied to a human bead. These TM numbers belong to this threat mode
 - TM-6 (risk accepted by ADR 0020): The global failed-code throttle is shared by every user, so anyone submitting wrong codes can delay legitimate redemption and signup for everyone; the decision accepts this, and only the threshold tuning of p9-ratelimit (jade-6cq) limits it (AB11).
 - TM-7 (open): Kit deletion and retention reductions do not reach the 30-day backups (ARCHITECTURE.md section 10; PRIVACY.md "Data inventory"), which may conflict with the consent promise that records can be deleted at any time (PRIVACY.md "Sentences the consent form can borrow"); no decision covers it.
 - TM-8 (open): The production secrets script (jade-lnn.1) generates `CODE_PEPPER`, `SESSION_SECRET` and the backup encryption key on the server and writes them to the app's env file; `CODE_PEPPER` and the backup key are also kept in the team's offline store (jade-fgs). So the VM disk holds the database, the pepper and the backup key together. No source covers encryption at rest of the VM disk, or keeping the pepper and the backup key off the disk, and no source says whether the key on the VM can decrypt backups or only encrypt them. Provider and disk handling stay open until jade-0za; until then only the hardening of p10-prod-infra (jade-dvm) applies (AB14b).
+- TM-9 (risk accepted by ADR 0025): On pages that show a module video, the student device connects to YouTube (Google), which receives the device's network address, user agent and possibly the referrer. This happens for kits with logging off too: the consent switch governs what JADE stores (ADR 0009), not what a third-party player receives. JADE stores and logs nothing new because of it. Privacy-enhanced mode avoids cookies until playback, not all browser storage after it (ADR 0025; AB17).
+- TM-10 (open): Which origins the YouTube player loads inside its frame, and so which the e2e off-origin allowlist must contain; whether the iframe needs its own referrer policy; how p6-video-events (jade-iwr) reads playback state without YouTube's script in our page; and what a step shows when a video cannot load (ADR 0025).
 
 ## 8. Sources
 
 - Handoff docs: [ARCHITECTURE.md](handoff/ARCHITECTURE.md) sections 1 to 6 and 8 to 12; [DATA-MODEL.md](handoff/DATA-MODEL.md) sections 1 to 7; [EVENTS.md](handoff/EVENTS.md) client rule 5 and server rules 1 and 2; [PRIVACY.md](handoff/PRIVACY.md) "Who the data is about", "Data inventory", "Consent and opt-out", "Retention", "Sentences the consent form can borrow"; [REVIEW.md](handoff/REVIEW.md) finding 20.
-- Decisions: [docs/adr/README.md](adr/README.md) (assumptions A1, A2, A4, A6 and the open questions); [ADR 0004](adr/0004-one-canadian-vm-docker-compose.md), [ADR 0005](adr/0005-authentication-without-email.md), [ADR 0006](adr/0006-content-as-markdown-version-locked.md), [ADR 0007](adr/0007-self-hosted-same-origin-video.md), [ADR 0008](adr/0008-event-integrity.md), [ADR 0009](adr/0009-consent-gated-logging.md), [ADR 0010](adr/0010-kit-is-the-unit-of-analysis.md), [ADR 0011](adr/0011-kit-code-format-and-storage.md), [ADR 0014](adr/0014-staging-from-phase-1.md), [ADR 0016](adr/0016-step-views-and-retention-post-launch-ok.md), [ADR 0017](adr/0017-live-stuck-alerts-for-no-log-kits.md), [ADR 0020](adr/0020-rate-limit-keys-for-redemption-and-signup.md), [ADR 0021](adr/0021-split-human-and-agent-work.md), [ADR 0023](adr/0023-tiered-retention-for-kit-keyed-data.md).
+- Decisions: [docs/adr/README.md](adr/README.md) (assumptions A1, A2, A4, A6 and the open questions); [ADR 0004](adr/0004-one-canadian-vm-docker-compose.md), [ADR 0005](adr/0005-authentication-without-email.md), [ADR 0006](adr/0006-content-as-markdown-version-locked.md), [ADR 0007](adr/0007-self-hosted-same-origin-video.md) (superseded), [ADR 0008](adr/0008-event-integrity.md), [ADR 0009](adr/0009-consent-gated-logging.md), [ADR 0010](adr/0010-kit-is-the-unit-of-analysis.md), [ADR 0011](adr/0011-kit-code-format-and-storage.md), [ADR 0014](adr/0014-staging-from-phase-1.md), [ADR 0016](adr/0016-step-views-and-retention-post-launch-ok.md), [ADR 0017](adr/0017-live-stuck-alerts-for-no-log-kits.md), [ADR 0020](adr/0020-rate-limit-keys-for-redemption-and-signup.md), [ADR 0021](adr/0021-split-human-and-agent-work.md), [ADR 0023](adr/0023-tiered-retention-for-kit-keyed-data.md), [ADR 0013](adr/0013-no-third-party-requests-from-the-browser.md), [ADR 0025](adr/0025-youtube-embedded-module-video.md).
 - Project rules: [CLAUDE.md](../CLAUDE.md) rules 1 to 4.
-- Beads (description and acceptance criteria, `bd show <id>`): jade-0za, jade-tw4, jade-6is, jade-bi5 (Phase 0); jade-8v4, jade-80h, jade-alt, jade-4zw, jade-xu0 (Phase 1); jade-fd5, jade-99j, jade-7if, jade-o07, jade-pe9 (Phase 2); jade-vcy, jade-5nj, jade-axr, jade-bu6, jade-8lt, jade-aq5 (Phase 3); jade-u8z (Phase 4); jade-fy1, jade-7cf (Phase 5); jade-3ek, jade-4a7, jade-zg3, jade-hhp (Phase 6); jade-p99, jade-p4p, jade-d03, jade-7s7.1, jade-7s7.2 (Phase 7, epic jade-7s7); jade-1cc (Phase 8); jade-6cq, jade-ada, jade-c42, jade-l13, jade-8vo, jade-sio (Phase 9); jade-dvm, jade-6o3, jade-fgs, jade-lnn.1, jade-t17, jade-kn0 (Phase 10).
+- Beads (description and acceptance criteria, `bd show <id>`): jade-0za, jade-tw4, jade-6is, jade-bi5 (Phase 0); jade-8v4, jade-80h, jade-alt, jade-4zw, jade-xu0 (Phase 1); jade-fd5, jade-99j, jade-7if, jade-o07, jade-pe9 (Phase 2); jade-vcy, jade-5nj, jade-axr, jade-bu6, jade-8lt, jade-aq5 (Phase 3); jade-u8z (Phase 4); jade-fy1, jade-7cf (Phase 5); jade-3ek, jade-4a7, jade-zg3, jade-hhp, jade-iwr (Phase 6); jade-p99, jade-p4p, jade-d03, jade-7s7.1, jade-7s7.2 (Phase 7, epic jade-7s7); jade-1cc (Phase 8); jade-6cq, jade-ada, jade-c42, jade-l13, jade-8vo, jade-sio (Phase 9); jade-dvm, jade-6o3, jade-fgs, jade-lnn.1, jade-t17, jade-kn0 (Phase 10).
