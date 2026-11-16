@@ -29,6 +29,7 @@ These are the accepted decisions for the JADE learning platform. CLAUDE.md rule 
 | 0021 | [Beads that mix human and agent work are split](0021-split-human-and-agent-work.md) | accepted | bead jade-8n2.6 |
 | 0022 | [The open-product-questions bead covers retention, quiz entry and the freeze date](0022-open-product-questions-scope.md) | accepted | bead jade-8n2.7 |
 | 0023 | [Tiered retention for kit-keyed data](0023-tiered-retention-for-kit-keyed-data.md) | accepted | bead jade-8n2.8 |
+| 0024 | [Node 24 is the pinned Node LTS line](0024-node-24-pinned.md) | accepted | bead jade-h8i |
 
 ## Amendments to the handoff documents
 
