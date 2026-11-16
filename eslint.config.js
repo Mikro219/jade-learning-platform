@@ -25,6 +25,44 @@ export default defineConfig(
 		}
 	},
 	{
+		// Only the config module reads the environment (plan V1); everything else asks it.
+		files: ['src/**'],
+		ignores: ['src/lib/server/config/**'],
+		rules: {
+			'no-restricted-properties': [
+				'error',
+				{
+					object: 'process',
+					property: 'env',
+					message: 'Read settings through getConfig() in src/lib/server/config (plan V1).'
+				}
+			],
+			'no-restricted-imports': [
+				'error',
+				{
+					paths: [
+						{
+							name: 'node:process',
+							importNames: ['env'],
+							message: 'Read settings through getConfig() in src/lib/server/config (plan V1).'
+						},
+						{
+							name: 'process',
+							importNames: ['env'],
+							message: 'Read settings through getConfig() in src/lib/server/config (plan V1).'
+						}
+					],
+					patterns: [
+						{
+							group: ['$env/*', '$app/env/*'],
+							message: 'Read settings through getConfig() in src/lib/server/config (plan V1).'
+						}
+					]
+				}
+			]
+		}
+	},
+	{
 		files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
 		languageOptions: {
 			parserOptions: {

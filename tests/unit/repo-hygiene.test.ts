@@ -34,3 +34,22 @@ describe('gate output is ignored', () => {
 		expect(ignored('package.json')).toBe(false);
 	});
 });
+
+// Env files hold secrets (plan V4, INV4): .env and its variants are ignored, and the only env
+// file git tracks is the documented example.
+describe('env files', () => {
+	it.each(['.env', '.env.local', '.env.production', 'tests/.env'])('%s is ignored', (path) => {
+		expect(ignored(path)).toBe(true);
+	});
+
+	it('.env.example is not ignored', () => {
+		expect(ignored('.env.example')).toBe(false);
+	});
+
+	it('git tracks no .env* file but .env.example', () => {
+		const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8' })
+			.split('\0')
+			.filter((path) => /(^|\/)\.env/.test(path));
+		expect(tracked.filter((path) => path !== '.env.example')).toEqual([]);
+	});
+});
