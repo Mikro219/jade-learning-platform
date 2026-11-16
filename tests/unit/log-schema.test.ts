@@ -226,22 +226,27 @@ describe('error lines', () => {
 			expect(tagOf({ tag: 'not upper case' }).line.err_tag).toBe(INVALID);
 		});
 
-		it('the app registers its own fixed tags (DbError, db:reset)', async () => {
-			await import('../../src/lib/server/db/index.ts');
-			await import('../../tools/db/reset.ts');
-			for (const tag of [
-				'MIGRATION_HISTORY_MISMATCH',
-				'MIGRATION_MANIFEST_MISMATCH',
-				'MIGRATION_FAILED',
-				'MIGRATION_LOCK_TIMEOUT',
-				'ROLE_BOOTSTRAP_FAILED',
-				'ROLE_LOCK_TIMEOUT',
-				'DB_RESET_REFUSED',
-				'DB_RESET_FAILED'
-			]) {
-				expect(tagOf({ tag }).line.err_tag).toBe(tag);
+		// Two cold dynamic imports (pg, drizzle, zod), which can pass 5 s under a loaded gate.
+		it(
+			'the app registers its own fixed tags (DbError, db:reset)',
+			{ timeout: 30_000 },
+			async () => {
+				await import('../../src/lib/server/db/index.ts');
+				await import('../../tools/db/reset.ts');
+				for (const tag of [
+					'MIGRATION_HISTORY_MISMATCH',
+					'MIGRATION_MANIFEST_MISMATCH',
+					'MIGRATION_FAILED',
+					'MIGRATION_LOCK_TIMEOUT',
+					'ROLE_BOOTSTRAP_FAILED',
+					'ROLE_LOCK_TIMEOUT',
+					'DB_RESET_REFUSED',
+					'DB_RESET_FAILED'
+				]) {
+					expect(tagOf({ tag }).line.err_tag).toBe(tag);
+				}
 			}
-		});
+		);
 
 		it('a SQLSTATE, an ERR_ code and a listed errno name in .code are written', () => {
 			for (const code of ['23505', '42P01', '57P01', 'ERR_INVALID_ARG_TYPE', 'ERR_SOCKET_CLOSED']) {

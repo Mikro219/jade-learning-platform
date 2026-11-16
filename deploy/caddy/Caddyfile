@@ -1,0 +1,45 @@
+# The production stack's only public service (plan D4, D5; compose.prod.yml). Caddy terminates
+# TLS for {$SITE_ADDRESS}: its internal CA for `localhost`, ACME for a real host name.
+#
+# Privacy (CLAUDE.md rule 4, plan INV2): no access log is written (the site block has no `log`
+# directive), Caddy's own runtime log has the `request` object deleted from every entry, and the
+# standard-library HTTP logger, whose messages can embed a peer address (TLS handshake errors),
+# is excluded. tests/infra/caddy-logs.test.ts is what decides that this holds.
+{
+	# Only TCP 80 and 443 are published, so HTTP/3 (UDP) is off.
+	servers {
+		protocols h1 h2
+	}
+	# The internal CA's root is not installed into a trust store inside the container.
+	skip_install_trust
+	# The default logger: Caddy's runtime log on stderr, as JSON, never a request.
+	log default {
+		output stderr
+		format filter {
+			wrap json
+			fields {
+				request delete
+			}
+		}
+		exclude http.stdlib
+	}
+}
+
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	# /media is closed until jade-u8z replaces this gate with the signed-URL entitlement check
+	# (ADR 0007). The file-server directives it will use are in media-files.caddy, which is
+	# deliberately not imported here.
+	handle /media/* {
+		respond 403
+	}
+
+	handle {
+		reverse_proxy app:3000 {
+			# Nothing in Phase 1 uses a client address (rule 4): the app never receives one. The
+			# per-IP flag of ADR 0020 restores this header deliberately (jade-vcy, jade-6cq).
+			header_up -X-Forwarded-For
+		}
+	}
+}

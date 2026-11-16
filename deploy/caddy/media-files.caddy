@@ -1,0 +1,7 @@
+# The file-server directives for the media volume (plan D5, ADR 0007). NOT imported by the
+# Caddyfile: /media/* answers 403 until jade-u8z adds the signed-URL entitlement check and imports
+# this file inside that check. compose.prod.yml mounts the media volume read-only at /srv/media,
+# so /media/<file> is served from /srv/media/<file>, with Range support (206 Partial Content).
+# tests/infra/media.test.ts imports it into a throwaway Caddy over a fixture file.
+root * /srv
+file_server

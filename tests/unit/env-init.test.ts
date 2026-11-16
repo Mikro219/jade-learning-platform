@@ -1,5 +1,5 @@
 // `pnpm env:init` (plan V5). Grows with the variables each bead adds: jade-urd added the database
-// owner's variables and the `ci` profile; jade-80h adds the stack's variables and the `stack`
+// owner's variables and the `ci` profile; jade-80h added the stack's variables and the `stack`
 // profile.
 import { execFile } from 'node:child_process';
 import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -25,7 +25,30 @@ const DEV_NAMES = [
 	'DATABASE_URL',
 	'CODE_PEPPER',
 	'SESSION_SECRET',
-	'LOG_LEVEL'
+	'LOG_LEVEL',
+	'JADE_STACK_APP_ENV',
+	'SITE_ADDRESS',
+	'JADE_HTTP_PORT',
+	'JADE_HTTPS_PORT',
+	'JADE_ORIGIN'
+];
+const STACK_NAMES = [
+	'JADE_OWNER_DB_PASSWORD',
+	'JADE_APP_DB_PASSWORD',
+	'CODE_PEPPER',
+	'SESSION_SECRET',
+	'LOG_LEVEL',
+	'JADE_STACK_APP_ENV',
+	'SITE_ADDRESS',
+	'JADE_HTTP_PORT',
+	'JADE_HTTPS_PORT',
+	'JADE_ORIGIN'
+];
+const STACK_GENERATED = [
+	'JADE_OWNER_DB_PASSWORD',
+	'JADE_APP_DB_PASSWORD',
+	'CODE_PEPPER',
+	'SESSION_SECRET'
 ];
 const CI_NAMES = [
 	'APP_ENV',
@@ -101,6 +124,12 @@ describe('dev profile', () => {
 		expect(Object.keys(env).sort()).toEqual([...DEV_NAMES].sort());
 		expect(env.APP_ENV).toBe('development');
 		expect(env.LOG_LEVEL).toBe('info');
+		// The local production stack's variables (compose.prod.yml, jade-80h).
+		expect(env.JADE_STACK_APP_ENV).toBe('production');
+		expect(env.SITE_ADDRESS).toBe('localhost');
+		expect(env.JADE_HTTP_PORT).toBe('80');
+		expect(env.JADE_HTTPS_PORT).toBe('443');
+		expect(env.JADE_ORIGIN).toBe('https://localhost');
 
 		const url = new URL(env.DATABASE_URL!);
 		expect(url.protocol).toBe('postgres:');
@@ -162,12 +191,150 @@ describe('dev profile', () => {
 		}
 	});
 
+	it('--https-port 8443 gives JADE_ORIGIN=https://localhost:8443; --http-port is written', async () => {
+		const out = join(dir, 'ports.env');
+		const result = await envInit('--out', out, '--http-port', '8080', '--https-port', '8443');
+		expect(result.code).toBe(0);
+		const env = readEnv(out);
+		expect(env.JADE_HTTP_PORT).toBe('8080');
+		expect(env.JADE_HTTPS_PORT).toBe('8443');
+		expect(env.JADE_ORIGIN).toBe('https://localhost:8443');
+	});
+
 	it('two runs generate different secrets', async () => {
 		await envInit('--out', join(dir, 'a.env'), '--db-port', '6000');
 		await envInit('--out', join(dir, 'b.env'), '--db-port', '6000');
 		const a = readEnv(join(dir, 'a.env'));
 		const b = readEnv(join(dir, 'b.env'));
 		for (const name of GENERATED) expect(a[name]).not.toBe(b[name]);
+	});
+});
+
+describe('stack profile', () => {
+	it.each(['staging', 'production'])(
+		'--app-env %s: a mode-600 file with exactly the stack names, no development variable',
+		async (appEnv) => {
+			const out = join(dir, '.env');
+			const result = await envInit(
+				'--out',
+				out,
+				'--profile',
+				'stack',
+				'--app-env',
+				appEnv,
+				'--site',
+				'staging.example.org'
+			);
+			expect(result.code).toBe(0);
+			expect(statSync(out).mode & 0o777).toBe(0o600);
+
+			const env = readEnv(out);
+			expect(Object.keys(env).sort()).toEqual([...STACK_NAMES].sort());
+			for (const name of [
+				'APP_ENV',
+				'DATABASE_URL',
+				'MIGRATION_DATABASE_URL',
+				'JADE_DEV_DB_PORT'
+			]) {
+				expect(Object.keys(env)).not.toContain(name);
+			}
+			expect(env.JADE_STACK_APP_ENV).toBe(appEnv);
+			expect(env.SITE_ADDRESS).toBe('staging.example.org');
+			expect(env.JADE_HTTP_PORT).toBe('80');
+			expect(env.JADE_HTTPS_PORT).toBe('443');
+			expect(env.JADE_ORIGIN).toBe('https://staging.example.org');
+			expect(env.JADE_APP_DB_PASSWORD).toMatch(/^[A-Za-z0-9_-]{32,}$/);
+			expect(env.JADE_OWNER_DB_PASSWORD).toMatch(/^[A-Za-z0-9_-]{32,}$/);
+			expect(env.JADE_OWNER_DB_PASSWORD).not.toBe(env.JADE_APP_DB_PASSWORD);
+
+			// What compose.prod.yml gives the app is a configuration the app accepts.
+			expect(
+				loadAppConfig({
+					APP_ENV: env.JADE_STACK_APP_ENV,
+					DATABASE_URL: `postgres://jade_app:${env.JADE_APP_DB_PASSWORD}@db:5432/jade`,
+					CODE_PEPPER: env.CODE_PEPPER,
+					SESSION_SECRET: env.SESSION_SECRET,
+					NODE_ENV: 'production'
+				}).appEnv
+			).toBe(appEnv);
+
+			expect(result.stdout).toContain(STACK_NAMES.join(', '));
+			assertNoValuePrinted(result, env, STACK_GENERATED);
+		}
+	);
+
+	it('takes --https-port and --http-port', async () => {
+		const out = join(dir, '.env');
+		const result = await envInit(
+			'--out',
+			out,
+			'--profile',
+			'stack',
+			'--app-env',
+			'staging',
+			'--site',
+			'staging.invalid',
+			'--https-port',
+			'8443',
+			'--http-port',
+			'8080'
+		);
+		expect(result.code).toBe(0);
+		const env = readEnv(out);
+		expect(env.JADE_ORIGIN).toBe('https://staging.invalid:8443');
+		expect(env.JADE_HTTP_PORT).toBe('8080');
+	});
+
+	it.each([
+		[['--site', 'staging.invalid'], '--profile stack needs --app-env'],
+		[['--app-env', 'staging'], '--profile stack needs --app-env'],
+		[
+			['--app-env', 'development', '--site', 'x.invalid'],
+			'--app-env must be one of: staging, production'
+		],
+		[['--app-env', 'test', '--site', 'x.invalid'], '--app-env must be one of: staging, production'],
+		[
+			['--app-env', 'staging', '--db-port', '5432', '--site', 'x.invalid'],
+			'--db-port does not apply'
+		]
+	])('refuses %j and writes nothing', async (args, message) => {
+		const out = join(dir, '.env');
+		const result = await envInit('--out', out, '--profile', 'stack', ...args);
+		expect(result.code).toBe(2);
+		expect(result.stderr).toContain(message);
+		expect(() => statSync(out)).toThrow();
+	});
+
+	it.each([
+		'https://Canary.example',
+		'canary.example:443',
+		'canary example',
+		'canary/path',
+		'-canary'
+	])('refuses the site %j without echoing it', async (site) => {
+		const out = join(dir, '.env');
+		const result = await envInit(
+			'--out',
+			out,
+			'--profile',
+			'stack',
+			'--app-env',
+			'staging',
+			'--site',
+			site
+		);
+		expect(result.code).toBe(2);
+		expect(result.stderr).toContain('--site needs a host name');
+		expect(result.stderr.toLowerCase()).not.toContain('canary');
+		expect(() => statSync(out)).toThrow();
+	});
+
+	it('--app-env and --site belong to the stack profile', async () => {
+		const out = join(dir, '.env');
+		const result = await envInit('--out', out, '--app-env', 'staging', '--site', 'x.invalid');
+		expect(result.code).toBe(2);
+		expect(result.stderr).toContain('--app-env and --site belong to --profile stack');
+		expect(() => statSync(out)).toThrow();
 	});
 });
 
@@ -223,6 +390,24 @@ describe('ci profile', () => {
 			expect(result.stderr).not.toContain('CanaryOwnerPassword');
 			expect(result.stdout).not.toContain('CanaryOwnerPassword');
 		}
+		expect(() => statSync(out)).toThrow();
+	});
+
+	it('takes no stack port', async () => {
+		const out = join(dir, '.env');
+		const result = await envInitWith(
+			{ JADE_OWNER_DB_PASSWORD: CI_OWNER_PASSWORD },
+			'--out',
+			out,
+			'--profile',
+			'ci',
+			'--db-port',
+			'5000',
+			'--https-port',
+			'8443'
+		);
+		expect(result.code).toBe(2);
+		expect(result.stderr).toContain('--profile ci writes no stack variable');
 		expect(() => statSync(out)).toThrow();
 	});
 
@@ -344,12 +529,12 @@ describe('refusals', () => {
 		expect(errorCodeOf(Object.assign(new Error('x'), { code: 'secret value' }))).toBe('unknown');
 	});
 
-	it('refuses a profile that does not exist yet, and writes nothing', async () => {
+	it('refuses a profile that does not exist, and writes nothing', async () => {
 		const out = join(dir, '.env');
-		for (const profile of ['stack', 'nope']) {
+		for (const profile of ['nope', 'prod']) {
 			const result = await envInit('--out', out, '--profile', profile);
 			expect(result.code).toBe(2);
-			expect(result.stderr).toContain('--profile must be one of: dev, ci');
+			expect(result.stderr).toContain('--profile must be one of: dev, stack, ci');
 		}
 		expect(() => statSync(out)).toThrow();
 	});

@@ -70,6 +70,22 @@ export default defineConfig({
 					testTimeout: 30_000,
 					hookTimeout: 240_000
 				}
+			},
+			{
+				// The image and the production Compose stack (plan section 11), `pnpm test:infra` only:
+				// `pnpm test` excludes this project. Global setup pulls the pinned third-party images
+				// and builds the run's image once through `pnpm ci:image` (D7). Files run one at a time:
+				// each brings up a whole stack of its own.
+				test: {
+					name: 'infra',
+					environment: 'node',
+					include: ['tests/infra/**/*.test.ts'],
+					globalSetup: ['tests/infra/global-setup.ts'],
+					expect: { requireAssertions: true },
+					fileParallelism: false,
+					testTimeout: 180_000,
+					hookTimeout: 900_000
+				}
 			}
 		]
 	}

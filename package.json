@@ -27,6 +27,8 @@
 		"env:init": "node tools/env-init.ts",
 		"db:up": "node tools/compose.ts up",
 		"db:down": "node tools/compose.ts down",
+		"stack:up": "node tools/compose.ts stack-up",
+		"stack:down": "node tools/compose.ts stack-down",
 		"db:migrate": "node tools/db/migrate.ts",
 		"db:reset": "node tools/db/reset.ts",
 		"db:generate": "drizzle-kit generate && node tools/db/manifest.ts",
@@ -38,6 +40,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
 		"test": "vitest run --project '!infra'",
 		"e2e": "playwright test",
+		"test:infra": "vitest run --project infra",
+		"ci:image": "node tools/compose.ts with-stack-env docker buildx bake --file compose.prod.yml --load app",
 		"ci:clean-clone": "bash tools/ci/clean-clone.sh"
 	},
 	"devDependencies": {

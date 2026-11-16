@@ -1,0 +1,13 @@
+# A throwaway Caddy for tests/infra/media.test.ts: plain HTTP on :8080, /media/* served by the
+# directives of deploy/caddy/media-files.caddy (imported, as jade-u8z will import them) from a
+# fixture file the test writes, mounted where compose.prod.yml mounts the media volume (/srv/media).
+{
+	admin off
+	auto_https off
+}
+
+:8080 {
+	handle /media/* {
+		import /etc/caddy/media-files.caddy
+	}
+}
