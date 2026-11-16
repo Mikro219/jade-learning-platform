@@ -89,7 +89,7 @@ Web platform that hosts the learning modules for JADE STEM kits. Kit codes unloc
 2. When a kit's `logging_enabled` is false, the server stores nothing about that kit's activity. The `p6-nolog-invariant` test must never be skipped, weakened or deleted.
 3. Class and kit identity come from the session, never from a request body.
 4. Plain kit codes, join codes and tokens are never stored or logged. IP addresses are never stored or logged.
-5. No request from the browser to any origin but our own. No third-party scripts, fonts, analytics or embeds.
+5. No request from the browser to any origin but our own. No third-party scripts, fonts, analytics or embeds. The one exception is the embedded YouTube player's origins, on pages that show a module video ([ADR 0025](docs/adr/0025-youtube-embedded-module-video.md)).
 6. Step IDs are permanent. A changed step gets a version bump; CI enforces it.
 7. Do not write teaching content for the kit. Use the `demo` kit for development. Real content comes from Given.
 8. The decisions in `docs/adr/` stand. If one looks wrong, file a `decision` bead and stop.

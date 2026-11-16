@@ -12,13 +12,13 @@ These are the accepted decisions for the JADE learning platform. CLAUDE.md rule 
 | 0004 | [One Canadian VM, Docker Compose](0004-one-canadian-vm-docker-compose.md) | accepted | DECISIONS.md ADR-04 |
 | 0005 | [Authentication without email](0005-authentication-without-email.md) | accepted | DECISIONS.md ADR-05 |
 | 0006 | [Content as Markdown in the repo, version-locked](0006-content-as-markdown-version-locked.md) | accepted | DECISIONS.md ADR-06 |
-| 0007 | [Self-hosted, same-origin video](0007-self-hosted-same-origin-video.md) | accepted | DECISIONS.md ADR-07 |
+| 0007 | [Self-hosted, same-origin video](0007-self-hosted-same-origin-video.md) | superseded by [0025](0025-youtube-embedded-module-video.md) | DECISIONS.md ADR-07 |
 | 0008 | [Event integrity](0008-event-integrity.md) | accepted | DECISIONS.md ADR-08 |
 | 0009 | [Consent-gated logging](0009-consent-gated-logging.md) | accepted | DECISIONS.md ADR-09 |
 | 0010 | [The kit is the unit of analysis](0010-kit-is-the-unit-of-analysis.md) | accepted | DECISIONS.md ADR-10 |
 | 0011 | [Kit code format and storage](0011-kit-code-format-and-storage.md) | accepted | DECISIONS.md ADR-11 |
 | 0012 | [Device telemetry and AI assistant are out of scope](0012-device-telemetry-and-ai-assistant-out-of-scope.md) | accepted | DECISIONS.md ADR-12 |
-| 0013 | [No third-party requests from the browser](0013-no-third-party-requests-from-the-browser.md) | accepted | DECISIONS.md ADR-13 |
+| 0013 | [No third-party requests from the browser](0013-no-third-party-requests-from-the-browser.md) | accepted, amended by [0025](0025-youtube-embedded-module-video.md) | DECISIONS.md ADR-13 |
 | 0014 | [Staging from Phase 1](0014-staging-from-phase-1.md) | accepted | DECISIONS.md ADR-14 |
 | 0015 | [Tooling](0015-tooling.md) | accepted | DECISIONS.md ADR-15 |
 | 0016 | [Step-metrics views and the retention job are post-launch-ok](0016-step-views-and-retention-post-launch-ok.md) | accepted | bead jade-8n2.1 |
@@ -30,6 +30,7 @@ These are the accepted decisions for the JADE learning platform. CLAUDE.md rule 
 | 0022 | [The open-product-questions bead covers retention, quiz entry and the freeze date](0022-open-product-questions-scope.md) | accepted | bead jade-8n2.7 |
 | 0023 | [Tiered retention for kit-keyed data](0023-tiered-retention-for-kit-keyed-data.md) | accepted | bead jade-8n2.8 |
 | 0024 | [Node 24 is the pinned Node LTS line](0024-node-24-pinned.md) | accepted | bead jade-h8i |
+| 0025 | [Module videos play from YouTube in an embedded player](0025-youtube-embedded-module-video.md) | accepted | bead jade-d48 |
 
 ## Amendments to the handoff documents
 
@@ -46,6 +47,10 @@ The handoff snapshot is in git commit 079e846 and in `jade-handoff.zip`.
 | `ARCHITECTURE.md` section 9, row "Guessing kit codes online" (per-account limit only) and the "retention job that reduces raw events to aggregates" sentence | [0020](0020-rate-limit-keys-for-redemption-and-signup.md), [0023](0023-tiered-retention-for-kit-keyed-data.md) | Not edited; the ADRs are current |
 | `START-HERE.md` "Suggested calendar" (Phase 9 Dec 13-16 overlapping Phase 10 Dec 14-18) | [0022](0022-open-product-questions-scope.md) | Not edited; jade-6is re-sequences it once the freeze is confirmed |
 | Phase files in `docs/handoff/phases/`: p0-open-decisions (`phase-00` still lists three acceptance lines for jade-6is), p0-adr (`phase-00` lists three acceptance lines for jade-hqq), p6-ingest, p6-client, p6-nolog-invariant, p7-quiz, p7-live-stuck, p2-redeem, p3-adult-auth, p8-views (labels: `phase-08` still shows it launch-blocking), p9-ratelimit, p9-retention, p9-privacy-doc, p4-real-content, p10-secrets, p10-codes, p10-accounts; the new beads jade-buf.1, jade-buf.2, jade-lnn.1, jade-lnn.2 and jade-lnn.3 are not in the phase files | [0016](0016-step-views-and-retention-post-launch-ok.md) to [0023](0023-tiered-retention-for-kit-keyed-data.md) | Generated, not edited; the bead's acceptance criteria and labels are current |
+| `PRIVACY.md` "Data inventory" ("Not collected at all" sentence), "Where it runs" | [0025](0025-youtube-embedded-module-video.md) | Corrected in place in `docs/handoff/PRIVACY.md` |
+| `ARCHITECTURE.md` section 2 principle 5 ("one origin", "one domain for a school to allowlist"); section 4, rows "Caddy" and "Media volume" (video served same-origin through signed URLs); section 9, row "Sharing a video URL" and "strict CSP with no third-party origins"; section 10, "Sizing" (video bandwidth on the VM); section 14, risk row "School network blocks the domain or throttles video" ("single origin") | [0025](0025-youtube-embedded-module-video.md) | Not edited; the ADR is current |
+| `DECISIONS.md` ADR-07 and ADR-13; `CLAUDE-SECTION.md` rule 5; `REVIEW.md` findings 10 and 11 (the self-hosted video fix) | [0025](0025-youtube-embedded-module-video.md) | Not edited; ADR 0007 is superseded, ADR 0013 and CLAUDE.md rule 5 are current |
+| Phase files: p1-ui-shell (`phase-01` acceptance "No network request leaves the app origin on any page"), p4-video (`phase-04` transcode, same-origin serving, 403 acceptance), p5-pwa (`phase-05` "download this session's videos"), p6-video-events (`phase-06`), p9-headers (`phase-09` CSP `default-src 'self'`), p9-authz-sweep (`phase-09` "media URL sharing"), p9-load (`phase-09` each device streaming 720p from the VM), p10-backups (`phase-10` media volume) | [0025](0025-youtube-embedded-module-video.md) | Generated, not edited; ADR 0025 is current, and the beads' descriptions and acceptance are not yet updated |
 
 Where a phase file and a bead's acceptance criteria that cite a jade-8n2.<k> decision differ, the bead is current.
 
