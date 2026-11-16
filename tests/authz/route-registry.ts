@@ -39,5 +39,26 @@ export const routes: readonly RouteEntry[] = [
 		access: 'dev-only',
 		sample: '/dev/boom',
 		note: 'Throws, to exercise the error path on the built server (plan A5).'
+	},
+	{
+		id: '/(student)/dev/shell/student',
+		kind: 'page',
+		access: 'dev-only',
+		sample: '/dev/shell/student',
+		note: 'The student shell with neutral sample elements (plan PD8, L3).'
+	},
+	{
+		id: '/(adult)/dev/shell/adult',
+		kind: 'page',
+		access: 'dev-only',
+		sample: '/dev/shell/adult',
+		note: 'The adult shell with neutral sample elements (plan PD8, L3).'
+	},
+	{
+		id: '/(staff)/dev/shell/staff',
+		kind: 'page',
+		access: 'dev-only',
+		sample: '/dev/shell/staff',
+		note: 'The staff shell with neutral sample elements (plan PD8, L3).'
 	}
 ];

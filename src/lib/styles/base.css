@@ -1,0 +1,160 @@
+/*
+ * Base styles (plan section 13, L1): a small reset, focus-visible outlines and the
+ * reduced-motion block. Shell-specific rules live in src/lib/components/shell/.
+ */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+* {
+	margin: 0;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+body {
+	min-height: 100vh;
+	background: var(--color-bg);
+	color: var(--color-text);
+	font-family: var(--font-family);
+	/* 18px: the student default. The adult and staff shells set a smaller size on their root. */
+	font-size: var(--text-lg);
+	line-height: var(--leading-body);
+	-webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+svg,
+video,
+canvas {
+	display: block;
+	max-width: 100%;
+}
+
+/* Monospace at the surrounding size: the doubled family turns off the browsers' smaller default. */
+code,
+kbd,
+samp,
+pre {
+	font-family: ui-monospace, monospace, monospace;
+	font-size: 1em;
+}
+
+button {
+	font: inherit;
+	color: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3 {
+	line-height: var(--leading-tight);
+}
+
+a {
+	color: var(--color-link);
+	text-underline-offset: 0.15em;
+}
+
+/* Focus: visible for keyboard users, never removed. */
+:focus-visible {
+	outline: var(--focus-width) solid var(--color-focus);
+	outline-offset: var(--focus-offset);
+}
+
+/* The main landmark is the skip link's target; it takes focus without a ring. */
+main:focus {
+	outline: none;
+}
+
+/* A plain button, used by every shell. */
+.button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-2);
+	padding: var(--space-2) var(--space-5);
+	border: 2px solid var(--color-accent);
+	border-radius: var(--radius-md);
+	background: var(--color-accent);
+	color: var(--color-on-accent);
+	font-weight: 600;
+	cursor: pointer;
+	transition:
+		background-color var(--duration-short) ease,
+		border-color var(--duration-short) ease;
+}
+
+.button:hover {
+	background: var(--color-accent-strong);
+	border-color: var(--color-accent-strong);
+}
+
+/*
+ * The skip link: first in each shell's header, in the markup and on screen, so it is the first
+ * stop for the keyboard. Always visible, so it is a full-size target that never covers another.
+ */
+.skip-link {
+	display: inline-flex;
+	align-items: center;
+}
+
+/*
+ * Target sizes (WCAG 2.5.8). Every interactive target is at least --target-min on each side, and
+ * at least --tap-min in the student shell, when its box is not inline: minimum sizes have no
+ * effect on a `display: inline` link, which is how a link inside running text stays in the line
+ * (2.5.8 exempts inline targets). A standalone link therefore needs a non-inline box (a flex
+ * item, `inline-flex`, `.button`) to get the minimum. Both rules have zero specificity and set
+ * only minimum sizes, so a component's own rules win. `.target` opts any other element in.
+ * layout.spec.ts exempts exactly the targets whose computed display is inline.
+ */
+:where(a[href], button, [role='button'], summary, .target) {
+	min-block-size: var(--target-min);
+	min-inline-size: var(--target-min);
+}
+
+:where([data-shell='student']) :where(a[href], button, [role='button'], summary, .target) {
+	min-block-size: var(--tap-min);
+	min-inline-size: var(--tap-min);
+}
+
+/*
+ * Reduced motion: transitions and animations run in effectively no time. They are shortened,
+ * not removed, so transitionend and animationend still fire for code that waits on them.
+ * Svelte's transition:, in: , out: and animate: directives run through the Web Animations API
+ * with their own durations, which this block does not reach: a component that uses them reads
+ * `prefersReducedMotion` from svelte/motion and passes duration 0 when it is true.
+ * Two consequences for later code: every element now runs a 0.01ms transition on each style
+ * change, and those transitionend events bubble, so a transitionend handler checks
+ * `event.target === event.currentTarget` and `event.propertyName`; and an infinite animation
+ * stops after one run, so a loading indicator also needs a state that is not motion (text, or
+ * aria-busy).
+ */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		transition-duration: 0.01ms !important;
+		transition-delay: 0s !important;
+		animation-duration: 0.01ms !important;
+		animation-delay: 0s !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+	}
+}
