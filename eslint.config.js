@@ -25,6 +25,13 @@ export default defineConfig(
 		}
 	},
 	{
+		// The closed logger is the app's only output channel (plan PD6, INV1).
+		files: ['src/**'],
+		rules: {
+			'no-console': 'error'
+		}
+	},
+	{
 		// Only the config module reads the environment (plan V1); everything else asks it.
 		files: ['src/**'],
 		ignores: ['src/lib/server/config/**'],

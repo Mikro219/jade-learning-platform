@@ -13,8 +13,31 @@ export interface RouteEntry {
 	readonly access: AccessClass;
 	/** A concrete URL path that reaches the route. */
 	readonly sample: string;
+	/** Why the access class is right, where that is not obvious. */
+	readonly note?: string;
 }
 
 export const routes: readonly RouteEntry[] = [
-	{ id: '/(student)', kind: 'page', access: 'public', sample: '/' }
+	{ id: '/(student)', kind: 'page', access: 'public', sample: '/' },
+	{
+		id: '/healthz',
+		kind: 'endpoint',
+		access: 'public',
+		sample: '/healthz',
+		note: 'Liveness: returns no data about anyone (plan A3, A5).'
+	},
+	{
+		id: '/readyz',
+		kind: 'endpoint',
+		access: 'public',
+		sample: '/readyz',
+		note: 'Readiness: returns no data about anyone, no host name, no error text (plan A3, A5).'
+	},
+	{
+		id: '/dev/boom',
+		kind: 'endpoint',
+		access: 'dev-only',
+		sample: '/dev/boom',
+		note: 'Throws, to exercise the error path on the built server (plan A5).'
+	}
 ];

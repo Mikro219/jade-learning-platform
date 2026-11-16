@@ -5,8 +5,10 @@
 // no-restricted-properties).
 //
 // Error text is built from variable names and fixed phrases only: never a value, never zod's own
-// message text (INV4).
+// message text (INV4). A configuration failure is reported through the logger (V3a), so the
+// logger stays the only output channel (INV1).
 import { z } from 'zod';
+import { createLogger, log, registerConfigKeyNames } from '../log/index.ts';
 
 export const APP_ENVS = ['development', 'test', 'staging', 'production'] as const;
 export const LOG_LEVELS = ['debug', 'info', 'warn', 'error'] as const;
@@ -29,6 +31,9 @@ export const MIGRATION_CONFIG_KEYS = ['APP_ENV', 'MIGRATION_DATABASE_URL', 'DATA
 /** Every variable the config schemas read: the app's and the migration tool's. */
 export const CONFIG_KEYS = [...APP_CONFIG_KEYS, 'MIGRATION_DATABASE_URL'] as const;
 export type ConfigKey = (typeof CONFIG_KEYS)[number];
+
+// The logger writes a `config_error` line's names only when they are in this set (V3a).
+registerConfigKeyNames(CONFIG_KEYS);
 
 /** The app's secret keys. None of them has a default, in any APP_ENV. */
 export const SECRET_KEYS = ['DATABASE_URL', 'CODE_PEPPER', 'SESSION_SECRET'] as const;
@@ -325,15 +330,12 @@ export function getConfig(): AppConfig {
 }
 
 /**
- * Report a configuration failure (V3a). Until jade-alt adds the logger this writes the V3
- * sentence on stderr, rebuilt from the error's names through `formatConfigError`, so a name
- * outside the schemas' key set, or any other text, cannot reach the output.
+ * Report a configuration failure (V3a): one lifecycle line on stdout through the logger, `msg`
+ * `config_error`, with the keys `missing` and `invalid`. The logger writes every element that is
+ * not a key of the config schemas as `[invalid]`, so no value or other text can reach the output.
+ * `write` replaces stdout (tests).
  */
-export function reportConfigError(
-	err: ConfigError,
-	write: (line: string) => void = (line) => {
-		process.stderr.write(line);
-	}
-): void {
-	write(`${formatConfigError(err.missing, err.invalid, err.reasons)}\n`);
+export function reportConfigError(err: ConfigError, write?: (line: string) => void): void {
+	const logger = write === undefined ? log : createLogger({ write });
+	logger.lifecycle('config_error', { missing: err.missing, invalid: err.invalid }, 'error');
 }

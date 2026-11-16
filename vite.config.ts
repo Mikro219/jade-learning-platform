@@ -45,11 +45,17 @@ export default defineConfig({
 				}
 			},
 			{
-				// Black-box checks of the built server (plan PD9). They build the app themselves.
+				// Black-box checks of the built server (plan PD9). Global setup builds the app once per
+				// run with an empty environment (jade-b1f), and gives health.test.ts the database
+				// harness of U7.
 				test: {
 					name: 'blackbox',
 					environment: 'node',
 					include: ['tests/blackbox/**/*.test.ts'],
+					globalSetup: [
+						'tests/support/global-setup-blackbox.ts',
+						'tests/support/global-setup-db.ts'
+					],
 					expect: { requireAssertions: true },
 					testTimeout: 30_000,
 					hookTimeout: 240_000
