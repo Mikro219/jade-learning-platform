@@ -15,6 +15,32 @@ const BUILD = fileURLToPath(new URL('../../build', import.meta.url));
 const LISTENING = /Listening on /;
 const MAX_ATTEMPTS = 3;
 
+/** Chooses the port for one attempt. Tests can inject one to force a collision (PD11). */
+export type PortChooser = () => Promise<number>;
+
+/**
+ * Whether a failed start was a port collision (PD11). The app's `uncaughtException` handler
+ * writes the crash as a closed JSON error line on stdout (`"err_tag":"EADDRINUSE"`) and leaves
+ * stderr empty; Node's own crash output (no handler yet) names it on stderr.
+ */
+export function isAddrInUse(stdout: string, stderr: string): boolean {
+	if (/EADDRINUSE/.test(stderr)) return true;
+	for (const line of stdout.split('\n')) {
+		if (!line.startsWith('{')) continue;
+		try {
+			const parsed = JSON.parse(line) as { err_tag?: unknown } | null;
+			if (parsed?.err_tag === 'EADDRINUSE') return true;
+		} catch {
+			// Not a log line.
+		}
+	}
+	return false;
+}
+
+function exitReport(stdout: string, stderr: string): string {
+	return `stdout:\n${stdout}\nstderr:\n${stderr}`;
+}
+
 function spawnBuild(env: ServerEnv, port: number): ChildProcess {
 	return spawn(process.execPath, [BUILD], {
 		cwd: root,
@@ -39,11 +65,15 @@ export interface ServerRun {
  * Run `node build` until it exits, listens, or `timeoutMs` passes, whichever comes first; a
  * server that listens or hangs is stopped. For checks of what happens before listen.
  */
-export async function runServer(env: ServerEnv, timeoutMs = 5000): Promise<ServerRun> {
+export async function runServer(
+	env: ServerEnv,
+	timeoutMs = 5000,
+	choosePort: PortChooser = freePort
+): Promise<ServerRun> {
 	for (let attempt = 1; ; attempt++) {
-		const run = await runOnce(env, await freePort(), timeoutMs);
+		const run = await runOnce(env, await choosePort(), timeoutMs);
 		// The port was taken between freePort() and listen: retry, at most three times (PD11).
-		if (run.code !== 0 && /EADDRINUSE/.test(run.stderr) && attempt < MAX_ATTEMPTS) continue;
+		if (run.code !== 0 && isAddrInUse(run.stdout, run.stderr) && attempt < MAX_ATTEMPTS) continue;
 		return run;
 	}
 }
@@ -93,9 +123,13 @@ export interface StartedServer {
  * Start `node build` and wait until it listens. A start that fails because the port was taken in
  * between is retried with a new port, at most three times (PD11, RR13).
  */
-export async function startServer(env: ServerEnv, timeoutMs = 10_000): Promise<StartedServer> {
+export async function startServer(
+	env: ServerEnv,
+	timeoutMs = 10_000,
+	choosePort: PortChooser = freePort
+): Promise<StartedServer> {
 	for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-		const port = await freePort();
+		const port = await choosePort();
 		const child = spawnBuild(env, port);
 		let stdout = '';
 		let stderr = '';
@@ -132,8 +166,10 @@ export async function startServer(env: ServerEnv, timeoutMs = 10_000): Promise<S
 			await closed;
 			throw new Error(`node build did not listen within ${timeoutMs} ms`);
 		}
-		if (/EADDRINUSE/.test(stderr) && attempt < MAX_ATTEMPTS) continue;
-		throw new Error(`node build exited before listening (code ${child.exitCode}):\n${stderr}`);
+		if (isAddrInUse(stdout, stderr) && attempt < MAX_ATTEMPTS) continue;
+		throw new Error(
+			`node build exited before listening (code ${child.exitCode}):\n${exitReport(stdout, stderr)}`
+		);
 	}
 	throw new Error('node build could not get a free port in three attempts');
 }

@@ -199,10 +199,20 @@ describe('no secret has a default', () => {
 });
 
 describe('reportConfigError', () => {
-	it('writes the V3 sentence', () => {
+	/** The one line written, parsed; its keys are exactly the lifecycle line's (V3a). */
+	function configErrorLine(lines: string[]): Record<string, unknown> {
+		expect(lines).toHaveLength(1);
+		expect(lines[0]!.endsWith('\n')).toBe(true);
+		const line = JSON.parse(lines[0]!) as Record<string, unknown>;
+		expect(Object.keys(line)).toEqual(['ts', 'level', 'msg', 'missing', 'invalid']);
+		expect(line).toMatchObject({ level: 'error', msg: 'config_error' });
+		return line;
+	}
+
+	it('writes one config_error lifecycle line through the logger (V3a)', () => {
 		const lines: string[] = [];
 		reportConfigError(configError(without(validEnv(), 'CODE_PEPPER')), (l) => lines.push(l));
-		expect(lines).toEqual(['Configuration error. Missing: CODE_PEPPER. See .env.example.\n']);
+		expect(configErrorLine(lines)).toMatchObject({ missing: ['CODE_PEPPER'], invalid: [] });
 	});
 
 	it('writes [invalid] in place of a name outside the schemas, and no canary', () => {
@@ -214,10 +224,10 @@ describe('reportConfigError', () => {
 		const lines: string[] = [];
 		reportConfigError(err, (l) => lines.push(l));
 		const out = lines.join('');
-		expect(out).toBe(
-			'Configuration error. Missing: [invalid], [invalid]. ' +
-				'Invalid: DATABASE_URL (must be a postgres URL for role jade_app), [invalid]. See .env.example.\n'
-		);
+		expect(configErrorLine(lines)).toMatchObject({
+			missing: ['[invalid]', '[invalid]'],
+			invalid: ['DATABASE_URL', '[invalid]']
+		});
 		expect(out).not.toContain('Canary');
 		expect(out).not.toContain('NOT_A_CONFIG_KEY');
 		expect(err.message).not.toContain('Canary');
@@ -329,8 +339,11 @@ describe('loadMigrationConfig', () => {
 		reportConfigError(migrationError(without(migrationEnv(), 'MIGRATION_DATABASE_URL')), (l) =>
 			lines.push(l)
 		);
-		expect(lines).toEqual([
-			'Configuration error. Missing: MIGRATION_DATABASE_URL. See .env.example.\n'
-		]);
+		expect(lines).toHaveLength(1);
+		expect(JSON.parse(lines[0]!)).toMatchObject({
+			msg: 'config_error',
+			missing: ['MIGRATION_DATABASE_URL'],
+			invalid: []
+		});
 	});
 });
