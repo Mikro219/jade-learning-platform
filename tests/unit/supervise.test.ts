@@ -191,6 +191,105 @@ describe('run() exit status', () => {
 	});
 });
 
+describe('a forked child before its exec (jade-h3k)', () => {
+	// A child that bash forks keeps the trap table, EXIT included, until it execs. A TERM there
+	// must kill it by the signal without running the cleanup a second time (in the child).
+	// Each test's processes carry a unique duration and a group of their own; whatever is left
+	// of them after a test, on a failure or a timeout too, is woken and killed.
+	const durs: string[] = [];
+	const groups: number[] = [];
+	const newDur = () => {
+		const dur = `${300000 + Math.floor(Math.random() * 600000)}`;
+		durs.push(dur);
+		return dur;
+	};
+	afterEach(() => {
+		for (const pgid of groups.splice(0)) {
+			try {
+				process.kill(-pgid, 'SIGKILL');
+			} catch {
+				// gone
+			}
+		}
+		for (const dur of durs.splice(0)) {
+			for (const p of readdirSync('/proc').filter((n) => /^\d+$/.test(n))) {
+				try {
+					if (!readFileSync(`/proc/${p}/cmdline`, 'utf8').includes(dur)) continue;
+					process.kill(Number(p), 'SIGCONT');
+					process.kill(Number(p), 'SIGKILL');
+				} catch {
+					// gone
+				}
+			}
+		}
+	});
+	it('a TERMed child still inside a command substitution runs no cleanup and dies by the signal', async () => {
+		const out = mkdtempDir();
+		const dur = newDur();
+		const { child, done } = bashWithLib(
+			[
+				'cleanup() { echo "cleanup $1" >>"$OUT/marker"; }',
+				'supervise_init fixture cleanup',
+				// The child waits for $(sleep) with the inherited traps.
+				`/bin/true $(sleep ${dur}) & c=$!`,
+				'gc=""; for _ in $(seq 500); do gc=$(pgrep -P "$c" || true); [ -n "$gc" ] && break; sleep 0.01; done',
+				'[ -n "$gc" ] || { echo "no substitution child"; exit 3; }',
+				'kill -TERM "$c"',
+				'st=0; wait "$c" || st=$?',
+				'kill -KILL $gc 2>/dev/null || true',
+				'echo "wait $st"',
+				'if [ -e "$OUT/marker" ]; then echo "marker: $(cat "$OUT/marker")"; else echo "marker absent"; fi'
+			].join('\n'),
+			{ detached: true, env: { OUT: out } }
+		);
+		groups.push(child.pid!);
+		const r = await done;
+		expect(r.code).toBe(0);
+		expect(r.out).toContain('wait 143');
+		expect(r.out).toContain('marker absent');
+		// The owner's own cleanup still runs, once, on its normal exit.
+		expect(readFileSync(join(out, 'marker'), 'utf8')).toBe('cleanup 0\n');
+	}, 20_000);
+
+	// End to end: the TERM is held in the window, the owner acts on it, and its cleanup TERMs the
+	// child while that is still bash (held stopped until then). Three hits, each with one cleanup.
+	it('run(): a child TERMed by the cleanup before its exec does not run the cleanup again', async () => {
+		let hits = 0;
+		for (let attempt = 0; attempt < 15 && hits < 3; attempt++) {
+			const out = mkdtempDir();
+			const dur = newDur();
+			const { child, done } = bashWithLib(
+				[
+					'cleanup() { echo "cleanup $1" >>"$OUT/log"; signal_child TERM; kill -CONT "$child" 2>/dev/null || true; }',
+					'supervise_init fixture cleanup',
+					'supervise_after_fork() {',
+					'  kill -STOP $!',
+					// Until it has stopped (only then does /proc show where), boundedly: a child that
+					// is gone or never shows T is a miss.
+					'  local s="" i',
+					`  for ((i = 0; i < 3000; i++)); do s=$(awk '{print $3}' /proc/$!/stat 2>/dev/null || true); [ "$s" = T ] && break; [ -n "$s" ] || break; done`,
+					'  if [ "$s" != T ] || [ "$(readlink /proc/$!/exe)" != "$(readlink /proc/$$/exe)" ]; then',
+					'    echo missed >>"$OUT/missed"; kill -CONT $! 2>/dev/null || true', // stop it as usual
+					'  fi',
+					'  kill -TERM $BASHPID',
+					'}',
+					`run sleep ${dur}`,
+					'echo finished'
+				].join('\n'),
+				{ detached: true, env: { OUT: out } }
+			);
+			groups.push(child.pid!);
+			const r = await done;
+			if (existsSync(join(out, 'missed'))) continue; // the exec came first: try again
+			hits++;
+			expect(r.code).toBe(143);
+			expect(r.out).toContain('fixture: stopped by SIGTERM');
+			expect(readFileSync(join(out, 'log'), 'utf8')).toBe('cleanup 143\n');
+		}
+		expect(hits, 'the child was caught before its exec').toBe(3);
+	}, 30_000);
+});
+
 describe('cleanup under a second Ctrl-C', () => {
 	// migration-compat.sh drops its databases in cleanup with `setsid -w node ...` (R1): bash
 	// ignores INT there, but Node resets inherited dispositions at start-up, so only a session of

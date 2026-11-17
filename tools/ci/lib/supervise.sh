@@ -17,6 +17,11 @@
 # is known (N4). supervise_after_fork, when the caller defines it, runs inside that window: a test
 # hook.
 #
+# The traps act only in the shell that called supervise_init (its $BASHPID). A forked child keeps
+# the trap table until it resets it or execs, so the child of `setsid -w ... &` that stop_child
+# TERMs before its exec would otherwise run the EXIT trap, and the cleanup, a second time. A
+# non-owner does nothing in the EXIT trap and dies by the signal, so `wait` still gives 143.
+#
 # A SIGKILL of the script itself (no INT or TERM before it) cannot be handled: running children
 # are orphaned. A hosted CI runner discards its VM after the job; locally the next run of
 # migration-compat.sh warns about what was left.
@@ -40,6 +45,7 @@ _supervise_cleanup=""
 _supervise_starting=0
 _supervise_pending=""
 _supervise_done=0
+_supervise_owner=""
 
 # Send `$1` (TERM, KILL) to the running child's pid and to its whole process group.
 signal_child() {
@@ -62,6 +68,12 @@ stop_child() {
 }
 
 _supervise_signal() {
+	if [ "$BASHPID" != "$_supervise_owner" ]; then
+		# A forked child before its exec: die by the signal, silently.
+		trap - "$1"
+		kill "-$1" "$BASHPID"
+		return 0
+	fi
 	if [ "$_supervise_starting" = 1 ]; then
 		# Between the fork and child=$!: act once the child is known.
 		_supervise_pending=$1
@@ -75,6 +87,8 @@ _supervise_signal() {
 
 _supervise_exit() {
 	local status=$?
+	# Not the owner (a forked child before its exec): no cleanup, no output, no exit.
+	if [ "$BASHPID" != "$_supervise_owner" ]; then return 0; fi
 	trap '' INT TERM
 	if [ "$_supervise_done" = 0 ]; then
 		_supervise_done=1
@@ -89,6 +103,7 @@ _supervise_exit() {
 supervise_init() {
 	_supervise_name=$1
 	_supervise_cleanup=$2
+	_supervise_owner=$BASHPID
 	trap _supervise_exit EXIT
 	trap '_supervise_signal INT' INT
 	trap '_supervise_signal TERM' TERM
