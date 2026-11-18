@@ -7,7 +7,8 @@
 # is never pushed with branches. The fix patch is the diff between the
 # baseline tree and a later snapshot, so unrelated edits that were already
 # present, even in the same file, never enter it. Edits anyone makes after the
-# baseline do enter it; ignored files never do.
+# baseline do enter it; ignored files never do, nor do the EXCLUDE paths
+# below (bd's interaction log), which every snapshot takes from HEAD.
 #
 # A worktree built by materialize or candidate prints its tree hash. That
 # hash, with the patch sha256, is what reviews and gates are bound to: check
@@ -31,10 +32,13 @@
 #                                            only: exactly what a commit of the fix would contain
 #                                            (none: that same HEAD without the fix)
 #   fixpatch.sh check <dir> <tree>           exit 0 only if the worktree <dir> still holds <tree>
+#                                            (EXCLUDE paths compared at the worktree's HEAD, as in
+#                                            every snapshot)
 #   fixpatch.sh staged <tree> [<path>...]    exit 0 only if the real index's whole tree is <tree>,
 #                                            except that each listed path differs only by being
 #                                            made executable (100644 -> 100755, same content);
-#                                            reads a copy, never changes the index
+#                                            reads a copy, never changes the index; no EXCLUDE
+#                                            exemption: a staged change to bd's log fails it
 #   fixpatch.sh cleanup <name> [<dir>...]    remove this bugfix's recorded worktrees (all, or the
 #                                            listed ones); refuses unrecorded, foreign or in-use paths
 #   fixpatch.sh drop <name>                  delete the baseline ref once the fix is delivered
@@ -43,15 +47,31 @@
 set -euo pipefail
 shopt -s inherit_errexit
 
+# Paths every snapshot takes from HEAD, whatever the working tree holds (jade-lpm).
+# .beads/interactions.jsonl is tracked and bd appends to it on every write; the
+# orchestrator must run bd mid-fix, so without this a bd write after `patch`
+# would enter the fix and make verify fail. Snapshots (baseline, patch, verify,
+# check) hold HEAD's version of these paths, or lack them when HEAD does, so
+# they never enter a patch and never move a snapshot tree. `staged` reads the
+# real index and stays exact: a staged change to one of them fails it. Entries are
+# literal paths from the repository root; git add never reads them (B-L1).
+EXCLUDE=(.beads/interactions.jsonl)
+
 die() { echo "fixpatch: $*" >&2; exit 2; }
+# Always called as $(snapshot) (a subshell), so its EXIT trap removes the temporary
+# index on any failure without touching the script's own traps.
 snapshot() {
-  local idx tree
-  idx="$(mktemp)"
-  rm -f "$idx"
-  GIT_INDEX_FILE="$idx" git read-tree HEAD
-  GIT_INDEX_FILE="$idx" git add -A -- . >/dev/null
-  tree="$(GIT_INDEX_FILE="$idx" git write-tree)"
-  rm -f "$idx"
+  local tree x
+  local -a spec=(.)
+  for x in "${EXCLUDE[@]+"${EXCLUDE[@]}"}"; do spec+=(":(top,literal,exclude)$x"); done
+  _fp_idx="$(mktemp)"
+  trap 'rm -f "$_fp_idx"' EXIT
+  rm -f "$_fp_idx"
+  GIT_INDEX_FILE="$_fp_idx" git read-tree HEAD
+  # EXCLUDE paths are never read: read-tree already holds HEAD's entry, or none.
+  GIT_INDEX_FILE="$_fp_idx" git add -A -- "${spec[@]}" >/dev/null
+  tree="$(GIT_INDEX_FILE="$_fp_idx" git write-tree)"
+  rm -f "$_fp_idx"
   echo "$tree"
 }
 ref_of() { [[ "$1" =~ ^[A-Za-z0-9._-]+$ ]] || die "name must be [A-Za-z0-9._-]+"; echo "refs/bugfix/$1"; }

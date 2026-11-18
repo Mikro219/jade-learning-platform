@@ -326,4 +326,79 @@ for gap in 3 14; do
   fi
 done
 
+repo bd_log
+mkdir -p .beads; echo '{"i":1}' > .beads/interactions.jsonl; echo "prefix: jade" > .beads/config.yaml
+git add -A; git commit -qm beads
+echo '{"i":2}' >> .beads/interactions.jsonl
+"$FP" baseline bd >/dev/null
+echo '{"i":3}' >> .beads/interactions.jsonl
+if "$FP" patch bd "$root/bd0.patch" >/dev/null 2>&1; then fail "a bd log append alone made a patch"; else ok "bd's interaction log appended alone is no change since baseline"; fi
+sed -i 's/line4/line4 FIX/' a.rs
+echo '{"i":4}' >> .beads/interactions.jsonl
+"$FP" patch bd "$root/bd.patch" > "$root/bd.out"
+P="$root/bd.patch"; S="$(sha "$P")"
+grep -q '^+line4 FIX' "$P" && ! grep -q 'interactions.jsonl' "$P" "$root/bd.out" \
+  && ok "the fix enters the patch and bd's interaction log does not" || fail "bd log in patch or fix missing"
+echo '{"i":5}' >> .beads/interactions.jsonl
+"$FP" verify bd "$P" "$S" >/dev/null && ok "verify still passes after a bd write appends to its interaction log" || fail "bd log append broke verify"
+echo "prefix: other" > .beads/config.yaml
+[[ "$(rc_of "$FP" verify bd "$P" "$S")" == 1 ]] && ok "the exclusion is narrow: another tracked .beads file changed after patch fails verify" || fail "verify missed a .beads/config.yaml edit"
+git checkout -q -- .beads/config.yaml
+echo "drift" >> a.rs
+[[ "$(rc_of "$FP" verify bd "$P" "$S")" == 1 ]] && ok "and an edit to a real file after patch still fails verify" || fail "verify missed a real-file edit"
+sed -i '$d' a.rs
+"$FP" verify bd "$P" "$S" >/dev/null || fail "verify after undoing the drift"
+T="$(tree_of "$("$FP" candidate bd "$P" "$root/bdc")")"
+echo '{"i":6}' >> "$root/bdc/.beads/interactions.jsonl"
+"$FP" check "$root/bdc" "$T" >/dev/null && ok "check ignores a bd log append inside the candidate worktree" || fail "check failed on a bd log append"
+echo "prefix: other" > "$root/bdc/.beads/config.yaml"
+[[ "$(rc_of "$FP" check "$root/bdc" "$T")" == 1 ]] && ok "but check still fails on any other change in the candidate" || fail "check missed a .beads/config.yaml edit"
+"$FP" cleanup bd >/dev/null
+[[ "$(git ls-tree "$T" -- .beads/interactions.jsonl)" == "$(git ls-tree HEAD -- .beads/interactions.jsonl)" ]] \
+  && ok "the candidate tree holds HEAD's interaction log" || fail "candidate tree interaction log"
+git diff --cached --quiet && git apply --cached "$P" && "$FP" staged "$T" >/dev/null \
+  && ok "staged passes for the exact fix while the working tree's bd log has unstaged appends" || fail "staged with unstaged bd log"
+git add .beads/interactions.jsonl; i0="$(sha .git/index)"
+out="$("$FP" staged "$T" || true)"
+[[ "$out" == FAIL*interactions.jsonl* && "$(sha .git/index)" == "$i0" ]] \
+  && ok "staged stays exact: a staged bd log change fails it and is named, so the commit is only the fix" || fail "staged accepted a staged bd log: $out"
+
+repo bd_log_more
+mkdir -p .beads; echo '{"i":1}' > .beads/interactions.jsonl; git add -A; git commit -qm beads
+"$FP" baseline bm >/dev/null
+sed -i 's/line4/line4 FIX/' a.rs
+"$FP" patch bm "$root/bm.patch" >/dev/null
+P="$root/bm.patch"; S="$(sha "$P")"
+T="$(tree_of "$("$FP" materialize bm "$P" "$root/bmm")")"
+echo '{"i":2}' >> "$root/bmm/.beads/interactions.jsonl"
+"$FP" check "$root/bmm" "$T" >/dev/null && ok "check ignores a bd log append inside a materialize worktree" || fail "check failed on a bd log append (materialize)"
+"$FP" cleanup bm >/dev/null
+chmod 000 .beads/interactions.jsonl
+r="$(rc_of "$FP" verify bm "$P" "$S")"; chmod 644 .beads/interactions.jsonl
+[[ "$r" == 0 ]] && ok "an unreadable bd log is never read: verify still passes" || fail "unreadable bd log broke verify ($r)"
+mkdir -p "$root/fptmp"; chmod 000 a.rs
+r="$(TMPDIR="$root/fptmp" rc_of "$FP" verify bm "$P" "$S")"; chmod 644 a.rs
+leak="$(find "$root/fptmp" -type f | wc -l)"
+[[ "$r" != 0 ]] || fail "verify with an unreadable a.rs should fail"
+echo '{"i":3}' >> .beads/interactions.jsonl; git commit -qm session -- .beads/interactions.jsonl
+out="$("$FP" verify bm "$P" "$S" || true)"
+[[ "$out" == *"HEAD moved"* ]] && ok "a log-only session commit is still reported as HEAD moved" || fail "HEAD move after log commit: $out"
+T2="$(tree_of "$("$FP" candidate bm "$P" "$root/bmc2")")"
+echo '{"i":4}' >> "$root/bmc2/.beads/interactions.jsonl"
+"$FP" check "$root/bmc2" "$T2" >/dev/null && ok "head-moved route: the candidate applies at the new HEAD and check ignores its log append" || fail "head-moved candidate check"
+"$FP" cleanup bm >/dev/null
+git diff --cached --quiet && git apply --cached "$P" && "$FP" staged "$T2" >/dev/null \
+  && ok "head-moved route: staged matches the new candidate" || fail "head-moved staged"
+git reset -q
+[[ "$leak" == 0 ]] && ok "a snapshot that fails (unreadable file) leaves no temporary index behind" || fail "$leak temporary index files leaked"
+
+repo bd_log_untracked
+"$FP" baseline bu >/dev/null
+mkdir -p .beads; echo '{"i":1}' > .beads/interactions.jsonl
+echo "fix" > fix.rs
+"$FP" patch bu "$root/bu.patch" >/dev/null
+echo '{"i":2}' >> .beads/interactions.jsonl
+grep -q 'fix.rs' "$root/bu.patch" && ! grep -q 'interactions.jsonl' "$root/bu.patch" && "$FP" verify bu "$root/bu.patch" "$(sha "$root/bu.patch")" >/dev/null \
+  && ok "a bd log HEAD lacks never enters the patch either, and its appends leave verify passing" || fail "untracked bd log"
+
 echo "$pass passed"
