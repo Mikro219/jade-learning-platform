@@ -1,0 +1,2607 @@
+{
+ "known_omissions": [],
+ "schema": "planloop-discovery/1",
+ "searches": [
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-8w4' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "Phase 2 epic id; hits: docs/handoff/beads/id-map.json"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-o07' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 5,
+   "match_proof": null,
+   "purpose": "bead id (core schema); hits: docs/adr/0001-kit-agnostic-platform.md, docs/handoff/beads/id-map.json, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, src/lib/server/db/schema.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-fd5' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 5,
+   "match_proof": null,
+   "purpose": "bead id (code library); hits: docs/adr/0011-kit-code-format-and-storage.md, docs/handoff/beads/id-map.json, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, src/lib/server/config/index.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-7if' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 6,
+   "match_proof": null,
+   "purpose": "bead id (redemption); hits: docs/adr/0011-kit-code-format-and-storage.md, docs/adr/0020-rate-limit-keys-for-redemption-and-signup.md, docs/handoff/beads/id-map.json, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-99j' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "bead id (batch CLI); hits: docs/adr/0011-kit-code-format-and-storage.md, docs/handoff/beads/id-map.json, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-q01' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "bead id (seed); hits: docs/adr/0001-kit-agnostic-platform.md, docs/handoff/beads/id-map.json"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-pe9' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "bead id (staff codes); hits: docs/handoff/beads/id-map.json, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-hap' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "readiness pool decision bead; hits: plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-4el' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "FaultForge redeem scenario bead; hits: plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-bnk' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "FaultForge ingest scenario bead; hits: plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-0nf' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "FaultForge no-log scenario bead; hits: plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-8n2.5' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "rate-limit decision bead; hits: docs/adr/0020-rate-limit-keys-for-redemption-and-signup.md, docs/adr/README.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-8n2.4' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "participant-letter decision bead; hits: docs/adr/0019-participant-letters-a-to-d.md, docs/adr/README.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-6is' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 8,
+   "match_proof": null,
+   "purpose": "open product questions (human); hits: docs/adr/0001-kit-agnostic-platform.md, docs/adr/0012-device-telemetry-and-ai-assistant-out-of-scope.md, docs/adr/0022-open-product-questions-scope.md, docs/adr/0023-tiered-retention-for-kit-keyed-data.md, docs/adr/README.md, docs/handoff/beads/id-map.json, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-vcy' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 5,
+   "match_proof": null,
+   "purpose": "p3-adult-auth (blocks jade-pe9; consumer of users/auth_sessions/invites); hits: deploy/caddy/Caddyfile, docs/adr/0005-authentication-without-email.md, docs/adr/0020-rate-limit-keys-for-redemption-and-signup.md, docs/handoff/beads/id-map.json, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-aq5' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "authorization matrix bead; hits: docs/handoff/beads/id-map.json, docs/threat-model.md, tests/authz/route-registry.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-l13' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "kit data deletion (delete_kit_data consumer); hits: docs/handoff/beads/id-map.json, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-6cq' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 4,
+   "match_proof": null,
+   "purpose": "rate-limit review (consumer of p2-redeem limits); hits: deploy/caddy/Caddyfile, docs/adr/0020-rate-limit-keys-for-redemption-and-signup.md, docs/handoff/beads/id-map.json, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-4zw' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 9,
+   "match_proof": null,
+   "purpose": "staging bead (deferred acceptance); hits: .github/workflows/ci.yml, docs/adr/0004-one-canadian-vm-docker-compose.md, docs/adr/0014-staging-from-phase-1.md, docs/handoff/beads/id-map.json, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, plans/handoffs/HANDOFF_jade-vtk_phase1-plan-approved_2026-11-15.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-0za' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 9,
+   "match_proof": null,
+   "purpose": "host bead (human, blocks staging); hits: docs/adr/0004-one-canadian-vm-docker-compose.md, docs/adr/0014-staging-from-phase-1.md, docs/adr/README.md, docs/handoff/beads/id-map.json, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, plans/handoffs/HANDOFF_jade-vtk_phase1-plan-approved_2026-11-15.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-t17' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "production code batch (consumer of CLI); hits: docs/adr/0021-split-human-and-agent-work.md, docs/handoff/beads/id-map.json, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-lnn.2' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "code-batch runbook (consumer of CLI); hits: docs/adr/0021-split-human-and-agent-work.md, docs/adr/README.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-fgs' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 4,
+   "match_proof": null,
+   "purpose": "pepper backup (consumer of code lib); hits: docs/adr/0011-kit-code-format-and-storage.md, docs/adr/0021-split-human-and-agent-work.md, docs/handoff/beads/id-map.json, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-lnn.1' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 4,
+   "match_proof": null,
+   "purpose": "secrets script (CODE_PEPPER generation); hits: docs/adr/0011-kit-code-format-and-storage.md, docs/adr/0021-split-human-and-agent-work.md, docs/adr/README.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-bu6' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "classes/redeem UI (consumer of redeemCode); hits: docs/handoff/beads/id-map.json, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-5nj' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "join flow (consumer of device_sessions); hits: docs/adr/0005-authentication-without-email.md, docs/handoff/beads/id-map.json, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-8lt' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "consent flag (consumer of class_kits.logging_enabled); hits: docs/adr/0009-consent-gated-logging.md, docs/handoff/beads/id-map.json, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-9tk' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "invites (consumer of invites table); hits: docs/adr/0005-authentication-without-email.md, docs/handoff/beads/id-map.json"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-7j8' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "events table (next migration after core); hits: docs/adr/0008-event-integrity.md, docs/handoff/beads/id-map.json"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade-dfj' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "content registry (depends on o07); hits: docs/handoff/beads/id-map.json"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'p2-schema-core' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 8,
+   "match_proof": null,
+   "purpose": "plan key of jade-o07; hits: docs/adr/0001-kit-agnostic-platform.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/phases/phase-04-content-pipeline.md, docs/handoff/phases/phase-06-event-pipeline.md, docs/handoff/tools/build_plan.py, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'p2-code-lib' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 6,
+   "match_proof": null,
+   "purpose": "plan key of jade-fd5; hits: docs/adr/0011-kit-code-format-and-storage.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'p2-redeem' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 12,
+   "match_proof": null,
+   "purpose": "plan key of jade-7if; hits: docs/adr/0011-kit-code-format-and-storage.md, docs/adr/0020-rate-limit-keys-for-redemption-and-signup.md, docs/adr/README.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/phases/phase-03-accounts-classes-sessions.md, docs/handoff/phases/phase-09-privacy-security-hardening.md, docs/handoff/tools/build_plan.py, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'p2-code-cli' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 7,
+   "match_proof": null,
+   "purpose": "plan key of jade-99j; hits: docs/adr/0011-kit-code-format-and-storage.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'p2-seed' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 5,
+   "match_proof": null,
+   "purpose": "plan key of jade-q01; hits: docs/adr/0001-kit-agnostic-platform.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'p2-staff-codes' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 5,
+   "match_proof": null,
+   "purpose": "plan key of jade-pe9; hits: docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'products' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 7,
+   "match_proof": null,
+   "purpose": "table; hits: docs/adr/0001-kit-agnostic-platform.md, docs/handoff/DATA-MODEL.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'code_batches' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "table; hits: docs/handoff/DATA-MODEL.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'kit_codes' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "table; hits: docs/handoff/DATA-MODEL.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'auth_sessions' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "table; hits: docs/handoff/DATA-MODEL.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'invites' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 10,
+   "match_proof": null,
+   "purpose": "table; hits: docs/adr/0005-authentication-without-email.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DATA-MODEL.md, docs/handoff/beads/id-map.json, docs/handoff/beads/plan.json, docs/handoff/phases/phase-03-accounts-classes-sessions.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md, src/lib/server/auth/index.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'class_kits' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 6,
+   "match_proof": null,
+   "purpose": "table; hits: .claude/skills/planloop/SKILL.md, docs/adr/0009-consent-gated-logging.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DATA-MODEL.md, docs/handoff/EVENTS.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'device_sessions' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "table; hits: docs/adr/0023-tiered-retention-for-kit-keyed-data.md, docs/handoff/DATA-MODEL.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'audit_log' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "table; hits: docs/handoff/DATA-MODEL.md, docs/handoff/PRIVACY.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'code_hmac' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "column; hits: docs/handoff/DATA-MODEL.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'code_prefix' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "column; hits: docs/handoff/DATA-MODEL.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'token_hash' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "column; hits: docs/handoff/DATA-MODEL.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'join_code_hash' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "column; hits: docs/handoff/DATA-MODEL.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'display_number' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "column; hits: docs/handoff/DATA-MODEL.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'logging_enabled' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 18,
+   "match_proof": null,
+   "purpose": "column (consent switch on class_kits); hits: .claude/skills/bugfix/SKILL.md, .claude/skills/planloop/SKILL.md, .claude/skills/planloop/tests/test_planloop.py, CLAUDE.md, docs/adr/0009-consent-gated-logging.md, docs/adr/0025-youtube-embedded-module-video.md, docs/handoff/ARCHITECTURE.md, docs/handoff/CLAUDE-SECTION.md, docs/handoff/DATA-MODEL.md, docs/handoff/DECISIONS.md, docs/handoff/EVENTS.md, docs/handoff/REVIEW.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-03-accounts-classes-sessions.md, docs/handoff/phases/phase-05-student-experience.md, docs/handoff/tools/build_plan.py, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'redeemed_by' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "column; hits: docs/handoff/DATA-MODEL.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'entitlements' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 5,
+   "match_proof": null,
+   "purpose": "column; hits: .claude/skills/planloop/SKILL.md, docs/handoff/DATA-MODEL.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-05-student-experience.md, docs/handoff/tools/build_plan.py"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'one_live_code_per_kit' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "index; hits: docs/handoff/DATA-MODEL.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'kit_in_one_active_class' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "index; hits: docs/handoff/DATA-MODEL.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'delete_kit_data' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 4,
+   "match_proof": null,
+   "purpose": "deletion function covering kit_id tables; hits: .claude/skills/bugfix/SKILL.md, .claude/skills/planloop/SKILL.md, docs/handoff/DATA-MODEL.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'redeemCode' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 4,
+   "match_proof": null,
+   "purpose": "service function; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, tests/blackbox/log-privacy.test.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'CODE_PEPPER' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 22,
+   "match_proof": null,
+   "purpose": "config variable; hits: .claude/skills/planloop/SKILL.md, .env.example, compose.prod.yml, docs/adr/0011-kit-code-format-and-storage.md, docs/adr/0021-split-human-and-agent-work.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md, src/lib/server/config/index.ts, tests/blackbox/boot-failfast.test.ts, tests/infra/compose-config.test.ts, tests/infra/image.test.ts, tests/support/env.ts, tests/unit/ci-workflow.test.ts, tests/unit/config.test.ts, tests/unit/env-init.test.ts, tests/unit/log-schema.test.ts, tools/ci/compat.ts, tools/env-init.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'codePepper' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "config accessor; hits: src/lib/server/config/index.ts, tests/unit/config.test.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'NODE_ENV=production' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 9,
+   "match_proof": null,
+   "purpose": "seed refusal wording; hits: Dockerfile, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, src/lib/server/config/index.ts, tests/blackbox/boot-failfast.test.ts, tests/support/global-setup-blackbox.ts, tests/unit/config.test.ts, vite.config.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'RETENTION_MONTHS' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 6,
+   "match_proof": null,
+   "purpose": "config variable (retention); hits: docs/adr/0016-step-views-and-retention-post-launch-ok.md, docs/adr/0022-open-product-questions-scope.md, docs/adr/0023-tiered-retention-for-kit-keyed-data.md, docs/handoff/DATA-MODEL.md, docs/handoff/PRIVACY.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- '/redeem' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 8,
+   "match_proof": null,
+   "purpose": "route the QR opens; hits: docs/adr/0011-kit-code-format-and-storage.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, tests/blackbox/log-privacy.test.ts, tests/infra/caddy-logs.test.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'codes:generate' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "CLI script name; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'db:seed' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "seed script name; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'Crockford' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 8,
+   "match_proof": null,
+   "purpose": "code alphabet; hits: docs/adr/0011-kit-code-format-and-storage.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, src/lib/server/log/index.ts, tests/unit/log-schema.test.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'check character' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 6,
+   "match_proof": null,
+   "purpose": "code check character; hits: docs/adr/0011-kit-code-format-and-storage.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'packing CSV' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 6,
+   "match_proof": null,
+   "purpose": "CLI output; hits: docs/adr/0011-kit-code-format-and-storage.md, docs/handoff/ARCHITECTURE.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'code card' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 5,
+   "match_proof": null,
+   "purpose": "CLI output; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'QR' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 18,
+   "match_proof": null,
+   "purpose": "CLI output; hits: docs/adr/0006-content-as-markdown-version-locked.md, docs/adr/0011-kit-code-format-and-storage.md, docs/adr/README.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DECISIONS.md, docs/handoff/REVIEW.md, docs/handoff/START-HERE.md, docs/handoff/architecture.png, docs/handoff/architecture.svg, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/phases/phase-03-accounts-classes-sessions.md, docs/handoff/phases/phase-04-content-pipeline.md, docs/handoff/phases/phase-09-privacy-security-hardening.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md, tests/blackbox/log-privacy.test.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'citext' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "extension for users.email; hits: docs/handoff/DATA-MODEL.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'argon2' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 8,
+   "match_proof": null,
+   "purpose": "password hashing (seed users); hits: .claude/skills/planloop/SKILL.md, docs/adr/0005-authentication-without-email.md, docs/handoff/DATA-MODEL.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-03-accounts-classes-sessions.md, docs/handoff/tools/build_plan.py, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'global failed-code throttle' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "rate-limit key (ADR 0020); hits: docs/adr/0020-rate-limit-keys-for-redemption-and-signup.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'lockout' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 8,
+   "match_proof": null,
+   "purpose": "rate-limit lockout; hits: .claude/skills/bugfix/SKILL.md, .claude/skills/planloop/SKILL.md, docs/adr/0020-rate-limit-keys-for-redemption-and-signup.md, docs/handoff/ARCHITECTURE.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-09-privacy-security-hardening.md, docs/handoff/tools/build_plan.py, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'per-IP' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 6,
+   "match_proof": null,
+   "purpose": "rate-limit key (ADR 0020); hits: deploy/caddy/Caddyfile, docs/adr/0020-rate-limit-keys-for-redemption-and-signup.md, docs/adr/README.md, docs/handoff/PRIVACY.md, docs/handoff/REVIEW.md, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'demo kit' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 7,
+   "match_proof": null,
+   "purpose": "rule 7 development kit; hits: .claude/skills/bugfix/SKILL.md, .claude/skills/planloop/SKILL.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-04-content-pipeline.md, docs/handoff/phases/phase-06-event-pipeline.md, docs/handoff/tools/build_plan.py, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'closeDatabase' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "readiness pool shutdown; hits: src/hooks.server.ts, src/lib/server/http/index.ts, src/lib/server/http/readiness.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'readiness' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 25,
+   "match_proof": null,
+   "purpose": "readiness pool (jade-hap); hits: .claude/skills/planloop/SKILL.md, .claude/skills/planloop/check_receipt.sh, .claude/skills/planloop/references/formats.md, .claude/skills/planloop/scripts/planloop.py, .claude/skills/planloop/tests/fixtures/planloop_c391e6b.py, .claude/skills/planloop/tests/test_planloop.py, docs/handoff/START-HERE.md, docs/handoff/beads/plan.json, docs/handoff/phases/README.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, migrations/0000_baseline.sql, migrations/README.md, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, plans/handoffs/HANDOFF_jade-vtk_phase1-plan-approved_2026-11-15.md, src/lib/server/db/index.ts, src/lib/server/db/migrate.ts, src/lib/server/http/index.ts, src/lib/server/http/readiness.ts, tests/infra/compose-up.test.ts, tests/integration/migrate.test.ts, tests/unit/compat.test.ts, tests/unit/readiness.test.ts, tools/ci/migration-compat.sh"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'ci:compat' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 12,
+   "match_proof": null,
+   "purpose": "migration-compat harness; hits: .env.example, .github/workflows/ci.yml, README.md, package.json, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, tests/unit/ci-workflow.test.ts, tests/unit/compat.test.ts, tests/unit/supervise.test.ts, tools/ci/base-ref.ts, tools/ci/compat.ts, tools/ci/local.sh, tools/ci/migration-compat.sh"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'migration-compat' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 10,
+   "match_proof": null,
+   "purpose": "migration-compat harness; hits: .github/workflows/ci.yml, README.md, package.json, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, plans/handoffs/HANDOFF_jade-vtk_phase1-plan-approved_2026-11-15.md, tests/unit/ci-workflow.test.ts, tests/unit/supervise.test.ts, tools/ci/compat.ts, tools/ci/lib/supervise.sh, tools/ci/local.sh"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade_app' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 24,
+   "match_proof": null,
+   "purpose": "app role grants; hits: .env.example, README.md, compose.prod.yml, migrations/0000_baseline.sql, migrations/README.md, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, src/lib/server/config/index.ts, src/lib/server/db/client.ts, src/lib/server/db/migrate.ts, src/lib/server/db/roles.ts, tests/infra/compose-config.test.ts, tests/integration/baseline-migration.test.ts, tests/integration/db-scripts.test.ts, tests/integration/role-bootstrap.test.ts, tests/support/db.ts, tests/support/env.ts, tests/unit/config.test.ts, tests/unit/env-init.test.ts, tests/unit/log-schema.test.ts, tests/unit/migrations-static.test.ts, tools/ci/migration-compat.sh, tools/db/migrate.ts, tools/env-init.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'jade:contract' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 4,
+   "match_proof": null,
+   "purpose": "destructive-migration marker; hits: migrations/0000_baseline.sql, migrations/README.md, tests/unit/migrations-static.test.ts, tools/db/check-migrations.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'schema.ts' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 4,
+   "match_proof": null,
+   "purpose": "Drizzle schema file; hits: drizzle.config.ts, migrations/README.md, src/lib/server/db/client.ts, tests/unit/migrations-static.test.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'route-registry' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 9,
+   "match_proof": null,
+   "purpose": "authorization registry; hits: plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, src/routes/api/README.md, tests/authz/route-registry.ts, tests/blackbox/log-privacy.test.ts, tests/blackbox/route-access.test.ts, tests/e2e/a11y.spec.ts, tests/e2e/layout.spec.ts, tests/e2e/no-offorigin.spec.ts, tests/unit/route-registry.test.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'createTestDatabase' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 4,
+   "match_proof": null,
+   "purpose": "test DB harness; hits: tests/blackbox/health.test.ts, tests/integration/baseline-migration.test.ts, tests/integration/harness-isolation.test.ts, tests/support/db.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'gen_random_uuid' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "uuid default; hits: docs/handoff/DATA-MODEL.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'FaultForge' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "FaultForge scenarios; hits: plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'faultforge' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "FaultForge config; hits: plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'mode=client' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 0,
+   "match_proof": "same command with the known string 'kit_codes' (present in docs/handoff/DATA-MODEL.md) returns 2 files: docs/handoff/DATA-MODEL.md, docs/threat-model.md",
+   "purpose": "FaultForge propose_fix mode; hits: none"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'staff invite' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 8,
+   "match_proof": null,
+   "purpose": "signup path (users); hits: docs/adr/0005-authentication-without-email.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DECISIONS.md, docs/handoff/REVIEW.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-03-accounts-classes-sessions.md, docs/handoff/tools/build_plan.py, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'pilot_label' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "classes column; hits: docs/handoff/DATA-MODEL.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'revoke' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 14,
+   "match_proof": null,
+   "purpose": "code lifecycle; hits: README.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DATA-MODEL.md, docs/handoff/EVENTS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/phases/phase-03-accounts-classes-sessions.md, docs/handoff/tools/build_plan.py, docs/threat-model.md, migrations/0000_baseline.sql, migrations/README.md, src/lib/server/codes/index.ts, tools/ci/migration-compat.sh, tools/db/check-migrations.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'reissue' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 5,
+   "match_proof": null,
+   "purpose": "code lifecycle; hits: docs/handoff/ARCHITECTURE.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'HMAC' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 14,
+   "match_proof": null,
+   "purpose": "code storage; hits: .claude/skills/planloop/SKILL.md, .claude/skills/planloop/tests/test_planloop.py, .env.example, docs/adr/0011-kit-code-format-and-storage.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DATA-MODEL.md, docs/handoff/DECISIONS.md, docs/handoff/REVIEW.md, docs/handoff/architecture.svg, docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, docs/threat-model.md, src/lib/server/codes/index.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'constant-time' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "code comparison; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'timingSafeEqual' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 0,
+   "match_proof": "same command with the known string 'kit_codes' (present in docs/handoff/DATA-MODEL.md) returns 2 files: docs/handoff/DATA-MODEL.md, docs/threat-model.md",
+   "purpose": "constant-time comparison API; hits: none"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'serial' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 6,
+   "match_proof": null,
+   "purpose": "kits column; hits: .claude/skills/planloop/SKILL.md, .claude/skills/planloop/tests/run_parallel.py, .claude/skills/planloop/tests/test_planloop.py, docs/handoff/DATA-MODEL.md, src/lib/server/db/migrate.ts, tests/unit/migrations-static.test.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'batch label' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "CLI duplicate refusal; hits: docs/handoff/beads/plan.json, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'Q4' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 6,
+   "match_proof": null,
+   "purpose": "Mike decision Phase 2 without staging; hits: docs/handoff/ARCHITECTURE.md, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, plans/handoffs/HANDOFF_jade-vtk_phase1-plan-approved_2026-11-15.md, tests/infra/caddy-logs.test.ts, tests/unit/log-schema.test.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'TM-4' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "threat-model item: code in redeem URL; hits: docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'TM-5' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "threat-model item: device_sessions with logging off; hits: docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'RL_MEM' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "rate-limit counter storage; hits: docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'AB1' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "abuse case: guessing codes; hits: docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'AB16' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "abuse case: code in redeem URL; hits: docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'forward-only' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 13,
+   "match_proof": null,
+   "purpose": "migration rule (ADR 0003, migrations/README.md); hits: .claude/skills/planloop/SKILL.md, .claude/skills/planloop/scripts/planloop.py, .claude/skills/planloop/tests/test_planloop.py, docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, migrations/README.md, plans/handoffs/HANDOFF_jade-vtk_phase1-plan-approved_2026-11-15.md, src/lib/server/db/migrate.ts, tools/db/check-migrations.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'Drizzle' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 19,
+   "match_proof": null,
+   "purpose": "schema and migration tooling; hits: docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md, docs/adr/README.md, docs/handoff/DATA-MODEL.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-02-data-model-and-kit-codes.md, docs/handoff/tools/build_plan.py, drizzle.config.ts, migrations/README.md, plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, plans/handoffs/HANDOFF_jade-vtk_phase1-plan-approved_2026-11-15.md, src/lib/server/db/client.ts, src/lib/server/db/migrate.ts, src/lib/server/db/schema.ts, tests/unit/migrations-static.test.ts, tools/db/check-migrations.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- '`codes`' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "module boundary (ADR 0002); hits: docs/adr/0002-modular-monolith-in-sveltekit.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DECISIONS.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'index.ts' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 42,
+   "match_proof": null,
+   "purpose": "module public API rule; hits: .claude/skills/bugfix/references/walkthroughs.md, docs/adr/0002-modular-monolith-in-sveltekit.md, docs/handoff/ARCHITECTURE.md, docs/handoff/DECISIONS.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, src/hooks.server.ts, src/lib/server/config/index.ts, src/lib/server/db/roles.ts, src/lib/server/http/dev-only.ts, src/lib/server/http/readiness.ts, src/lib/server/http/request-context.ts, src/routes/(adult)/dev/shell/adult/+page.server.ts, src/routes/(staff)/dev/shell/staff/+page.server.ts, src/routes/(student)/dev/shell/student/+page.server.ts, src/routes/dev/boom/+server.ts, src/routes/readyz/+server.ts, tests/blackbox/boot-failfast.test.ts, tests/blackbox/log-privacy.test.ts, tests/infra/compose-up.test.ts, tests/integration/baseline-migration.test.ts, tests/integration/db-scripts.test.ts, tests/integration/migrate.test.ts, tests/integration/role-bootstrap.test.ts, tests/support/db.ts, tests/support/global-setup-db.ts, tests/support/global-setup-e2e.ts, tests/unit/config.test.ts, tests/unit/db-client.test.ts, tests/unit/env-example.test.ts, tests/unit/env-init.test.ts, tests/unit/log-schema.test.ts, tests/unit/migrations-static.test.ts, tests/unit/module-boundaries.test.ts, tests/unit/readiness.test.ts, tools/ci/compat.ts, tools/db/check-migrations.ts, tools/db/manifest.ts, tools/db/migrate.ts, tools/db/reset.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'third-party' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 25,
+   "match_proof": null,
+   "purpose": "rule 5 / ADR 0013 (printed sheet, staff pages); hits: .claude/skills/bugfix/SKILL.md, .claude/skills/planloop/SKILL.md, .claude/skills/planloop/references/formats.md, AGENTS.md, CLAUDE.md, docs/adr/0002-modular-monolith-in-sveltekit.md, docs/adr/0007-self-hosted-same-origin-video.md, docs/adr/0013-no-third-party-requests-from-the-browser.md, docs/adr/0025-youtube-embedded-module-video.md, docs/adr/README.md, docs/handoff/ARCHITECTURE.md, docs/handoff/CLAUDE-SECTION.md, docs/handoff/DECISIONS.md, docs/handoff/PRIVACY.md, docs/handoff/REVIEW.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/phases/phase-10-production-deploy.md, docs/handoff/tools/build_plan.py, docs/threat-model.md, plans/handoffs/HANDOFF_jade-vtk_phase1-plan-approved_2026-11-15.md, tests/infra/compose-config.test.ts, tests/infra/global-setup.ts, tools/compose.ts, vite.config.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'property test' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "jade-fd5 acceptance (test library); hits: docs/threat-model.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'global-setup-db' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 7,
+   "match_proof": null,
+   "purpose": "test DB harness global setup; hits: tests/integration/baseline-migration.test.ts, tests/integration/migrate.test.ts, tests/integration/role-bootstrap.test.ts, tests/support/db.ts, tests/support/global-setup-e2e.ts, tools/ci/compat.ts, vite.config.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'load-env' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 10,
+   "match_proof": null,
+   "purpose": "tools read .env; hits: .env.example, drizzle.config.ts, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-plan-approved_2026-11-15.md, tests/support/global-setup-blackbox.ts, tests/support/global-setup-db.ts, tools/compose.ts, tools/db/migrate.ts, tools/db/reset.ts, vite.config.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'db:reset' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 10,
+   "match_proof": null,
+   "purpose": "development reset tool; hits: .env.example, README.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, migrations/README.md, package.json, tests/integration/db-scripts.test.ts, tests/unit/log-schema.test.ts, tools/db/reset.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'manifest.json' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 18,
+   "match_proof": null,
+   "purpose": "migration lock / readiness manifest; hits: .claude/skills/planloop/SKILL.md, .claude/skills/planloop/references/formats.md, .claude/skills/planloop/scripts/planloop.py, .claude/skills/planloop/tests/fixtures/planloop_c391e6b.py, .claude/skills/planloop/tests/test_planloop.py, migrations/README.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, src/lib/server/db/migrate.ts, src/lib/server/http/readiness.ts, tests/infra/compose-up.test.ts, tests/integration/migrate.test.ts, tests/unit/base-ref.test.ts, tests/unit/migrations-static.test.ts, tools/ci/base-ref.ts, tools/ci/compat.ts, tools/ci/migration-compat.sh, tools/db/check-migrations.ts, tools/db/manifest.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'repo-hygiene' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "ignored-file test; hits: plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'module-boundaries' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 0,
+   "match_proof": "same command with the known string 'kit_codes' (present in docs/handoff/DATA-MODEL.md) returns 2 files: docs/handoff/DATA-MODEL.md, docs/threat-model.md",
+   "purpose": "module import rule test; hits: none"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'Node 24' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 9,
+   "match_proof": null,
+   "purpose": "pinned runtime (ADR 0024); hits: Dockerfile, README.md, docs/adr/0015-tooling.md, docs/adr/0024-node-24-pinned.md, docs/adr/README.md, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md, plans/handoffs/HANDOFF_jade-vtk_phase1-plan-approved_2026-11-15.md, tests/unit/toolchain-pins.test.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'display_name' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "users column; hits: docs/handoff/DATA-MODEL.md"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'pnpm db:migrate' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 10,
+   "match_proof": null,
+   "purpose": "migration command; hits: .claude/skills/bugfix/SKILL.md, .env.example, README.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, drizzle.config.ts, migrations/README.md, tests/integration/db-scripts.test.ts, tools/db/migrate.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'DATABASE_URL' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 29,
+   "match_proof": null,
+   "purpose": "app role URL; hits: .env.example, README.md, compose.prod.yml, docs/handoff/ARCHITECTURE.md, docs/handoff/beads/plan.json, docs/handoff/phases/phase-01-foundation.md, docs/handoff/tools/build_plan.py, migrations/README.md, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, src/lib/server/config/index.ts, src/lib/server/db/roles.ts, tests/blackbox/boot-failfast.test.ts, tests/blackbox/health.test.ts, tests/infra/compose-config.test.ts, tests/infra/image.test.ts, tests/integration/db-scripts.test.ts, tests/support/db.ts, tests/support/env.ts, tests/support/global-setup-db.ts, tests/support/server.ts, tests/unit/ci-workflow.test.ts, tests/unit/config.test.ts, tests/unit/env-init.test.ts, tests/unit/log-schema.test.ts, tools/ci/compat.ts, tools/db/migrate.ts, tools/db/reset.ts, tools/env-init.ts, vite.config.ts"
+  },
+  {
+   "command": "command grep -rlnF --exclude-dir=__pycache__ -- 'MIGRATION_DATABASE_URL' docs plans/handoffs CLAUDE.md AGENTS.md README.md .claude/skills migrations src tests tools .github .env.example .gitignore .dockerignore package.json drizzle.config.ts vite.config.ts compose.dev.yml compose.prod.yml Dockerfile deploy",
+   "hits": 17,
+   "match_proof": null,
+   "purpose": "owner role URL; hits: .env.example, README.md, compose.prod.yml, migrations/README.md, plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md, src/lib/server/config/index.ts, tests/infra/compose-config.test.ts, tests/infra/image.test.ts, tests/integration/db-scripts.test.ts, tests/support/global-setup-db.ts, tests/unit/ci-workflow.test.ts, tests/unit/config.test.ts, tests/unit/env-init.test.ts, tools/db/migrate.ts, tools/db/reset.ts, tools/env-init.ts, vite.config.ts"
+  },
+  {
+   "command": "bd show jade-8w4",
+   "hits": 8,
+   "match_proof": null,
+   "purpose": "seed: the bead's own text; hits: jade-4zw, jade-7if, jade-8w4.1, jade-99j, jade-fd5, jade-o07, jade-pe9, jade-q01"
+  },
+  {
+   "command": "bd dep list jade-8w4",
+   "hits": 0,
+   "match_proof": "bd dep list jade-7if on the same database lists jade-8n2.5, jade-8w4, jade-e9a, jade-fd5 and jade-o07, so the command returns rows when they exist",
+   "purpose": "seed: beads this bead depends on; hits: none"
+  },
+  {
+   "command": "bd dep list jade-8w4 --direction=up",
+   "hits": 7,
+   "match_proof": null,
+   "purpose": "seed: beads that depend on this bead; hits: jade-7if, jade-8w4.1, jade-99j, jade-fd5, jade-o07, jade-pe9, jade-q01"
+  },
+  {
+   "command": "bd search jade-8w4",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "seed: beads whose title or text names this id; hits: jade-8w4, jade-8w4.1"
+  },
+  {
+   "command": "bd show jade-o07",
+   "hits": 8,
+   "match_proof": null,
+   "purpose": "seed: the bead's own text; hits: jade-7if, jade-7j8, jade-8n2.4, jade-8w4, jade-99j, jade-dfj, jade-q01, jade-urd"
+  },
+  {
+   "command": "bd dep list jade-o07",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "seed: beads this bead depends on; hits: jade-8n2.4, jade-8w4, jade-urd"
+  },
+  {
+   "command": "bd dep list jade-o07 --direction=up",
+   "hits": 5,
+   "match_proof": null,
+   "purpose": "seed: beads that depend on this bead; hits: jade-7if, jade-7j8, jade-99j, jade-dfj, jade-q01"
+  },
+  {
+   "command": "bd search jade-o07",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "seed: beads whose title or text names this id; hits: jade-o07"
+  },
+  {
+   "command": "bd show jade-fd5",
+   "hits": 4,
+   "match_proof": null,
+   "purpose": "seed: the bead's own text; hits: jade-7if, jade-8v4, jade-8w4, jade-99j"
+  },
+  {
+   "command": "bd dep list jade-fd5",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "seed: beads this bead depends on; hits: jade-8v4, jade-8w4"
+  },
+  {
+   "command": "bd dep list jade-fd5 --direction=up",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "seed: beads that depend on this bead; hits: jade-7if, jade-99j"
+  },
+  {
+   "command": "bd search jade-fd5",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "seed: beads whose title or text names this id; hits: jade-fd5"
+  },
+  {
+   "command": "bd show jade-7if",
+   "hits": 9,
+   "match_proof": null,
+   "purpose": "seed: the bead's own text; hits: jade-4el, jade-6cq, jade-8n2.5, jade-8w4, jade-e9a, jade-fd5, jade-o07, jade-pe9, jade-vcy"
+  },
+  {
+   "command": "bd dep list jade-7if",
+   "hits": 5,
+   "match_proof": null,
+   "purpose": "seed: beads this bead depends on; hits: jade-8n2.5, jade-8w4, jade-e9a, jade-fd5, jade-o07"
+  },
+  {
+   "command": "bd dep list jade-7if --direction=up",
+   "hits": 5,
+   "match_proof": null,
+   "purpose": "seed: beads that depend on this bead; hits: jade-4el, jade-6cq, jade-e9a, jade-pe9, jade-vcy"
+  },
+  {
+   "command": "bd search jade-7if",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "seed: beads whose title or text names this id; hits: jade-7if"
+  },
+  {
+   "command": "bd show jade-99j",
+   "hits": 5,
+   "match_proof": null,
+   "purpose": "seed: the bead's own text; hits: jade-8w4, jade-fd5, jade-lnn.2, jade-o07, jade-t17"
+  },
+  {
+   "command": "bd dep list jade-99j",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "seed: beads this bead depends on; hits: jade-8w4, jade-fd5, jade-o07"
+  },
+  {
+   "command": "bd dep list jade-99j --direction=up",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "seed: beads that depend on this bead; hits: jade-lnn.2, jade-t17"
+  },
+  {
+   "command": "bd search jade-99j",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "seed: beads whose title or text names this id; hits: jade-99j"
+  },
+  {
+   "command": "bd show jade-q01",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "seed: the bead's own text; hits: jade-8w4, jade-o07"
+  },
+  {
+   "command": "bd dep list jade-q01",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "seed: beads this bead depends on; hits: jade-8w4, jade-o07"
+  },
+  {
+   "command": "bd dep list jade-q01 --direction=up",
+   "hits": 0,
+   "match_proof": "bd dep list jade-7if --direction=up on the same database lists jade-4el, jade-6cq, jade-e9a, jade-pe9 and jade-vcy, so the command returns rows when they exist",
+   "purpose": "seed: beads that depend on this bead; hits: none"
+  },
+  {
+   "command": "bd search jade-q01",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "seed: beads whose title or text names this id; hits: jade-q01"
+  },
+  {
+   "command": "bd show jade-pe9",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "seed: the bead's own text; hits: jade-7if, jade-8w4, jade-vcy"
+  },
+  {
+   "command": "bd dep list jade-pe9",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "seed: beads this bead depends on; hits: jade-7if, jade-8w4, jade-vcy"
+  },
+  {
+   "command": "bd dep list jade-pe9 --direction=up",
+   "hits": 0,
+   "match_proof": "bd dep list jade-7if --direction=up on the same database lists jade-4el, jade-6cq, jade-e9a, jade-pe9 and jade-vcy, so the command returns rows when they exist",
+   "purpose": "seed: beads that depend on this bead; hits: none"
+  },
+  {
+   "command": "bd search jade-pe9",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "seed: beads whose title or text names this id; hits: jade-pe9"
+  },
+  {
+   "command": "bd show jade-hap",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "seed: the bead's own text; hits: jade-alt"
+  },
+  {
+   "command": "bd dep list jade-hap",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "seed: beads this bead depends on; hits: jade-alt"
+  },
+  {
+   "command": "bd dep list jade-hap --direction=up",
+   "hits": 0,
+   "match_proof": "bd dep list jade-7if --direction=up on the same database lists jade-4el, jade-6cq, jade-e9a, jade-pe9 and jade-vcy, so the command returns rows when they exist",
+   "purpose": "seed: beads that depend on this bead; hits: none"
+  },
+  {
+   "command": "bd search jade-hap",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "seed: beads whose title or text names this id; hits: jade-hap"
+  },
+  {
+   "command": "bd show jade-4el",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "seed: the bead's own text; hits: jade-7if, jade-cdw, jade-e9a"
+  },
+  {
+   "command": "bd dep list jade-4el",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "seed: beads this bead depends on; hits: jade-7if, jade-cdw, jade-e9a"
+  },
+  {
+   "command": "bd dep list jade-4el --direction=up",
+   "hits": 0,
+   "match_proof": "bd dep list jade-7if --direction=up on the same database lists jade-4el, jade-6cq, jade-e9a, jade-pe9 and jade-vcy, so the command returns rows when they exist",
+   "purpose": "seed: beads that depend on this bead; hits: none"
+  },
+  {
+   "command": "bd search jade-4el",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "seed: beads whose title or text names this id; hits: jade-4el"
+  },
+  {
+   "command": "bd search 'p2-schema-core'",
+   "hits": 0,
+   "match_proof": "bd search 'kit code' on the same database returns jade-8w4, jade-fd5 and jade-o07, so bd search returns rows when a bead's title or text matches; bd search matches titles and descriptions, not acceptance criteria or notes, which is why plan keys cited only there return nothing (the id-map and the per-id searches above cover them)",
+   "purpose": "bead text search for a Phase 2 term; hits: none"
+  },
+  {
+   "command": "bd search 'p2-code-lib'",
+   "hits": 0,
+   "match_proof": "bd search 'kit code' on the same database returns jade-8w4, jade-fd5 and jade-o07, so bd search returns rows when a bead's title or text matches; bd search matches titles and descriptions, not acceptance criteria or notes, which is why plan keys cited only there return nothing (the id-map and the per-id searches above cover them)",
+   "purpose": "bead text search for a Phase 2 term; hits: none"
+  },
+  {
+   "command": "bd search 'p2-redeem'",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-4el"
+  },
+  {
+   "command": "bd search 'p2-code-cli'",
+   "hits": 0,
+   "match_proof": "bd search 'kit code' on the same database returns jade-8w4, jade-fd5 and jade-o07, so bd search returns rows when a bead's title or text matches; bd search matches titles and descriptions, not acceptance criteria or notes, which is why plan keys cited only there return nothing (the id-map and the per-id searches above cover them)",
+   "purpose": "bead text search for a Phase 2 term; hits: none"
+  },
+  {
+   "command": "bd search 'p2-seed'",
+   "hits": 0,
+   "match_proof": "bd search 'kit code' on the same database returns jade-8w4, jade-fd5 and jade-o07, so bd search returns rows when a bead's title or text matches; bd search matches titles and descriptions, not acceptance criteria or notes, which is why plan keys cited only there return nothing (the id-map and the per-id searches above cover them)",
+   "purpose": "bead text search for a Phase 2 term; hits: none"
+  },
+  {
+   "command": "bd search 'p2-staff-codes'",
+   "hits": 0,
+   "match_proof": "bd search 'kit code' on the same database returns jade-8w4, jade-fd5 and jade-o07, so bd search returns rows when a bead's title or text matches; bd search matches titles and descriptions, not acceptance criteria or notes, which is why plan keys cited only there return nothing (the id-map and the per-id searches above cover them)",
+   "purpose": "bead text search for a Phase 2 term; hits: none"
+  },
+  {
+   "command": "bd search 'kit code'",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-8w4, jade-fd5, jade-o07"
+  },
+  {
+   "command": "bd search 'redeem'",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-1tn, jade-4el, jade-bu6"
+  },
+  {
+   "command": "bd search 'pepper'",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-fgs"
+  },
+  {
+   "command": "bd search 'batch'",
+   "hits": 6,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-4a7, jade-99j, jade-lnn.2, jade-o07, jade-pe9, jade-t17"
+  },
+  {
+   "command": "bd search 'seed'",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-q01"
+  },
+  {
+   "command": "bd search 'staging'",
+   "hits": 3,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-4zw, jade-lnn.2, jade-lnn.3"
+  },
+  {
+   "command": "bd search 'rate limit'",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-6cq, jade-7if"
+  },
+  {
+   "command": "bd search 'audit'",
+   "hits": 4,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-7if, jade-8ho, jade-ada, jade-o07"
+  },
+  {
+   "command": "bd search 'device session'",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-5nj, jade-o07"
+  },
+  {
+   "command": "bd search 'readiness'",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-hap, jade-lnn"
+  },
+  {
+   "command": "bd search 'drizzle'",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-hap"
+  },
+  {
+   "command": "bd search 'migration'",
+   "hits": 0,
+   "match_proof": "bd search 'kit code' on the same database returns jade-8w4, jade-fd5 and jade-o07, so bd search returns rows when a bead's title or text matches; bd search matches titles and descriptions, not acceptance criteria or notes, which is why plan keys cited only there return nothing (the id-map and the per-id searches above cover them)",
+   "purpose": "bead text search for a Phase 2 term; hits: none"
+  },
+  {
+   "command": "bd search 'demo'",
+   "hits": 0,
+   "match_proof": "bd search 'kit code' on the same database returns jade-8w4, jade-fd5 and jade-o07, so bd search returns rows when a bead's title or text matches; bd search matches titles and descriptions, not acceptance criteria or notes, which is why plan keys cited only there return nothing (the id-map and the per-id searches above cover them)",
+   "purpose": "bead text search for a Phase 2 term; hits: none"
+  },
+  {
+   "command": "bd search 'delete_kit_data'",
+   "hits": 0,
+   "match_proof": "bd search 'kit code' on the same database returns jade-8w4, jade-fd5 and jade-o07, so bd search returns rows when a bead's title or text matches; bd search matches titles and descriptions, not acceptance criteria or notes, which is why plan keys cited only there return nothing (the id-map and the per-id searches above cover them)",
+   "purpose": "bead text search for a Phase 2 term; hits: none"
+  },
+  {
+   "command": "bd search 'kit_codes'",
+   "hits": 2,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-8w4, jade-o07"
+  },
+  {
+   "command": "bd search 'audit_log'",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-o07"
+  },
+  {
+   "command": "bd search 'CODE_PEPPER'",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "bead text search for a Phase 2 term; hits: jade-fgs"
+  },
+  {
+   "command": "git check-ignore -v .env .env.local .env.staging .env.production",
+   "hits": 4,
+   "match_proof": null,
+   "purpose": "are env files ignored (snapshot overlay: Evidence, 'What reaches Codex'); hits: .gitignore:23:.env\t.env; .gitignore:24:.env.*\t.env.local; .gitignore:24:.env.*\t.env.staging; .gitignore:24:.env.*\t.env.production"
+  },
+  {
+   "command": "git check-ignore -v .env.example",
+   "hits": 0,
+   "match_proof": "git check-ignore -v .env prints '.gitignore:23:.env' in the same repo, so the command prints a rule when one applies; .env.example is negated by '!.env.example' at .gitignore:25",
+   "purpose": "is .env.example tracked and not ignored; hits: none"
+  },
+  {
+   "command": "git ls-files -- '.env*'",
+   "hits": 1,
+   "match_proof": null,
+   "purpose": "which env files are tracked; hits: .env.example"
+  },
+  {
+   "command": "command grep -rnE 'codes?-?out|packing|cards?/|code-cards|out/codes' .gitignore .dockerignore",
+   "hits": 0,
+   "match_proof": "same command with the known string 'node_modules' returns .gitignore:12 and a .dockerignore line, so the files are readable and a listed directory would match",
+   "purpose": "is a code-card or packing-CSV output directory listed in .gitignore or .dockerignore (none exists yet: jade-99j creates it); hits: none"
+  },
+  {
+   "command": "git status --porcelain=v1 --untracked-files=all",
+   "hits": 4,
+   "match_proof": null,
+   "purpose": "untracked or modified non-ignored files the snapshot would overlay; hits:  M .claude/skills/bugfix/SKILL.md;  M .claude/skills/bugfix/scripts/fixpatch.sh;  M .claude/skills/bugfix/tests/test_fixpatch.sh; ?? plans/planloop/jade-8w4.pl1/run.json"
+  },
+  {
+   "command": "bd show <id> for every bead id named in the Phase 2 beads and in every binding or candidate file (the repo_files, plus the approved Phase 1 plan), then for every id named in each bead shown (breadth-first, visited set, no hop limit)",
+   "hits": 151,
+   "match_proof": null,
+   "purpose": "transitive closure over beads; visited set (151): jade-0d8, jade-0nf, jade-0ys, jade-0za, jade-151, jade-1cc, jade-1m4, jade-1tn, jade-3ek, jade-3hh, jade-3nx, jade-3sf, jade-3xi, jade-4a7, jade-4el, jade-4zw, jade-5kj, jade-5km, jade-5nj, jade-68l, jade-6cq, jade-6is, jade-6o3, jade-771, jade-7cf, jade-7if, jade-7j8, jade-7s7, jade-7s7.1, jade-7s7.2, jade-7yz, jade-80h, jade-85i, jade-873, jade-8ho, jade-8lt, jade-8n2, jade-8n2.1, jade-8n2.2, jade-8n2.3, jade-8n2.4, jade-8n2.5, jade-8n2.6, jade-8n2.7, jade-8n2.8, jade-8n2.9, jade-8v4, jade-8vo, jade-8w4, jade-8w4.1, jade-99j, jade-9tk, jade-a5u, jade-ada, jade-ahw, jade-al9, jade-alt, jade-app, jade-aq5, jade-as7, jade-axr, jade-b1f, jade-b4j, jade-b7o, jade-bi5, jade-bnk, jade-bu6, jade-buf, jade-buf.1, jade-buf.2, jade-c42, jade-cbp, jade-ccp, jade-cdw, jade-cev, jade-cnm, jade-d03, jade-d25, jade-d48, jade-d98, jade-dd8, jade-dev, jade-dfj, jade-dvm, jade-dvz, jade-e6m, jade-e77, jade-e9a, jade-f1w, jade-fd5, jade-fgs, jade-fxd, jade-fy1, jade-h3k, jade-h3k.1, jade-h3k.2, jade-h8i, jade-hap, jade-hh8, jade-hhp, jade-hqq, jade-hwu, jade-imm, jade-iwr, jade-j93, jade-jd5, jade-kn0, jade-l13, jade-lhq, jade-lnn, jade-lnn.1, jade-lnn.2, jade-lnn.3, jade-lpm, jade-lx4, jade-mfl, jade-mz1, jade-npq, jade-o07, jade-oek, jade-okb, jade-oy8, jade-p4p, jade-p99, jade-pe9, jade-pua, jade-q01, jade-r7c, jade-rug, jade-sio, jade-t17, jade-tmm, jade-tv0, jade-tw4, jade-u8z, jade-ueg, jade-ukn, jade-urd, jade-vcy, jade-vtk, jade-vtk.1, jade-vtk.2, jade-wb9, jade-x94, jade-xu0, jade-xyn, jade-y0i, jade-yvx, jade-zeg, jade-zg3, jade-zwq"
+  }
+ ],
+ "sources": [
+  {
+   "class": "candidate",
+   "path": ".claude/skills/bugfix/SKILL.md",
+   "reason": "gate commands a Phase 2 bug fix would run (env:init, db:up, COMPOSE_PROJECT_NAME)"
+  },
+  {
+   "class": "irrelevant",
+   "path": ".claude/skills/bugfix/references/walkthroughs.md",
+   "reason": "bugfix walkthrough examples; generic hits"
+  },
+  {
+   "class": "candidate",
+   "path": ".claude/skills/planloop/SKILL.md",
+   "reason": "risk domains and the JADE rubric this plan is reviewed against"
+  },
+  {
+   "class": "irrelevant",
+   "path": ".claude/skills/planloop/check_receipt.sh",
+   "reason": "tool code; generic hits"
+  },
+  {
+   "class": "irrelevant",
+   "path": ".claude/skills/planloop/references/formats.md",
+   "reason": "record formats; used for this file only"
+  },
+  {
+   "class": "irrelevant",
+   "path": ".claude/skills/planloop/scripts/planloop.py",
+   "reason": "tool code; generic hits"
+  },
+  {
+   "class": "irrelevant",
+   "path": ".claude/skills/planloop/tests/fixtures/planloop_c391e6b.py",
+   "reason": "old tool fixture"
+  },
+  {
+   "class": "irrelevant",
+   "path": ".claude/skills/planloop/tests/run_parallel.py",
+   "reason": "tool tests"
+  },
+  {
+   "class": "irrelevant",
+   "path": ".claude/skills/planloop/tests/test_planloop.py",
+   "reason": "tool tests"
+  },
+  {
+   "class": "candidate",
+   "path": ".env.example",
+   "reason": "every variable the app and tools read; CODE_PEPPER generated by env:init; any key the plan adds goes here"
+  },
+  {
+   "class": "candidate",
+   "path": ".github/workflows/ci.yml",
+   "reason": "check and migration-compat jobs that every Phase 2 migration PR runs"
+  },
+  {
+   "class": "candidate",
+   "path": ".gitignore",
+   "reason": ".env and .env.* ignored; no CLI output directory yet (jade-99j adds it)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "AGENTS.md",
+   "reason": "agent instructions duplicated from CLAUDE.md's beads block; no Phase 2 requirement"
+  },
+  {
+   "class": "binding",
+   "path": "CLAUDE.md",
+   "reason": "rules 1-5, 7 and 8; the bead workflow (authorization matrix for every new route, gates, merge once CI is green, separate planloop per major implementation, approval is not authorization); stop-and-ask; OB37-OB56"
+  },
+  {
+   "class": "irrelevant",
+   "path": "Dockerfile",
+   "reason": "image build; Phase 2 adds no runtime file outside src/ and migrations/ that the image must copy (the plan says so if a tool must run in the image)"
+  },
+  {
+   "class": "candidate",
+   "path": "README.md",
+   "reason": "setup steps jade-q01 extends (fresh clone to a usable app)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "compose.prod.yml",
+   "reason": "stack wiring; unchanged by Phase 2 (migrate service already runs pnpm db:migrate)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "deploy/caddy/Caddyfile",
+   "reason": "Caddy; the /redeem query string is jade-ada/jade-c42 territory (AB16), not changed in Phase 2"
+  },
+  {
+   "class": "binding",
+   "path": "docs/adr/0001-kit-agnostic-platform.md",
+   "reason": "products row per kit, placeholders (OB59)"
+  },
+  {
+   "class": "binding",
+   "path": "docs/adr/0002-modular-monolith-in-sveltekit.md",
+   "reason": "codes/auth modules through index.ts (OB60)"
+  },
+  {
+   "class": "binding",
+   "path": "docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md",
+   "reason": "Postgres 16, Drizzle, forward-only SQL migrations compatible with the previous version (OB61, OB62)"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/adr/0004-one-canadian-vm-docker-compose.md",
+   "reason": "staging VM is a separate human decision (jade-0za): deferred staging acceptance"
+  },
+  {
+   "class": "binding",
+   "path": "docs/adr/0005-authentication-without-email.md",
+   "reason": "users: email + password argon2id, code- or invite-gated signup (OB63)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/adr/0006-content-as-markdown-version-locked.md",
+   "reason": "content format; no Phase 2 content"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/adr/0007-self-hosted-same-origin-video.md",
+   "reason": "superseded by ADR 0025; video"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/adr/0008-event-integrity.md",
+   "reason": "events (Phase 6); rule 3 is in CLAUDE.md"
+  },
+  {
+   "class": "binding",
+   "path": "docs/adr/0009-consent-gated-logging.md",
+   "reason": "class_kits.logging_enabled default off (OB64)"
+  },
+  {
+   "class": "binding",
+   "path": "docs/adr/0011-kit-code-format-and-storage.md",
+   "reason": "code format, HMAC under pepper, plain codes only on print and CSV, QR URL conflict open, losing the pepper (OB65-OB67)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/adr/0012-device-telemetry-and-ai-assistant-out-of-scope.md",
+   "reason": "out-of-scope extensions"
+  },
+  {
+   "class": "binding",
+   "path": "docs/adr/0013-no-third-party-requests-from-the-browser.md",
+   "reason": "no third-party request: staff pages and the printed sheet (OB68)"
+  },
+  {
+   "class": "binding",
+   "path": "docs/adr/0014-staging-from-phase-1.md",
+   "reason": "staging deploy on every merge; the deferred staging acceptance (OB69)"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/adr/0015-tooling.md",
+   "reason": "zod, Vitest, Playwright; any new library for property tests, QR or PDF is weighed against it"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/adr/0016-step-views-and-retention-post-launch-ok.md",
+   "reason": "analytics views and retention timing"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/adr/0019-participant-letters-a-to-d.md",
+   "reason": "jade-8n2.4's answer (A to D): affects section 5 tables only, no Phase 2 schema"
+  },
+  {
+   "class": "binding",
+   "path": "docs/adr/0020-rate-limit-keys-for-redemption-and-signup.md",
+   "reason": "redeem limited per account plus global throttle, no per-IP; interaction undefined (OB70-OB72)"
+  },
+  {
+   "class": "binding",
+   "path": "docs/adr/0021-split-human-and-agent-work.md",
+   "reason": "production actions stay human: the production batch is jade-t17 (OB73)"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/adr/0022-open-product-questions-scope.md",
+   "reason": "jade-6is scope: kit prefix and RETENTION_MONTHS are open; Phase 2 does not need them"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/adr/0023-tiered-retention-for-kit-keyed-data.md",
+   "reason": "retention deletes device_sessions created by jade-o07"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/adr/0024-node-24-pinned.md",
+   "reason": "pinned Node 24 for any new tool or dependency"
+  },
+  {
+   "class": "binding",
+   "path": "docs/adr/0025-youtube-embedded-module-video.md",
+   "reason": "the rule-5 exception is video pages only; staff pages and printed sheet get none (OB74)"
+  },
+  {
+   "class": "binding",
+   "path": "docs/adr/README.md",
+   "reason": "the bead is current where it and a phase file differ (OB57); open question 1 kit prefix owned by jade-6is (OB58); amendment table (p2-redeem listed); ADR numbering conventions for any new ADR"
+  },
+  {
+   "class": "binding",
+   "path": "docs/handoff/ARCHITECTURE.md",
+   "reason": "codes and auth modules, module boundary rule, staff access, classroom redeem flow, section 6 kit codes, section 9 abuse rows, section 10 releases (OB101-OB117)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/handoff/CLAUDE-SECTION.md",
+   "reason": "handoff copy of the rules; CLAUDE.md is current (rule 5 amended by ADR 0025)"
+  },
+  {
+   "class": "binding",
+   "path": "docs/handoff/DATA-MODEL.md",
+   "reason": "sections 1-3 are the tables jade-o07 implements (OB75-OB90, verbatim); section 6 delete_kit_data and retention of device_sessions (OB91, OB92)"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/handoff/DECISIONS.md",
+   "reason": "original ADR text and open question 1 (kit name and prefix); the docs/adr files are current"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/handoff/EVENTS.md",
+   "reason": "server adds class and kit from the session; Phase 2 changes no event shape (catalog_version untouched)"
+  },
+  {
+   "class": "binding",
+   "path": "docs/handoff/PRIVACY.md",
+   "reason": "who the data is about, users and audit_log inventory rows, server logs, IPs never collected, per-IP signup limit, consent default off (OB93-OB100)"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/handoff/REVIEW.md",
+   "reason": "finding 4 (plain SHA-256 of codes) and finding 20 (per-IP limits and a classroom IP) behind ADR 0011 and ADR 0020"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/handoff/START-HERE.md",
+   "reason": "calendar and reading order"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/handoff/architecture.png",
+   "reason": "diagram image"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/handoff/architecture.svg",
+   "reason": "diagram source"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/handoff/beads/id-map.json",
+   "reason": "plan keys to bead ids (p2-*, p3-adult-auth jade-vcy, p3-authz-tests jade-aq5, p9-delete jade-l13)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/handoff/beads/plan.json",
+   "reason": "generator input for the phase files and beads; the beads are current"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/handoff/phases/README.md",
+   "reason": "phase index"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/handoff/phases/phase-01-foundation.md",
+   "reason": "p1-staging (jade-4zw): the deferred staging check rides on it"
+  },
+  {
+   "class": "binding",
+   "path": "docs/handoff/phases/phase-02-data-model-and-kit-codes.md",
+   "reason": "Phase 2 phase file: exit criteria (OB3-OB5) and the task table (OB6, jade-pe9 depends on p3-adult-auth); its task sections equal the bead texts except p2-redeem, whose bead acceptance is current (OB57)"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/handoff/phases/phase-03-accounts-classes-sessions.md",
+   "reason": "consumers of the core tables: p3-adult-auth, p3-classes, p3-join, p3-consent-flag, p3-invites, p3-authz-tests"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/handoff/phases/phase-04-content-pipeline.md",
+   "reason": "p4-registry (jade-dfj) depends on jade-o07; p4-shortlinks QR generation (jade-b4j) is a second QR user"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/handoff/phases/phase-05-student-experience.md",
+   "reason": "student UI; consumes kits only through Phase 3 sessions"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/handoff/phases/phase-06-event-pipeline.md",
+   "reason": "p6-table (jade-7j8) is the next migration after the core schema"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/handoff/phases/phase-09-privacy-security-hardening.md",
+   "reason": "p9-delete (delete_kit_data and its enumerating test), p9-ratelimit, p9-logs consume Phase 2 tables and limits"
+  },
+  {
+   "class": "candidate",
+   "path": "docs/handoff/phases/phase-10-production-deploy.md",
+   "reason": "p10-codes and p10-secrets run the CLI and hold the pepper in production"
+  },
+  {
+   "class": "irrelevant",
+   "path": "docs/handoff/tools/build_plan.py",
+   "reason": "phase-file generator"
+  },
+  {
+   "class": "binding",
+   "path": "docs/threat-model.md",
+   "reason": "AB1, AB2, AB7, AB11, AB16; TM-4 (code in the redeem URL), TM-5 (device_sessions with logging off); retention/deletion paths for rate-limit counters, kits and codes, audit log, printed cards (OB118-OB128)"
+  },
+  {
+   "class": "candidate",
+   "path": "drizzle.config.ts",
+   "reason": "Drizzle Kit configuration for db:generate"
+  },
+  {
+   "class": "candidate",
+   "path": "migrations/0000_baseline.sql",
+   "reason": "the only migration; grants USAGE and SELECT on schema_migrations to jade_app"
+  },
+  {
+   "class": "binding",
+   "path": "migrations/README.md",
+   "reason": "forward-only rules, manifest lock, previous-release compatibility, contract marker, one transaction per file, grants to jade_app by name (OB129-OB136)"
+  },
+  {
+   "class": "candidate",
+   "path": "migrations/manifest.json",
+   "reason": "the migration lock the new files extend"
+  },
+  {
+   "class": "candidate",
+   "path": "migrations/meta/0000_snapshot.json",
+   "reason": "Drizzle Kit snapshot (empty schema)"
+  },
+  {
+   "class": "candidate",
+   "path": "migrations/meta/_journal.json",
+   "reason": "Drizzle Kit journal the new files extend"
+  },
+  {
+   "class": "candidate",
+   "path": "package.json",
+   "reason": "scripts (db:generate, db:migrate, ci:compat), pinned toolchain, current dependencies (no argon2, QR, PDF or property-test library)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "plans/handoffs/HANDOFF_jade-vtk_phase0-done-phase1-next_2026-11-14.md",
+   "reason": "superseded by the 2026-11-17 handoff"
+  },
+  {
+   "class": "irrelevant",
+   "path": "plans/handoffs/HANDOFF_jade-vtk_phase1-80h-done_2026-11-16.md",
+   "reason": "superseded by the 2026-11-17 handoff"
+  },
+  {
+   "class": "candidate",
+   "path": "plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md",
+   "reason": "latest session handoff: Phase 2 next steps, first real migration-compat run on Phase 2's first migration PR, FaultForge after jade-7if, jade-hap open"
+  },
+  {
+   "class": "irrelevant",
+   "path": "plans/handoffs/HANDOFF_jade-vtk_phase1-plan-approved_2026-11-15.md",
+   "reason": "superseded by the 2026-11-17 handoff (Q4 now answered)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "plans/planloop/jade-vtk.pl1/rev-005/plan.md",
+   "reason": "approved Phase 1 plan. planloop never supplies plans/planloop/ to a reviewer (excluded in code), so it cannot be a candidate; every contract Phase 2 inherits from it (INV1, INV5, INV6, INV8, OB53, PD12, PD15, section 15 hand-offs to jade-o07, jade-fd5, jade-99j, jade-q01) is restated in brief-r1.md 'Facts and decisions', and INV5's rules are binding through migrations/README.md (OB129-OB136). Reclassified by the orchestrator 2026-11-18 after bundle refused it as an unsupplied candidate."
+  },
+  {
+   "class": "candidate",
+   "path": "src/hooks.server.ts",
+   "reason": "closeDatabase on sveltekit:shutdown (jade-hap)"
+  },
+  {
+   "class": "candidate",
+   "path": "src/lib/server/auth/index.ts",
+   "reason": "empty auth module (users, sessions arrive with jade-vcy)"
+  },
+  {
+   "class": "candidate",
+   "path": "src/lib/server/codes/index.ts",
+   "reason": "empty codes module jade-fd5 and jade-7if fill"
+  },
+  {
+   "class": "candidate",
+   "path": "src/lib/server/config/index.ts",
+   "reason": "CODE_PEPPER opaque (key derivation is jade-fd5's), APP_ENV model, no secret defaults"
+  },
+  {
+   "class": "candidate",
+   "path": "src/lib/server/db/client.ts",
+   "reason": "createPool/createDatabase: the app pool of the jade-hap decision"
+  },
+  {
+   "class": "candidate",
+   "path": "src/lib/server/db/index.ts",
+   "reason": "db module public API"
+  },
+  {
+   "class": "candidate",
+   "path": "src/lib/server/db/migrate.ts",
+   "reason": "runner, ledger and readiness comparison (database ahead is ready)"
+  },
+  {
+   "class": "candidate",
+   "path": "src/lib/server/db/roles.ts",
+   "reason": "jade_app bootstrap, DbError tags"
+  },
+  {
+   "class": "candidate",
+   "path": "src/lib/server/db/schema.ts",
+   "reason": "empty Drizzle schema jade-o07 fills"
+  },
+  {
+   "class": "irrelevant",
+   "path": "src/lib/server/http/dev-only.ts",
+   "reason": "dev-only route guard; Phase 2 adds no dev route"
+  },
+  {
+   "class": "candidate",
+   "path": "src/lib/server/http/index.ts",
+   "reason": "exports closeDatabase used by hooks"
+  },
+  {
+   "class": "candidate",
+   "path": "src/lib/server/http/readiness.ts",
+   "reason": "private readiness pool and closeDatabase (jade-hap)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "src/lib/server/http/request-context.ts",
+   "reason": "request ids"
+  },
+  {
+   "class": "candidate",
+   "path": "src/lib/server/log/index.ts",
+   "reason": "closed logger: forbidden keys, registered error tags; codes and the pepper never logged"
+  },
+  {
+   "class": "irrelevant",
+   "path": "src/routes/(adult)/dev/shell/adult/+page.server.ts",
+   "reason": "dev shell page"
+  },
+  {
+   "class": "irrelevant",
+   "path": "src/routes/(staff)/dev/shell/staff/+page.server.ts",
+   "reason": "dev shell page"
+  },
+  {
+   "class": "irrelevant",
+   "path": "src/routes/(student)/dev/shell/student/+page.server.ts",
+   "reason": "dev shell page"
+  },
+  {
+   "class": "irrelevant",
+   "path": "src/routes/api/README.md",
+   "reason": "placeholder"
+  },
+  {
+   "class": "irrelevant",
+   "path": "src/routes/dev/boom/+server.ts",
+   "reason": "dev error route"
+  },
+  {
+   "class": "irrelevant",
+   "path": "src/routes/readyz/+server.ts",
+   "reason": "readiness route; its handler stays, jade-hap changes the pool behind it (readiness.ts)"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/authz/route-registry.ts",
+   "reason": "route registry: access classes public and dev-only only; jade-pe9 routes join it"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/blackbox/boot-failfast.test.ts",
+   "reason": "config fail-fast; changes only if a config key is added (then config.test.ts covers it)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/blackbox/health.test.ts",
+   "reason": "health endpoints"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/blackbox/log-privacy.test.ts",
+   "reason": "log privacy canaries a code canary would extend"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/blackbox/route-access.test.ts",
+   "reason": "public and dev-only route access checks; staff routes need a new class"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/e2e/a11y.spec.ts",
+   "reason": "e2e a11y"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/e2e/layout.spec.ts",
+   "reason": "e2e layout"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/e2e/no-offorigin.spec.ts",
+   "reason": "INV3 e2e; staff pages join it with jade-pe9 via the registry"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/infra/caddy-logs.test.ts",
+   "reason": "infra"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/infra/compose-config.test.ts",
+   "reason": "infra"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/infra/compose-up.test.ts",
+   "reason": "infra"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/infra/global-setup.ts",
+   "reason": "infra"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/infra/image.test.ts",
+   "reason": "infra"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/integration/baseline-migration.test.ts",
+   "reason": "pattern for testing jade_app's privileges over the app pool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/integration/db-scripts.test.ts",
+   "reason": "db:reset/db:migrate scripts"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/integration/harness-isolation.test.ts",
+   "reason": "harness isolation"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/integration/migrate.test.ts",
+   "reason": "runner tests (INV5)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/integration/role-bootstrap.test.ts",
+   "reason": "role bootstrap"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/support/db.ts",
+   "reason": "createTestDatabase/createEmptyDatabase: per-file databases for constraint and concurrency tests"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/support/env.ts",
+   "reason": "test env generation"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/support/global-setup-blackbox.ts",
+   "reason": "blackbox build"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/support/global-setup-db.ts",
+   "reason": "migrated template per run"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/support/global-setup-e2e.ts",
+   "reason": "e2e setup"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/support/server.ts",
+   "reason": "blackbox server helper"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/unit/base-ref.test.ts",
+   "reason": "CI base ref"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/unit/ci-workflow.test.ts",
+   "reason": "CI workflow shape"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/unit/compat.test.ts",
+   "reason": "compat harness"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/unit/config.test.ts",
+   "reason": "no secret has a default; any new key is tested here"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/unit/db-client.test.ts",
+   "reason": "db client unit test"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/unit/env-example.test.ts",
+   "reason": "env example coverage"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/unit/env-init.test.ts",
+   "reason": "env init"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/unit/log-schema.test.ts",
+   "reason": "logger allowlist and forbidden keys"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/unit/migrations-static.test.ts",
+   "reason": "static migration rules (INV5)"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/unit/module-boundaries.test.ts",
+   "reason": "modules import each other only through index.ts"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/unit/readiness.test.ts",
+   "reason": "readiness unit tests the jade-hap change touches"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/unit/repo-hygiene.test.ts",
+   "reason": "ignored files; the CLI output directory joins it"
+  },
+  {
+   "class": "candidate",
+   "path": "tests/unit/route-registry.test.ts",
+   "reason": "every route is in the registry"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/unit/supervise.test.ts",
+   "reason": "CI supervisor"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tests/unit/toolchain-pins.test.ts",
+   "reason": "toolchain pins"
+  },
+  {
+   "class": "candidate",
+   "path": "tools/ci/base-ref.ts",
+   "reason": "base commit for db:check --base and compat"
+  },
+  {
+   "class": "candidate",
+   "path": "tools/ci/compat.ts",
+   "reason": "database and app half of migration-compat"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tools/ci/lib/supervise.sh",
+   "reason": "CI supervisor"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tools/ci/local.sh",
+   "reason": "local CI"
+  },
+  {
+   "class": "candidate",
+   "path": "tools/ci/migration-compat.sh",
+   "reason": "previous release on the new schema: first real run on Phase 2's first migration PR"
+  },
+  {
+   "class": "irrelevant",
+   "path": "tools/compose.ts",
+   "reason": "compose wrapper"
+  },
+  {
+   "class": "candidate",
+   "path": "tools/db/check-migrations.ts",
+   "reason": "pnpm db:check static rules and --base prefix check"
+  },
+  {
+   "class": "candidate",
+   "path": "tools/db/manifest.ts",
+   "reason": "pnpm db:manifest"
+  },
+  {
+   "class": "candidate",
+   "path": "tools/db/migrate.ts",
+   "reason": "pnpm db:migrate entry point"
+  },
+  {
+   "class": "candidate",
+   "path": "tools/db/reset.ts",
+   "reason": "loopback/APP_ENV guard pattern the seed refusal can follow"
+  },
+  {
+   "class": "candidate",
+   "path": "tools/env-init.ts",
+   "reason": "generates CODE_PEPPER and the database passwords"
+  },
+  {
+   "class": "candidate",
+   "path": "tools/load-env.ts",
+   "reason": "how tools (the CLI, the seed) read .env outside production"
+  },
+  {
+   "class": "candidate",
+   "path": "vite.config.ts",
+   "reason": "Vitest projects (unit, integration, blackbox) new tests join"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-0d8",
+   "reason": "reached via docs/adr/0015-tooling.md; open; labels infra,phase-9,tests; 'Load test at twice pilot size' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-0nf",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; open; labels none; 'FaultForge scenario: logging_enabled false stores nothing, under load ' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-0ys",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-8; 'Phase 8: Analytics and the redesign loop' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-0za",
+   "reason": "human: host and domain (QR origin, staging)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-151",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels deploy,infra,phase-10; 'Domain, DNS and TLS for production' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-1cc",
+   "reason": "reached via docs/threat-model.md; open; labels analytics,phase-8; 'Staff export to CSV and JSON' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-1m4",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels analytics,phase-8; 'Data-quality report for pilot days' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-1tn",
+   "reason": "home mode: classes.kind 'home', one redeemed code"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-3ek",
+   "reason": "reached via docs/threat-model.md; open; labels events,phase-6; 'Event catalog as code, with generated documentation' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-3hh",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels codes,phase-5,student-ui; 'Entitlement gating for core and add-on content' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-3nx",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; open; labels none; 'jade-80h review lows (deferred)' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-3sf",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels content,phase-4; 'Build-time content loader and sanitised Markdown rendering' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-3xi",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-6; 'Phase 6: Event pipeline' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-4a7",
+   "reason": "reached via docs/threat-model.md; open; labels events,offline,phase-6; 'Client event queue: persistent, batched, retried' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "binding",
+   "path": "bead:jade-4el",
+   "reason": "FaultForge scenario citing p2-redeem: invariants and Mike's runtime decisions in notes (OB32-OB36); bundled with notes"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-4zw",
+   "reason": "p1-staging: the deferred staging acceptance waits on it"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-5kj",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels content,phase-4; 'Content format and validation schema' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-5km",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels adult-ui,content,phase-7; 'Facilitator view of steps with answer keys and common fixes' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-5nj",
+   "reason": "p3-join: writes device_sessions, join_code_hash"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-68l",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; open; labels decision,human,privacy; 'Decision: read YouTube playback state for video events without loading' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-6cq",
+   "reason": "p9-ratelimit: tunes and tests the redeem limits and the global throttle"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-6is",
+   "reason": "human: kit prefix and retention; does not block Phase 2"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-6o3",
+   "reason": "backups: the pepper is not in the dump (AB14a cites jade-fd5)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-771",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels docs,phase-9,privacy; 'Final privacy documentation and consent appendix' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-7cf",
+   "reason": "reached via docs/threat-model.md; open; labels phase-5,privacy,student-ui; 'Progress persistence: device always, server only when logging is enabl' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "binding",
+   "path": "bead:jade-7if",
+   "reason": "agent bead p2-redeem (OB15-OB19); its fourth acceptance line is current over the description (ADR 0020)"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-7j8",
+   "reason": "p6-table: next migration after the core schema"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-7s7",
+   "reason": "reached via docs/threat-model.md; open; labels phase-7; 'Phase 7: Facilitator dashboard' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-7s7.1",
+   "reason": "reached via docs/threat-model.md; open; labels phase-7; 'Show duplicate device joins per kit on the class dashboard' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-7s7.2",
+   "reason": "reached via docs/threat-model.md; open; labels phase-7; 'Bound the live stuck alert store and rate-limit its endpoint' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-7yz",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; closed; labels bug; 'Build-with-empty-env check never runs empty: vite.config loadEnv() rea' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-80h",
+   "reason": "reached via docs/threat-model.md; closed; labels foundation,infra,phase-1; 'Production Dockerfile and compose.prod.yml (app, postgres, caddy)' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-85i",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-3; 'Phase 3: Accounts, classes and student sessions' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-873",
+   "reason": "reached via docs/adr/0021-split-human-and-agent-work.md; open; labels deploy,human,phase-10; 'Create staff and facilitator accounts and the pilot class' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-8ho",
+   "reason": "reached via docs/adr/0024-node-24-pinned.md; open; labels phase-9,security; 'Dependency audit and pinned images' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-8lt",
+   "reason": "p3-consent-flag: class_kits.logging_enabled default off for every newly redeemed kit"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-8n2",
+   "reason": "reached via docs/adr/README.md; open; labels phase-0; 'Phase 0: Architecture lock' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-8n2.1",
+   "reason": "reached via docs/adr/README.md; closed; labels decision,human,phase-0; 'DECISION: p8-views is launch-blocking, but START-HERE says only p8-qua' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-8n2.2",
+   "reason": "reached via docs/adr/README.md; closed; labels decision,human,phase-0; 'DECISION: how live stuck alerts reach the facilitator for kits with lo' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-8n2.3",
+   "reason": "reached via docs/adr/README.md; closed; labels decision,human,phase-0; 'DECISION: stale client timestamps flagged only (EVENTS.md) or clamped ' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-8n2.4",
+   "reason": "closed decision A-D: no Phase 2 schema"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-8n2.5",
+   "reason": "closed decision behind ADR 0020"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-8n2.6",
+   "reason": "reached via docs/adr/README.md; closed; labels decision,human,phase-0; 'DECISION: beads labelled human that also contain agent work' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-8n2.7",
+   "reason": "reached via docs/adr/README.md; closed; labels decision,human,phase-0; 'DECISION: p0-open-decisions acceptance omits retention, quiz entry and' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-8n2.8",
+   "reason": "reached via docs/adr/README.md; closed; labels decision,human,phase-0; 'DECISION: retention for kit-keyed data other than raw events' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-8n2.9",
+   "reason": "reached via jade-8n2; closed; labels phase-0; 'planloop run jade-8n2.pl1' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-8v4",
+   "reason": "closed: config and CODE_PEPPER"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-8vo",
+   "reason": "p9-retention: deletes device_sessions"
+  },
+  {
+   "class": "binding",
+   "path": "bead:jade-8w4",
+   "reason": "Phase 2 epic: goal (OB1), Q4 note (OB2); acceptance equals the phase exit criteria (OB3-OB5); bundled with notes"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-8w4.1",
+   "reason": "reached via seed; open; labels phase-2; 'planloop run jade-8w4.pl1' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "binding",
+   "path": "bead:jade-99j",
+   "reason": "agent bead p2-code-cli (OB20-OB23)"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-9tk",
+   "reason": "p3-invites: invites table"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-a5u",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; open; labels none; 'Low hardening from fix-pass-2 reviews (checker, env-init mode, test pr' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-ada",
+   "reason": "p9-logs: no codes in staging logs"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-ahw",
+   "reason": "reached via jade-vtk.2; closed; labels none; 'planloop claude-backend checker flags read-only 'git branch -a' as a w' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-al9",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels events,phase-6; 'Active-time measurement' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-alt",
+   "reason": "closed: readiness pool origin of jade-hap"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-app",
+   "reason": "not a bead: the id pattern matched an image tag or Compose project prefix (jade-app:local / jade-app-<hash>) in the text it was reached from (README.md)"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-aq5",
+   "reason": "authorization matrix (Phase 3): jade-pe9's staff routes enter it"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-as7",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels ci,content,phase-4; 'Content lint and lockfile: unique permanent IDs and enforced version b' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-axr",
+   "reason": "session controls: device_sessions.revoked_at"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-b1f",
+   "reason": "reached via vite.config.ts; closed; labels none; 'Move blackbox vite build to a Vitest globalSetup so blackbox files don' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-b4j",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels content,phase-4,tooling; 'Stable step short links and QR generation for print' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-b7o",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels deploy,phase-10,tests; 'Production smoke test' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-bi5",
+   "reason": "reached via docs/threat-model.md; open; labels human,phase-0,pilot,privacy; 'HUMAN: update consent form and research application for the platform' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-bnk",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; open; labels none; 'FaultForge scenario: idempotent events under concurrent duplicate subm' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-bu6",
+   "reason": "p3-classes: the /redeem page and redeem-into-class flow on top of redeemCode; display numbers stable"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-buf",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-4; 'Phase 4: Content pipeline' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-buf.1",
+   "reason": "reached via docs/adr/README.md; open; labels content,phase-4; 'Convert supplied arm-kit drafts to the content format and pass lint' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-buf.2",
+   "reason": "reached via docs/adr/README.md; open; labels content,human,phase-4; 'HUMAN: Given reviews the converted arm-kit content and signs off' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-c42",
+   "reason": "headers, cookies and CSRF for staff pages"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-cbp",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-5,student-ui; 'Checkpoint questions' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-ccp",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-5,student-ui; 'Student home: module list, progress, resume' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-cdw",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; closed; labels external; 'External: FaultForge M11 (build SvelteKit + Postgres stack targets fro' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-cev",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; open; labels none; 'Align bugfix skill step-6.2 gate command with env:init + db:up' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-cnm",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; open; labels ci; 'Measure GitHub Actions minutes per CI run; decide levers if the free p' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-d03",
+   "reason": "reached via docs/threat-model.md; open; labels adult-ui,phase-7; 'Class dashboard: kits, current step, progress, last active' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-d25",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-5; 'Phase 5: Student experience' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-d48",
+   "reason": "reached via docs/adr/README.md; closed; labels decision,human,privacy; 'Decision: module videos uploaded to YouTube (Mike + Given) vs rule 5, ' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-d98",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels a11y,phase-5,student-ui; 'Accessibility and kid-usability pass on real devices' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-dd8",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels analytics,phase-8,post-launch-ok,staff-ui; 'Learning outcomes: pre/post gain' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-dev",
+   "reason": "not a bead: the id pattern matched an image tag or Compose project prefix (jade-dev:local / jade-dev-<hash>) in the text it was reached from (plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md)"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-dfj",
+   "reason": "p4-registry: depends on jade-o07"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-dvm",
+   "reason": "reached via docs/threat-model.md; open; labels deploy,infra,phase-10; 'Provision production VM' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-dvz",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-7,tests; 'End-to-end test: run a session as facilitator' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-e6m",
+   "reason": "reached via docs/adr/0019-participant-letters-a-to-d.md; open; labels adult-ui,data,phase-7; 'Pre/post quiz and exit card entry' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-e77",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels human,phase-10,pilot; 'HUMAN: facilitator dry run with all kits' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-e9a",
+   "reason": "FaultForge wiring; bundled with notes (dev tool only, demo kit only)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-f1w",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; closed; labels bug; 'DB URL query params (?host=, ?user=, ?port=) bypass reset loopback gua' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "binding",
+   "path": "bead:jade-fd5",
+   "reason": "agent bead p2-code-lib (OB11-OB14)"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-fgs",
+   "reason": "human: pepper backup; bundled with its split note"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-fxd",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels analytics,phase-8,post-launch-ok,staff-ui; 'Step heatmap ranked by friction' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-fy1",
+   "reason": "reached via docs/threat-model.md; open; labels phase-5,student-ui; ''I'm stuck' button with preset reasons and resolution' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-h3k",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; closed; labels bug,ci; 'supervise.sh early-signal path can run cleanup twice (CI flake: 'clean' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-h3k.1",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; closed; labels bug,ci; '[MEDIUM] F1: test (b) may not reliably fail on the original library' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-h3k.2",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; closed; labels bug,ci; '[LOW] F2: tests (a)/(b) can leave sleeps or a stopped bash; (b) until-' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-h8i",
+   "reason": "reached via docs/adr/README.md; closed; labels foundation,phase-1; 'Scaffold SvelteKit app with TypeScript strict, lint, unit and e2e test' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "binding",
+   "path": "bead:jade-hap",
+   "reason": "readiness pool vs app pool, to be decided in this plan (OB31)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-hh8",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; open; labels none; 'Blackbox globalSetup build is not rerun in vitest watch mode (stale bu' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-hhp",
+   "reason": "p6-nolog-invariant: TM-5 device_sessions question"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-hqq",
+   "reason": "reached via docs/adr/README.md; closed; labels docs,phase-0; 'Commit ADRs from the handoff decisions' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-hwu",
+   "reason": "deferred decision: jade_app CREATE TEMP (INV6); bundled with notes"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-imm",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels analytics,phase-8,post-launch-ok,staff-ui; 'Step detail page' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-iwr",
+   "reason": "reached via docs/threat-model.md; open; labels events,phase-6; 'Video instrumentation' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-j93",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels infra,phase-10; 'Uptime, resource and error alerts to Discord' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-jd5",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels content,docs,phase-4; 'Authoring guide for Given and per-branch preview' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-kn0",
+   "reason": "p10-cd: migrations backward compatible, rollback rehearsal"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-l13",
+   "reason": "p9-delete: delete_kit_data and its test enumerating kit_id tables"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-lhq",
+   "reason": "reached via docs/handoff/beads/id-map.json; closed; labels foundation,phase-1,ui; 'Base layout, design tokens, kid-friendly accessibility baseline' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-lnn",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-10; 'Phase 10: Production deploy and pilot readiness' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-lnn.1",
+   "reason": "production secret script (CODE_PEPPER)"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-lnn.2",
+   "reason": "code-batch runbook and staging rehearsal with the CLI"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-lnn.3",
+   "reason": "staff and facilitator setup script on users/invites"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-lpm",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; in_progress; labels skill; 'bugfix skill: .beads/interactions.jsonl (tracked, appended by every bd' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-lx4",
+   "reason": "reached via docs/adr/0003-postgresql-with-drizzle-and-sql-migrations.md; open; labels analytics,db,phase-8,post-launch-ok; 'Step metrics as SQL views' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-mfl",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-9; 'Phase 9: Privacy, security and hardening' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-mz1",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels offline,phase-5,student-ui; 'Offline support: service worker, app shell and content precache' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-npq",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-5,student-ui; 'Step player: text, images, video, navigation, track switch' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "binding",
+   "path": "bead:jade-o07",
+   "reason": "agent bead p2-schema-core: description and acceptance (OB7-OB10)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-oek",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels events,phase-6; 'Instrument the student app with all catalog events' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-okb",
+   "reason": "reached via docs/threat-model.md; closed; labels docs,phase-0,security; 'Write threat model and data-flow document' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-oy8",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels content,phase-4,tooling; 'Print stylesheet and PDF export of a module from the same source' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-p4p",
+   "reason": "reached via docs/threat-model.md; open; labels adult-ui,data,phase-7; 'Facilitator observation form' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-p99",
+   "reason": "reached via docs/threat-model.md; open; labels adult-ui,phase-7; 'Live stuck alerts' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "binding",
+   "path": "bead:jade-pe9",
+   "reason": "agent bead p2-staff-codes (OB27-OB30); depends on jade-vcy (Phase 3): specified, not implementable this phase"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-pua",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels docs,phase-10,pilot; 'Pilot-day runbook and offline fallback' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "binding",
+   "path": "bead:jade-q01",
+   "reason": "agent bead p2-seed (OB24-OB26)"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-r7c",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; closed; labels bug; 'Playwright webServer readiness polls url: a foreign process on the por' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-rug",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels human,phase-10,pilot; 'HUMAN: test on the pilot site's network and devices' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-sio",
+   "reason": "abuse-case sweep (AB1, AB2, AB7, AB16)"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-t17",
+   "reason": "human: production batch with the CLI; bundled with its split note"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-tmm",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; open; labels ci,privacy; 'INV3 allowlist: permit only YouTube embed origins on module-video page' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-tv0",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels content,phase-4; 'Placeholder kit content for development and tests' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-tw4",
+   "reason": "reached via docs/threat-model.md; open; labels human,phase-0,pilot; 'HUMAN: contact pilot-site IT about devices and network' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-u8z",
+   "reason": "reached via docs/threat-model.md; open; labels content,infra,phase-4; 'Video pipeline: transcode script, storage layout, same-origin serving ' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-ueg",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels content,deploy,phase-10; 'Content v1 freeze and release' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-ukn",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-5,tests; 'End-to-end test: join, complete a module, resume' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-urd",
+   "reason": "closed: runner and test harness Phase 2 builds on"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-vcy",
+   "reason": "p3-adult-auth: blocks jade-pe9; consumes users, auth_sessions, invites; global throttle on code-gated signup"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-vtk",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels phase-1; 'Phase 1: Foundation and walking skeleton' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-vtk.1",
+   "reason": "reached via jade-vtk; closed; labels phase-1; 'planloop run jade-vtk.pl1' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-vtk.2",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; open; labels phase-1; 'planloop run jade-vtk.pl1' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-wb9",
+   "reason": "reached via docs/adr/0021-split-human-and-agent-work.md; open; labels human,phase-10,pilot; 'Go/no-go checklist and launch' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-x94",
+   "reason": "reached via docs/adr/0021-split-human-and-agent-work.md; open; labels content,human,phase-4; 'HUMAN: Given delivers the arm-kit module drafts, images and videos' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "candidate",
+   "path": "bead:jade-xu0",
+   "reason": "closed: CI and migration-compat"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-xyn",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels analytics,phase-8,post-launch-ok,staff-ui; 'Version comparison for the same step' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-y0i",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; open; labels decision,human; 'Decision: p4-video rescope after ADR 0025 (click-to-load, offline/bloc' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-yvx",
+   "reason": "reached via jade-vtk.2; open; labels none; 'Reviewer benchmark and review-round log: jade-vtk.pl1' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-zeg",
+   "reason": "reached via docs/handoff/beads/id-map.json; open; labels offline,phase-6,tests; 'Offline and replay robustness tests' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-zg3",
+   "reason": "reached via docs/threat-model.md; open; labels events,phase-6,privacy,security; 'Ingest endpoint: authenticated, validated, consent-gated, idempotent' touches no Phase 2 table, column, config key, route or tool"
+  },
+  {
+   "class": "irrelevant",
+   "path": "bead:jade-zwq",
+   "reason": "reached via plans/handoffs/HANDOFF_jade-vtk_phase1-ci-lhq-h3k-done_2026-11-17.md; closed; labels none; 'Tighten logger err_tag: accept only SQLSTATE, Node E…/ERR_… codes and ' touches no Phase 2 table, column, config key, route or tool"
+  }
+ ]
+}
